@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS variables from Figma */
+:root{
+  --White:#FFF;
+  --Black:#000;
+  --Primary-Color:#401B60;
+  --Gray:#6F6C90;
+  --Neutral-800:#170F49;
+}
+
+html, body, :root {
+  height: 100%;
+}
+
+body {
+  color: #170F49;
+  background: #FFF;
+}
+
+/* Utility to mimic glass card */
+.glass {
+  @apply border border-white/20 bg-white/10 backdrop-blur-sm;
+}
+
+/* Max width container consistent with Figma 1920 layout */
+.container-2xl {
+  @apply mx-auto w-full max-w-[1171px];
+}
+/* -------- Modal system tokens -------- */
+:root {
+  --cl-ink: #161226;
+  --cl-sub: #7D7598;
+  --cl-brand: #4B236E;
+  --cl-brand-ink: #3F1A6A;
+  --cl-border: #E6DFEE;
+  --cl-panel: #FBF7FF;
+  --cl-input-bg: #F8F5FF;
+  --cl-input-br: #E0D9EA;
+  --cl-muted: #8B82A2;
+}
+
+.modal-h1 {
+  font-weight: 800;
+  color: var(--cl-ink);
+  letter-spacing: -0.01em;
+}
+@media (min-width: 640px){ .modal-h1 { font-size: 28px; } }
+@media (min-width: 768px){ .modal-h1 { font-size: 32px; } }
+@media (min-width: 1024px){ .modal-h1 { font-size: 36px; } }
+
+.modal-sub {
+  color: var(--cl-sub);
+  font-size: 14px;
+}
+@media (min-width: 640px){ .modal-sub { font-size: 15px; } }
+@media (min-width: 1024px){ .modal-sub { font-size: 16px; } }
+
+.btn-primary {
+  background: var(--cl-brand);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 12px 24px;
+}
+.btn-primary:hover { filter: brightness(0.98); }
+
+.btn-secondary {
+  background: #fff;
+  color: #6E6690;
+  border: 1px solid #CFC8DD;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 12px 20px;
+}
+
+.input {
+  height: 50px;
+  background: var(--cl-input-bg);
+  border: 1px solid var(--cl-input-br);
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: 15px;
+}
+.input::placeholder { color: #A5A0B7; }
+
+.card {
+  border: 1px solid var(--cl-border);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 50px 60px rgba(0,0,0,0.06);
+}
+.panel {
+  background: var(--cl-panel);
+  border: 1px solid #E7E1EF;
+  border-radius: 22px;
+}
