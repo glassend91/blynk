@@ -1,84 +1,41 @@
 "use client";
-
+import { useState } from "react";
 import ModalShell from "@/components/shared/ModalShell";
 import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
-import FormField from "@/components/shared/FormField";
+import MbbHeaderBanner from "../MbbHeaderBanner";
 import MbbStepper from "../MbbStepper";
 
 export default function MobileBroadbandSignup4({
-  onNext,
-  onBack,
-  onClose,
-}: {
-  onNext: () => void;
-  onBack: () => void;
-  onClose: () => void;
-}) {
+  onNext, onBack, onClose,
+}: { onNext: () => void; onBack: () => void; onClose: () => void; }) {
+  const [ok, setOk] = useState(false);
+
   return (
     <ModalShell onClose={onClose} size="wide">
-      <div className="panel p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="grid h-14 w-14 place-items-center rounded-full bg-[var(--cl-brand)] text-white">
-              {/* headphone */}
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M5.46 18.99V16.07c0-.97.76-1.84 1.84-1.84.97 0 1.84.76 1.84 1.84v2.81c0 1.95-1.62 3.57-3.57 3.57S2 20.82 2 18.88V12.72C1.89 7.1 6.33 2.55 11.95 2.55 17.57 2.55 22 7.1 22 12.61v6.16c0 1.95-1.62 3.57-3.57 3.57s-3.57-1.62-3.57-3.57v-3.03c0-.97.76-1.84 1.84-1.84.97 0 1.84.8 1.84 1.84v3.03" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div>
-              <div className="text-[17px] text-black">
-                Having trouble or have a question? Our team is here to help.
-              </div>
-              <div className="text-[14px] font-extrabold text-[var(--cl-brand)]">
-                Call us on (02) 8123 4567 or request a callback.
-              </div>
-            </div>
-          </div>
-
-          <div className="flex w-full sm:w-auto items-center gap-3">
-            <button className="btn-primary flex-1 sm:flex-initial inline-flex items-center justify-center gap-2">
-              {/* send */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M7.4 6.32 15.89 3.49c3.81-1.27 5.88.81 4.62 4.62l-2.83 8.49c-1.9 5.71-5.02 5.71-6.92 0l-.84-2.52-2.52-.84C1.69 11.34 1.69 8.23 7.4 6.32Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="m10.11 13.65 3.58-3.59" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Contact Us
-            </button>
-            <a href="tel:+61281234567" className="btn-primary flex-1 sm:flex-initial inline-flex items-center justify-center gap-2">
-              {/* call */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M22 16.92v2a2 2 0 01-2.18 2A19.79 19.79 0 013 5.18 2 2 0 015 3h2a2 2 0 012 1.72c.12.9.31 1.77.57 2.61a2 2 0 01-.45 2.11L8.09 10a16 16 0 007 7l.56-.63a2 2 0 012.11-.45c.84.26 1.71.45 2.61.57A2 2 0 0122 16.92z" stroke="white" strokeWidth="1.5"/>
-              </svg>
-              Call Now
-            </a>
-          </div>
-        </div>
-      </div>
-      <div className="mt-6">
-        <MbbStepper active={4} />
-      </div>
+      <MbbHeaderBanner />
+      <div className="mt-6"><MbbStepper active={4} /></div>
 
       <SectionPanel>
         <div className="text-center">
-          <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[var(--cl-brand-ink)] text-white">
-            {/* user */}
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="white" strokeWidth="1.5"/><path d="M20 20c0-4-3.6-6-8-6s-8 2-8 6" stroke="white" strokeWidth="1.5"/></svg>
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#4F1C76] text-white">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" /></svg>
           </div>
-          <h2 className="modal-h1 mt-4">Customer Details</h2>
-          <p className="modal-sub mt-1">Provide your contact and delivery information</p>
+          <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Identity Verification</h2>
+          <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">We need to verify your identity for security purposes</p>
         </div>
 
-        <div className="card mx-auto mt-8 max-w-[860px] p-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="First Name"><input className="input w-full" /></FormField>
-            <FormField label="Last Name"><input className="input w-full" /></FormField>
-            <FormField label="Email Address"><input className="input w-full" /></FormField>
-            <FormField label="Phone Number"><input className="input w-full" /></FormField>
-          </div>
-          <div className="mt-4">
-            <FormField label="Delivery Address"><input className="input w-full" /></FormField>
-          </div>
+        <div className="mx-auto mt-8 max-w-[740px] rounded-[16px] border border-[#E7E4EC] bg-white p-6">
+          <p className="text-[14px] leading-6 text-[#5B5668]">
+            To keep your account secure and protect you from fraud, I confirm I am authorised to provide these details and I consent
+            to them being checked against official records by a secure verification service.
+          </p>
+          <label className="mt-5 flex items-start gap-3">
+            <input type="checkbox" className="mt-1 h-4 w-4" checked={ok} onChange={e => setOk(e.target.checked)} />
+            <span className="text-[14px] text-[#3B3551]">
+              I consent to the identity verification process and understand that valid ID will be required
+            </span>
+          </label>
         </div>
       </SectionPanel>
 

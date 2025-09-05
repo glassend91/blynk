@@ -2,52 +2,50 @@
 
 const LABELS = [
   "Plan Selection",
-  "Device / SIM",
-  "Add-ons",
+  "SIM Type",
   "Customer Details",
   "ID Check",
   "Payment",
+  "Agreement",
 ];
 
 export default function MbbStepper({ active }: { active: number }) {
-  const pct = Math.max(0, Math.min(100, ((active - 1) / (LABELS.length - 1)) * 100));
+  // clamp 1..6
+  const a = Math.max(1, Math.min(LABELS.length, active));
+  const pct = ((a - 1) / (LABELS.length - 1)) * 100;
 
   return (
     <div className="w-full">
-      {/* desktop: dots + labels */}
-      <div className="hidden sm:flex items-start justify-between gap-3">
+      {/* Dots and labels only (no inter-segment bars) */}
+      <div className="flex items-center justify-between">
         {LABELS.map((label, i) => {
           const n = i + 1;
-          const on = n === active;
+          const on = n <= a;
           return (
-            <div key={label} className="flex flex-col items-center gap-3 flex-1">
+            <div key={label} className="flex flex-col items-center">
               <div
-                className={[
-                  "grid place-items-center h-10 w-10 rounded-full text-[17px] font-medium",
-                  on ? "bg-[var(--cl-brand)] text-white" : "bg-[#F0EEF4] text-[#6F6C90]",
-                ].join(" ")}
+                className={`grid h-10 w-10 place-items-center rounded-full border text-sm font-semibold ${
+                  on ? "text-white" : "text-[#6F6C90]"
+                }`}
+                style={{
+                  background: on ? "var(--b-brand)" : "#fff",
+                  borderColor: on ? "var(--b-brand)" : "#E5E7EB",
+                }}
               >
                 {n}
               </div>
-              <div className={on ? "text-black" : "text-[#6F6C90]"}>
-                <span className="text-[16px] font-medium">{label}</span>
-              </div>
+              <div className="mt-2 text-xs text-[#6F6C90]">{label}</div>
             </div>
           );
         })}
       </div>
 
-      {/* mobile: compact */}
-      <div className="sm:hidden mb-2 flex items-center justify-between">
-        <span className="text-[13px] font-semibold text-[#3F2E5A]">
-          Step {active} of {LABELS.length}
-        </span>
-        <span className="text-[12px] text-[#6F6C90]">{LABELS[active - 1]}</span>
-      </div>
-
-      {/* progress bar */}
-      <div className="mt-4 h-[10px] w-full rounded-[10px] bg-[rgba(111,108,144,0.20)]">
-        <div className="h-full rounded-[10px] bg-[var(--cl-brand)]" style={{ width: `${pct}%` }} />
+      {/* Single continuous progress bar */}
+      <div className="mt-4 h-2 w-full rounded-full bg-[#E5E7EB]">
+        <div
+          className="h-2 rounded-full"
+          style={{ width: `${pct}%`, background: "var(--b-brand)" }}
+        />
       </div>
     </div>
   );
