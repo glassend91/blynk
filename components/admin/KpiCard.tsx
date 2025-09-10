@@ -3,7 +3,7 @@
 type Trend = "up" | "down";
 type IconKey = "user" | "box" | "card" | "headset";
 
-const Icons: Record<IconKey, JSX.Element> = {
+const Icons: any = {
   user: (
     <svg width="24" height="24" viewBox="0 0 36 37" fill="none" aria-hidden>
       <path d="M13.74 16.805c-.15-.015-.33-.015-.495 0C9.675 16.685 6.84 13.76 6.84 10.16 6.84 6.485 9.81 3.5 13.5 3.5c3.675 0 6.66 2.985 6.66 6.66-.015 3.6-2.85 6.525-6.42 6.645Z" stroke="#401B60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -34,13 +34,7 @@ const Icons: Record<IconKey, JSX.Element> = {
 
 export default function KpiCard({
   title, value, delta, trend, icon,
-}: {
-  title: string;
-  value: number;
-  delta: string;
-  trend: Trend;
-  icon: IconKey;
-}) {
+}: any) {
   const isDown = trend === "down";
   const tone = isDown ? "text-red-600" : "text-emerald-600";
 

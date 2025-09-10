@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { CmsPage, PageStatus } from "../types";
 
-type Editable = Omit<CmsPage, "id" | "lastUpdated"> & {
+type Editable = Omit<any, "id" | "lastUpdated"> & {
   id?: number;
   lastUpdated?: string;
 };
@@ -19,7 +18,7 @@ export default function EditPageModal({
   title: string;
   initial?: Editable;
   onClose: () => void;
-  onSave: (data: CmsPage) => void;
+  onSave: (data: any) => void;
 }) {
   const [state, setState] = useState<Editable>({
     title: "",
@@ -40,7 +39,7 @@ export default function EditPageModal({
       title: state.title || "Untitled",
       slug: state.slug || "/new-page",
       description: state.description || "",
-      status: (state.status ?? "Draft") as PageStatus,
+      status: (state.status ?? "Draft"),
       lastUpdated: new Date().toISOString(),
     });
 
@@ -92,7 +91,7 @@ export default function EditPageModal({
             <div className="relative">
               <select
                 value={state.status}
-                onChange={(e) => setState((s) => ({ ...s, status: e.target.value as PageStatus }))}
+                onChange={(e) => setState((s) => ({ ...s, status: e.target.value }))}
                 className="field appearance-none pr-9"
               >
                 <option value="Published">Published</option>

@@ -11,7 +11,7 @@ import SignupModal7 from "./modals/SignupModal7";
 import StaticIPInfoModal from "./modals/StaticIPInfoModal";
 import LetsGetYourConnectionModal from "./modals/LetsGetYourConnectionModal";
 
-export type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+// export type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export default function NbnSignupController({
   open,
@@ -20,7 +20,7 @@ export default function NbnSignupController({
   open: boolean;
   onClose: () => void;
 }) {
-  const [step, setStep] = useState<Step>(1);
+  const [step, setStep] = useState<any>(1);
   const [showStaticIpInfo, setShowStaticIpInfo] = useState(false);
   const [showLetsGetConn, setShowLetsGetConn] = useState(false);
 
@@ -36,7 +36,7 @@ export default function NbnSignupController({
       setShowLetsGetConn(true);
       return;
     }
-    setStep((s) => Math.min(7, (s + 1) as Step));
+    setStep((s:any) => Math.min(7, (s + 1)));
   }, [step]);
 
   const goBack = useCallback(() => {
@@ -44,7 +44,7 @@ export default function NbnSignupController({
       setShowLetsGetConn(false);
       return;
     }
-    setStep((s) => Math.max(1, (s - 1) as Step));
+    setStep((s:any) => Math.max(1, (s - 1)));
   }, [showLetsGetConn]);
 
   if (!open) return null;
