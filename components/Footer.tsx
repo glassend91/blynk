@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import ContactUsModal from "@/components/ContactUsModal";
+import FindLocalSupportModal from "@/components/site/find-support/FindLocalSupportModal";
 
 export default function Footer() {
   const [openContact, setOpenContact] = useState(false);
+  const [openSupport, setOpenSupport] = useState(false);
 
   return (
     <>
@@ -68,14 +70,24 @@ export default function Footer() {
                   <button
                     type="button"
                     onClick={() => setOpenContact(true)}
-                    className="hover:text-[#401B60] transition-colors"
+                    className="transition-colors hover:text-[#401B60]"
                     aria-haspopup="dialog"
                     aria-controls="contact-modal"
                   >
                     Contact us
                   </button>
                 </li>
-                <li>Find Local Technician</li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setOpenSupport(true)}
+                    className="transition-colors hover:text-[#401B60]"
+                    aria-haspopup="dialog"
+                    aria-controls="find-local-support-modal"
+                  >
+                    Find Local Technician
+                  </button>
+                </li>
                 <li>My Account</li>
                 <li>Financial Hardship</li>
                 <li>Policies</li>
@@ -98,8 +110,9 @@ export default function Footer() {
         </div>
       </footer>
 
-      {/* Modal (renders outside the footer) */}
+      {/* Modals (render outside the footer) */}
       <ContactUsModal open={openContact} onClose={() => setOpenContact(false)} />
+      <FindLocalSupportModal open={openSupport} onClose={() => setOpenSupport(false)} />
     </>
   );
 }

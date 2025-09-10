@@ -8,6 +8,7 @@ import { AddNoteDialog } from './_local/AddNoteDialog';
 
 export default function CustomerVerificationPage() {
   const [openNote, setOpenNote] = useState(false);
+  console.log('openNote', openNote);
 
   // mock stats (wire to API later)
   const stats = [
@@ -50,7 +51,12 @@ export default function CustomerVerificationPage() {
         </button>
       </div>
 
-      <AddNoteDialog open={openNote} onOpenChange={setOpenNote} />
+{
+  openNote && (
+    <AddNoteDialog open={openNote} onOpenChange={setOpenNote} />
+  )
+}
+      {/* <AddNoteDialog open={openNote} onOpenChange={setOpenNote} /> */}
     </div>
   );
 }
