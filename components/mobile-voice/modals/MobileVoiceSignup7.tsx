@@ -51,7 +51,7 @@ export default function MobileVoiceSignup7({ onComplete, onBack, onClose }:{
         </div>
       </SectionPanel>
 
-      <BarActions onBack={onBack} onNext={onComplete} nextLabel="Complete Order" />
+      <BarActions onBack={onBack} onNext={onComplete} label="Complete Order" />
     </ModalShell>
   );
 }

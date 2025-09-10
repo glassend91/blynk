@@ -18,10 +18,7 @@ type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export default function BusinessSmeSignupController({
   open,
   onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+}: any) {
   const order: Step[] = [1, 2, 3, 4, 5, 6, 7];
   const [step, setStep] = useState<Step>(1);
 
@@ -53,13 +50,13 @@ export default function BusinessSmeSignupController({
         </div>
 
         <div className="px-8 pb-10">
-          {step === 1 && <BusinessSmeSignup1 onNext={goNext} onBack={closeAll} onClose={closeAll} />}
-          {step === 2 && <BusinessSmeSignup2 onNext={goNext} onBack={goBack} onClose={closeAll} />}
-          {step === 3 && <BusinessSmeSignup3 onNext={goNext} onBack={goBack} onClose={closeAll} />}
-          {step === 4 && <BusinessSmeSignup4 onNext={goNext} onBack={goBack} onClose={closeAll} />}
-          {step === 5 && <BusinessSmeSignup5 onNext={goNext} onBack={goBack} onClose={closeAll} />}
-          {step === 6 && <BusinessSmeSignup6 onNext={goNext} onBack={goBack} onClose={closeAll} />}
-          {step === 7 && <BusinessSmeSignup7 onComplete={closeAll} onBack={goBack} onClose={closeAll} />}
+          {step === 1 && <BusinessSmeSignup1 onNext={goNext} onBack={closeAll} />}
+          {step === 2 && <BusinessSmeSignup2 onNext={goNext} onBack={goBack} />}
+          {step === 3 && <BusinessSmeSignup3 onNext={goNext} onBack={goBack} />}
+          {step === 4 && <BusinessSmeSignup4 onNext={goNext} onBack={goBack} />}
+          {step === 5 && <BusinessSmeSignup5 onNext={goNext} onBack={goBack} />}
+          {step === 6 && <BusinessSmeSignup6 onNext={goNext} onBack={goBack} />}
+          {step === 7 && <BusinessSmeSignup7 onComplete={closeAll} onBack={goBack} />}
         </div>
       </ModalShell>
     </div>
