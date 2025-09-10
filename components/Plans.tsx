@@ -1,9 +1,9 @@
 import Image from "next/image";
 import NBN from "@/app/assets/images/NBNInternet.svg";
-import Mobile from "@/app/assets/images/Mobile.svg";
+import Mobile from "@/app/assets/images/mobile.svg";
 import Search from "@/app/assets/images/Search.svg";
 import ArrowRight from "@/app/assets/images/arrow-right.svg";
-import simpleMobile from "@/app/assets/images/simpleMobile.svg";
+import simpleMobile from "@/app/assets/images/SimpleMobile.svg";
 
 export default function Plans() {
   return (
