@@ -22,7 +22,7 @@ export function ManualVerification() {
       />
 
       <label className="mb-2 block text-[13px] font-semibold text-[#6F6C90]">
-        Verification Code
+         Ask the customer to read the OTP they received. Enter it here and select Verify. We&rsquo;ll mark the account as verified and add a note that it was confirmed over the phone.
       </label>
       <input
         value={code}

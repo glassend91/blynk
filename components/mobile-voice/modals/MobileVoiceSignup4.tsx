@@ -64,9 +64,39 @@ export default function MobileVoiceSignup4({ onNext, onBack, onClose }:{
             </div>
           </div>
 
-          <p className="mt-4 text-[12px] text-[#8A84A3]">
-            * You will receive an OTP on your registered mobile number (+61 412 **** *78).
-          </p>
+          <div className="mt-4 rounded-[12px] border border-[#DFDBE3] bg-[#F9F8FB] p-4">
+  <div className="text-[14px] font-semibold text-[#0A0A0A]">Verify Ownership</div>
+  <p className="mt-1 text-[12px] text-[#8A84A3]">
+    We&apos;ve sent a one-time passcode (OTP) to the number you want to port. Enter it below to confirm ownership.
+  </p>
+
+  <div className="mt-3 flex flex-wrap items-end gap-3">
+    <div className="grow">
+      <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">OTP Code</label>
+      <input
+        inputMode="numeric"
+        placeholder="6-digit code"
+        className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[16px] tracking-[4px] outline-none focus:ring-2 focus:ring-[#401B60]/20"
+      />
+    </div>
+
+    <button
+      type="button"
+      className="h-[48px] rounded-[10px] border border-[#DFDBE3] bg-white px-4 text-[15px] font-semibold text-[#401B60] hover:bg-[#F4F3F7]"
+      // onClick={() => /* resend */ null}
+    >
+      Resend OTP
+    </button>
+
+    <button
+      type="button"
+      className="h-[48px] rounded-[10px] bg-[#401B60] px-5 text-[15px] font-semibold text-white"
+      // onClick={() => /* verify */ null}
+    >
+      Verify
+    </button>
+  </div>
+</div>
         </div>
       </SectionPanel>
 

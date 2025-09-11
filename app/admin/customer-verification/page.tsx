@@ -37,8 +37,8 @@ export default function CustomerVerificationPage() {
 
       {/* Two-column content */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <OTPForm />
         <ManualVerification />
+        <OTPForm />
       </div>
 
       {/* Floating action: Add Note (match to your pattern of top-right CTA) */}
