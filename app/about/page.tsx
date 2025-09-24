@@ -17,7 +17,7 @@ export default function AboutPage() {
       <AlwaysImproving />
       <MoreThanProvider />
       <AboutCTA />
-      <Footer/>
+      <Footer />
     </main>
   );
 }

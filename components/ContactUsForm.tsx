@@ -13,9 +13,8 @@ export default function ContactUsForm({
 
   return (
     <section
-      className={`w-full ${dark ? "bg-[#190A2F]" : "bg-transparent"} ${
-        onClose ? "relative" : ""
-      }`}
+      className={`w-full ${dark ? "bg-[#190A2F]" : "bg-transparent"} ${onClose ? "relative" : ""
+        }`}
     >
       <form
         className="relative mx-auto w-[661px] rounded-[30px] bg-white px-[30px] py-[50px] shadow-[0_10px_40px_rgba(0,0,0,0.04)]"
@@ -48,9 +47,8 @@ export default function ContactUsForm({
 
         {/* Heading */}
         <h2
-          className={`text-center text-[32px] font-bold ${
-            dark ? "text-white" : "text-black"
-          }`}
+          className={`text-center text-[32px] font-bold ${dark ? "text-white" : "text-black"
+            }`}
         >
           Get in Touch
         </h2>

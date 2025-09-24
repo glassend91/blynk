@@ -5,7 +5,7 @@ import BarActions from "@/components/shared/BarActions";
 import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
 
-export default function MobileVoiceSignup1({ onNext, onBack, onClose }:{
+export default function MobileVoiceSignup1({ onNext, onBack, onClose }: {
   onNext: () => void; onBack: () => void; onClose: () => void;
 }) {
   return (
@@ -18,8 +18,8 @@ export default function MobileVoiceSignup1({ onNext, onBack, onClose }:{
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#2F2151] text-white">
             {/* phone icon */}
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <rect x="6" y="2" width="12" height="20" rx="3" stroke="white" strokeWidth="1.5"/>
-              <circle cx="12" cy="18" r="1.5" fill="white"/>
+              <rect x="6" y="2" width="12" height="20" rx="3" stroke="white" strokeWidth="1.5" />
+              <circle cx="12" cy="18" r="1.5" fill="white" />
             </svg>
           </div>
           <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">

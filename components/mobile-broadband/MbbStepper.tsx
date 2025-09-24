@@ -24,9 +24,8 @@ export default function MbbStepper({ active }: { active: number }) {
           return (
             <div key={label} className="flex flex-col items-center">
               <div
-                className={`grid h-10 w-10 place-items-center rounded-full border text-sm font-semibold ${
-                  on ? "text-white" : "text-[#6F6C90]"
-                }`}
+                className={`grid h-10 w-10 place-items-center rounded-full border text-sm font-semibold ${on ? "text-white" : "text-[#6F6C90]"
+                  }`}
                 style={{
                   background: on ? "var(--b-brand)" : "#fff",
                   borderColor: on ? "var(--b-brand)" : "#E5E7EB",

@@ -5,7 +5,7 @@ import BarActions from "@/components/shared/BarActions";
 import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
 
-export default function MobileVoiceSignup6({ onNext, onBack, onClose }:{
+export default function MobileVoiceSignup6({ onNext, onBack, onClose }: {
   onNext: () => void; onBack: () => void; onClose: () => void;
 }) {
   return (
@@ -17,8 +17,8 @@ export default function MobileVoiceSignup6({ onNext, onBack, onClose }:{
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#2F2151] text-white">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <rect x="3" y="6" width="18" height="12" rx="2" stroke="white" strokeWidth="1.5"/>
-              <path d="M3 10h18" stroke="white" strokeWidth="1.5"/>
+              <rect x="3" y="6" width="18" height="12" rx="2" stroke="white" strokeWidth="1.5" />
+              <path d="M3 10h18" stroke="white" strokeWidth="1.5" />
             </svg>
           </div>
           <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Payment Details</h2>

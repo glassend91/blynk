@@ -105,9 +105,11 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {error ? (
-          <div className="text-[14px] text-red-600">{error}</div>
-        ) : null}
+        {
+          error ? (
+            <div className="text-[14px] text-red-600">{error}</div>
+          ) : null
+        }
 
         <button
           type="submit"
@@ -117,6 +119,6 @@ export default function LoginPage() {
           {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
-    </AuthShell>
+    </AuthShell >
   );
 }

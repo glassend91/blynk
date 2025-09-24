@@ -21,7 +21,7 @@ export default function SignupModal2({
       <SectionPanel>
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[var(--cl-brand-ink)] text-white">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 8c6-5 12-5 18 0M6 12c4-3 8-3 12 0M9 16c2-1.5 4-1.5 6 0" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 8c6-5 12-5 18 0M6 12c4-3 8-3 12 0M9 16c2-1.5 4-1.5 6 0" stroke="white" strokeWidth="1.5" strokeLinecap="round" /></svg>
           </div>
           <h2 className="modal-h1 mt-4">Choose Your NBN Plan</h2>
           <p className="modal-sub mt-1">Select the plan that suits you</p>

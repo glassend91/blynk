@@ -15,8 +15,8 @@ export default function ModalShell({
 }) {
   const maxW =
     size === "narrow" ? "max-w-[600px]" :
-    size === "default" ? "max-w-[820px]" :
-    "max-w-[1160px]";
+      size === "default" ? "max-w-[820px]" :
+        "max-w-[1160px]";
 
   return (
     <div className="fixed inset-0 z-[100] grid place-items-center bg-black/55 px-3 py-4 sm:px-4">

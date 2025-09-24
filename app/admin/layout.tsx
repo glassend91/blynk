@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         style={{ paddingTop: TOPBAR_H + 30, marginLeft: SIDEBAR_W }}
       >
         <AuthGuard>{children}</AuthGuard>
-      </main>
-    </div>
+      </main >
+    </div >
   );
 }

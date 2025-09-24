@@ -22,7 +22,7 @@ export default function SignupModal6({
       <SectionPanel>
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[var(--cl-brand-ink)] text-white">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="white" strokeWidth="1.5"/><path d="M3 10h18" stroke="white" strokeWidth="1.5"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="white" strokeWidth="1.5" /><path d="M3 10h18" stroke="white" strokeWidth="1.5" /></svg>
           </div>
           <h2 className="modal-h1 mt-4">Payment Details</h2>
           <p className="modal-sub mt-1">Secure payment information</p>
