@@ -1,0 +1,52 @@
+import apiClient from "@/lib/apiClient";
+
+export type SignupPayload = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    phone?: string;
+    serviceAddress?: string;
+    type?: "NBN" | "MBL" | "MBB" | "SME";
+    mblSelectedNumber?: string;
+    mblKeepExistingNumber?: boolean;
+    mblCurrentMobileNumber?: string;
+    mblCurrentProvider?: string;
+    dateOfBirth?: string;
+    identity?: any;
+    businessDetails?: any;
+    simType?: "eSim" | "physical";
+};
+
+export type SignupResponse = {
+    success: boolean;
+    userId?: string;
+    message?: string;
+};
+
+export async function signup(payload: SignupPayload): Promise<SignupResponse> {
+    const { data } = await apiClient.post<SignupResponse>("/auth/signup", payload);
+    return data;
+}
+
+export type LoginPayload = {
+    email: string;
+    password: string;
+    remember?: boolean;
+};
+
+export type LoginResponse = {
+    success: boolean;
+    token?: string;
+    userId?: string;
+    message?: string;
+    requires2fa?: boolean;
+    user?: any;
+};
+
+export async function login(payload: LoginPayload): Promise<LoginResponse> {
+    const { data } = await apiClient.post<LoginResponse>("/auth/login", payload);
+    return data;
+}
+
+
