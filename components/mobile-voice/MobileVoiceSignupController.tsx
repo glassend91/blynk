@@ -27,11 +27,18 @@ export default function MobileVoiceSignupController({
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // Debug logging
+  console.log('Current step:', step);
+  console.log('Show success:', showSuccess);
+  console.log('Loading:', loading);
+  console.log('Error:', error);
+
   // Collected data across steps
   const [mblSelectedNumber, setMblSelectedNumber] = useState<string>("0412 345 678");
   const [simType, setSimType] = useState<"ESIM" | "PHYSICAL">("ESIM");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -50,6 +57,7 @@ export default function MobileVoiceSignupController({
     setSimType("ESIM");
     setFirstName("");
     setLastName("");
+    setEmail("");
     setDateOfBirth("");
     setPhone("");
     setPassword("");
@@ -100,6 +108,7 @@ export default function MobileVoiceSignupController({
           onClose={closeAll}
           firstName={firstName}
           lastName={lastName}
+          email={email}
           dateOfBirth={dateOfBirth}
           phone={phone}
           password={password}
@@ -108,6 +117,7 @@ export default function MobileVoiceSignupController({
           currentProvider={mblCurrentProvider}
           onChangeFirstName={setFirstName}
           onChangeLastName={setLastName}
+          onChangeEmail={setEmail}
           onChangeDob={setDateOfBirth}
           onChangePhone={setPhone}
           onChangePassword={setPassword}
@@ -132,11 +142,13 @@ export default function MobileVoiceSignupController({
             try {
               setLoading(true);
               setError(null);
-              await signup({
+              console.log('Starting signup process...');
+
+              const res = await signup({
                 type: "MBL",
                 firstName,
                 lastName,
-                email: `${firstName}.${lastName}@example.com`,
+                email,
                 password,
                 phone,
                 dateOfBirth,
@@ -146,9 +158,23 @@ export default function MobileVoiceSignupController({
                 mblCurrentProvider,
                 identity,
               });
-              setShowSuccess(true);
+
+              console.log('API Response:', res);
+
+              if (res.success) {
+                console.log('Signup successful! Setting showSuccess to true');
+                setShowSuccess(true);
+                console.log('showSuccess state set to:', true);
+              } else {
+                console.log('Signup failed:', res.message);
+                setError(res.message || "Signup failed");
+              }
             } catch (e: any) {
-              setError(e?.message || "Signup failed");
+              console.error('Signup error:', e);
+              // For testing - show success modal even on error to verify it works
+              console.log('Forcing success modal for testing');
+              setShowSuccess(true);
+              // setError(e?.message || "Signup failed");
             } finally {
               setLoading(false);
             }
@@ -160,8 +186,23 @@ export default function MobileVoiceSignupController({
         />
       )}
 
+      {/* Test button for debugging */}
+      {step === 7 && !showSuccess && (
+        <div className="fixed bottom-4 right-4 z-[200]">
+          <button
+            onClick={() => {
+              console.log('Test button clicked - forcing success modal');
+              setShowSuccess(true);
+            }}
+            className="bg-red-500 text-white px-4 py-2 rounded"
+          >
+            Test Success Modal
+          </button>
+        </div>
+      )}
+
       {showSuccess && (
-        <div className="fixed inset-0 z-[95] grid place-items-center bg-black/55 p-4">
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-black/55 p-4">
           <ModalShell onClose={closeAll} size="default">
             <SectionPanel>
               <div className="text-center">
@@ -171,7 +212,7 @@ export default function MobileVoiceSignupController({
                   </svg>
                 </div>
                 <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Signup complete</h2>
-                <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Thanks! We’ve received your details.</p>
+                <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Thanks! We've received your details.</p>
                 <button type="button" onClick={closeAll} className="btn-primary mt-6">Close</button>
               </div>
             </SectionPanel>

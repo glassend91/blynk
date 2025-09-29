@@ -29,7 +29,7 @@ export default function ModalShell({
           maxW,
         ].join(" ")}
       >
-        {showClose && (
+        {/* {showClose && (
           <button
             onClick={onClose}
             aria-label="Close"
@@ -39,7 +39,7 @@ export default function ModalShell({
               <path d="M1 1L13 13M13 1L1 13" stroke="white" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </button>
-        )}
+        )} */}
 
         {children}
 

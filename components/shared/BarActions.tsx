@@ -12,7 +12,15 @@ export default function BarActions(
         <button type="button" onClick={complete} disabled={disabled} className="btn-primary disabled:opacity-60">
           Complete Order →
         </button> :
-        <button type="button" onClick={onNext} disabled={nextDisabled} className="btn-primary disabled:opacity-60">{label} →</button>}
+        onNext ? (
+          <button type="button" onClick={onNext} disabled={nextDisabled || disabled} className="btn-primary disabled:opacity-60">
+            {label} →
+          </button>
+        ) : (
+          <div className="text-gray-500 text-sm">
+            {disabled ? "Complete payment to continue" : "Payment required"}
+          </div>
+        )}
     </div>
   );
 }

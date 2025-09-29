@@ -5,14 +5,20 @@ import BarActions from "@/components/shared/BarActions";
 import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
 
-export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName, lastName, dateOfBirth, phone, password, keepExisting, currentNumber, currentProvider, onChangeFirstName, onChangeLastName, onChangeDob, onChangePhone, onChangePassword, onChangeKeepExisting, onChangeCurrentNumber, onChangeCurrentProvider }: {
+export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName, lastName, email, dateOfBirth, phone, password, keepExisting, currentNumber, currentProvider, onChangeFirstName, onChangeLastName, onChangeEmail, onChangeDob, onChangePhone, onChangePassword, onChangeKeepExisting, onChangeCurrentNumber, onChangeCurrentProvider }: {
   onNext: () => void; onBack: () => void; onClose: () => void;
-  firstName: string; lastName: string; dateOfBirth: string; phone: string; password: string; keepExisting: boolean; currentNumber: string; currentProvider: string;
-  onChangeFirstName: (v: string) => void; onChangeLastName: (v: string) => void; onChangeDob: (v: string) => void; onChangePhone: (v: string) => void; onChangePassword: (v: string) => void; onChangeKeepExisting: (v: boolean) => void; onChangeCurrentNumber: (v: string) => void; onChangeCurrentProvider: (v: string) => void;
+  firstName: string; lastName: string; email: string; dateOfBirth: string; phone: string; password: string; keepExisting: boolean; currentNumber: string; currentProvider: string;
+  onChangeFirstName: (v: string) => void; onChangeLastName: (v: string) => void; onChangeEmail: (v: string) => void; onChangeDob: (v: string) => void; onChangePhone: (v: string) => void; onChangePassword: (v: string) => void; onChangeKeepExisting: (v: boolean) => void; onChangeCurrentNumber: (v: string) => void; onChangeCurrentProvider: (v: string) => void;
 }) {
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const canProceed = Boolean(
     firstName &&
     lastName &&
+    email && isValidEmail(email) &&
     dateOfBirth &&
     phone &&
     password && password.length >= 6 &&
@@ -47,6 +53,24 @@ export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName,
             <div>
               <label className="text-[12px] font-semibold text-[#3B3551]">Last Name</label>
               <input value={lastName} onChange={(e) => onChangeLastName(e.target.value)} className="mt-2 w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20" placeholder="Enter your last name" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-[12px] font-semibold text-[#3B3551]">Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => onChangeEmail(e.target.value)}
+                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${email && !isValidEmail(email)
+                  ? 'border-red-300 bg-red-50'
+                  : email && isValidEmail(email)
+                    ? 'border-green-300 bg-green-50'
+                    : 'border-[#DFDBE3]'
+                  }`}
+                placeholder="Enter your email address"
+              />
+              {email && !isValidEmail(email) && (
+                <p className="mt-1 text-xs text-red-600">Please enter a valid email address</p>
+              )}
             </div>
             <div>
               <label className="text-[12px] font-semibold text-[#3B3551]">Date of Birth</label>
