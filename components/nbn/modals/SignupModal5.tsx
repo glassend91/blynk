@@ -21,7 +21,7 @@ export default function SignupModal5({
       <SectionPanel>
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[var(--cl-brand-ink)] text-white">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7l8-4Z" stroke="white" strokeWidth="1.5"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7l8-4Z" stroke="white" strokeWidth="1.5" /></svg>
           </div>
           <h2 className="modal-h1 mt-4">Identity Verification</h2>
           <p className="modal-sub mt-1">We need to verify your identity for security purposes</p>

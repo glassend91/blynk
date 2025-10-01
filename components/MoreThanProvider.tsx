@@ -1,6 +1,6 @@
 // components/MoreThanNeighbour.tsx
 import Image from "next/image";
-import mapSrc from "@/app/assets/images/Morethanproviders.png"; 
+import mapSrc from "@/app/assets/images/Morethanproviders.png";
 
 
 type Props = {
@@ -9,7 +9,7 @@ type Props = {
 };
 
 export default function MoreThanNeighbour({
-  
+
 }: Props) {
   return (
     <section className="relative">

@@ -5,8 +5,8 @@ import BarActions from "@/components/shared/BarActions";
 import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
 
-export default function MobileVoiceSignup3({ onNext, onBack, onClose }:{
-  onNext: () => void; onBack: () => void; onClose: () => void;
+export default function MobileVoiceSignup3({ onNext, onBack, onClose, simType, onChangeSimType }: {
+  onNext: () => void; onBack: () => void; onClose: () => void; simType: "ESIM" | "PHYSICAL"; onChangeSimType: (v: "ESIM" | "PHYSICAL") => void;
 }) {
   return (
     <ModalShell onClose={onClose} size="wide">
@@ -17,7 +17,7 @@ export default function MobileVoiceSignup3({ onNext, onBack, onClose }:{
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#2F2151] text-white">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M7 3h7l4 4v14H7V3Z" stroke="white" strokeWidth="1.5"/>
+              <path d="M7 3h7l4 4v14H7V3Z" stroke="white" strokeWidth="1.5" />
             </svg>
           </div>
           <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">
@@ -37,9 +37,9 @@ export default function MobileVoiceSignup3({ onNext, onBack, onClose }:{
               </div>
               <div className="text-[13px] text-[#6F6C90]">Instant activation, environmentally friendly</div>
             </div>
-            <input type="radio" name="mv-sim" defaultChecked className="sr-only" />
+            <input type="radio" name="mv-sim" checked={simType === "ESIM"} onChange={() => onChangeSimType("ESIM")} className="sr-only" />
             <span className="grid h-5 w-5 place-items-center rounded-full border border-[#5C3B86]">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#5C3B86]" />
+              <span className={["h-2.5 w-2.5 rounded-full", simType === "ESIM" ? "bg-[#5C3B86]" : "bg-transparent"].join(" ")} />
             </span>
           </label>
 

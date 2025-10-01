@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { clearAuthToken } from "@/lib/auth";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -35,6 +36,7 @@ function Item({ label, href }: { label: string; href: string }) {
 }
 
 export default function Sidebar({ width = 234 }: { width?: number }) {
+  const router = useRouter();
   return (
     <aside
       className="fixed left-0 top-0 z-40 h-screen border-r border-[#DFDBE3] bg-white"
@@ -84,6 +86,7 @@ export default function Sidebar({ width = 234 }: { width?: number }) {
       <div className="absolute bottom-0 w-full bg-[#FFF0F0] px-[14px] py-[15px]">
         <button
           type="button"
+          onClick={() => { clearAuthToken(); router.push("/login"); }}
           className="flex w-[205px] items-center gap-[11.5px] rounded-[8.75px] px-[10.5px] py-[7px] text-[16px] font-semibold text-[#FF0000]"
         >
           <svg width="18" height="19" viewBox="0 0 18 19" fill="none" aria-hidden>

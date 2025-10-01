@@ -7,8 +7,8 @@ import MbbHeaderBanner from "../MbbHeaderBanner";
 import MbbStepper from "../MbbStepper";
 
 export default function MobileBroadBandSignup6({
-  onComplete, onBack, onClose,
-}: { onComplete: () => void; onBack: () => void; onClose: () => void; }) {
+  onComplete, onBack, onClose, loading, error,
+}: { onComplete: () => void; onBack: () => void; onClose: () => void; loading?: boolean; error?: string; }) {
   const [agree, setAgree] = useState(false);
 
   return (
@@ -39,7 +39,10 @@ export default function MobileBroadBandSignup6({
         </div>
       </SectionPanel>
 
-      <BarActions onBack={onBack} complete={onComplete} disabled={!agree} />
+      {error ? (
+        <div className="mx-auto mt-2 max-w-[720px] rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+      ) : null}
+      <BarActions onBack={onBack} complete={onComplete} disabled={!agree || !!loading} />
     </ModalShell>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { signup } from "@/lib/services/auth";
+import SectionPanel from "@/components/shared/SectionPanel";
 import ModalShell from "@/components/shared/ModalShell";
 import BsmHeaderBanner from "./BsmHeaderBanner";
 import BsmStepper from "./BsmStepper";
@@ -21,9 +23,34 @@ export default function BusinessSmeSignupController({
 }: any) {
   const order: Step[] = [1, 2, 3, 4, 5, 6, 7];
   const [step, setStep] = useState<Step>(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // State across steps
+  const [address, setAddress] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [businessType, setBusinessType] = useState("");
+  const [abn, setAbn] = useState("");
+  const [primaryFirstName, setPrimaryFirstName] = useState("");
+  const [primaryLastName, setPrimaryLastName] = useState("");
+  const [primaryEmail, setPrimaryEmail] = useState("");
+  const [primaryPhone, setPrimaryPhone] = useState("");
+  const [password, setPassword] = useState("");
 
   const closeAll = useCallback(() => {
     setStep(1);
+    setLoading(false);
+    setError(null);
+    setShowSuccess(false);
+    setAddress("");
+    setBusinessName("");
+    setBusinessType("");
+    setAbn("");
+    setPrimaryFirstName("");
+    setPrimaryLastName("");
+    setPrimaryEmail("");
+    setPrimaryPhone("");
     onClose();
   }, [onClose]);
 
@@ -50,15 +77,90 @@ export default function BusinessSmeSignupController({
         </div>
 
         <div className="px-8 pb-10">
-          {step === 1 && <BusinessSmeSignup1 onNext={goNext} onBack={closeAll} />}
+          {step === 1 && <BusinessSmeSignup1 onNext={goNext} onBack={closeAll} address={address} onChangeAddress={setAddress} />}
           {step === 2 && <BusinessSmeSignup2 onNext={goNext} onBack={goBack} />}
           {step === 3 && <BusinessSmeSignup3 onNext={goNext} onBack={goBack} />}
-          {step === 4 && <BusinessSmeSignup4 onNext={goNext} onBack={goBack} />}
+          {step === 4 && (
+            <BusinessSmeSignup4
+              onNext={goNext}
+              onBack={goBack}
+              businessName={businessName}
+              businessType={businessType}
+              abn={abn}
+              primaryFirstName={primaryFirstName}
+              primaryLastName={primaryLastName}
+              primaryEmail={primaryEmail}
+              primaryPhone={primaryPhone}
+              password={password}
+              onChangeBusinessName={setBusinessName}
+              onChangeBusinessType={setBusinessType}
+              onChangeAbn={setAbn}
+              onChangePrimaryFirstName={setPrimaryFirstName}
+              onChangePrimaryLastName={setPrimaryLastName}
+              onChangePrimaryEmail={setPrimaryEmail}
+              onChangePrimaryPhone={setPrimaryPhone}
+              onChangePassword={setPassword}
+            />
+          )}
           {step === 5 && <BusinessSmeSignup5 onNext={goNext} onBack={goBack} />}
           {step === 6 && <BusinessSmeSignup6 onNext={goNext} onBack={goBack} />}
-          {step === 7 && <BusinessSmeSignup7 onComplete={closeAll} onBack={goBack} />}
+          {step === 7 && (
+            <BusinessSmeSignup7
+              onComplete={async () => {
+                try {
+                  setLoading(true);
+                  setError(null);
+                  await signup({
+                    type: "SME",
+                    firstName: primaryFirstName,
+                    lastName: primaryLastName,
+                    email: primaryEmail,
+                    password,
+                    phone: primaryPhone,
+                    serviceAddress: address,
+                    businessDetails: {
+                      businessName,
+                      businessAddress: address,
+                      businessType,
+                      ABN: abn,
+                      primaryContact: {
+                        firstName: primaryFirstName,
+                        lastName: primaryLastName,
+                        phone: primaryPhone,
+                        email: primaryEmail,
+                      }
+                    }
+                  });
+                  setShowSuccess(true);
+                } catch (e: any) {
+                  setError(e?.message || "Signup failed");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              onBack={goBack}
+            />
+          )}
         </div>
       </ModalShell>
+      {showSuccess && (
+        <div className="fixed inset-0 z-[1001] grid place-items-center bg-black/55 p-4">
+          <ModalShell onClose={closeAll} size="default">
+            <SectionPanel>
+              <div className="text-center">
+                <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#4F1C76] text-white">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path d="M20 7 10 17 4 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Signup complete</h2>
+                <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Thanks! We’ve received your business details.</p>
+                <button type="button" onClick={closeAll} className="btn-primary mt-6">Close</button>
+              </div>
+            </SectionPanel>
+          </ModalShell>
+        </div>
+      )}
     </div>
   );
 }

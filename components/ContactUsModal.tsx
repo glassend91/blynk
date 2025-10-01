@@ -31,7 +31,7 @@ export default function ContactUsModal({
       <div className="relative w-full max-w-[720px] rounded-[20px] shadow-lg animate-fadeIn">
 
         {/* Contact form */}
-        <ContactUsForm onClose={onClose}/>
+        <ContactUsForm onClose={onClose} />
       </div>
     </div>
   );

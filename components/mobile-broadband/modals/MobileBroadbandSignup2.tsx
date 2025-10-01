@@ -7,9 +7,8 @@ import MbbHeaderBanner from "../MbbHeaderBanner";
 import MbbStepper from "../MbbStepper";
 
 export default function MobileBroadbandSignup2({
-  onNext, onBack, onClose,
-}: { onNext: () => void; onBack: () => void; onClose: () => void; }) {
-  const [type, setType] = useState<"esim" | "physical">("esim");
+  onNext, onBack, onClose, type, onChangeType,
+}: { onNext: () => void; onBack: () => void; onClose: () => void; type: "eSim" | "physical"; onChangeType: (v: "eSim" | "physical") => void; }) {
 
   const rows = [
     { id: "esim" as const, title: "eSIM (Digital)", tag: "FREE", sub: "Instant activation, environmentally friendly" },
@@ -32,12 +31,12 @@ export default function MobileBroadbandSignup2({
 
         <div className="mx-auto mt-8 max-w-[760px] space-y-4">
           {rows.map(r => {
-            const active = type === r.id;
+            const active = (type.toLowerCase() as any) === r.id;
             return (
               <button
                 key={r.id}
                 type="button"
-                onClick={() => setType(r.id)}
+                onClick={() => onChangeType(r.id === "esim" ? "eSim" : "physical")}
                 className={[
                   "w-full rounded-[14px] border bg-white p-4 text-left shadow-[0_24px_60px_rgba(64,27,118,0.10)]",
                   active ? "border-[#4F1C76]" : "border-[#E7E4EC] hover:border-[#CFC6DC]",
@@ -47,12 +46,12 @@ export default function MobileBroadbandSignup2({
                   <div>
                     <div className="flex items-center gap-3">
                       <div className="text-[16px] font-semibold text-[#3B3551]">{r.title}</div>
-                      <span className={`rounded-full px-2 py-[2px] text-[11px] font-semibold ${r.id==="esim"?"bg-black/5 text-[#111827]":"bg-[#EEE8F6] text-[#4F1C76]"}`}>{r.tag}</span>
+                      <span className={`rounded-full px-2 py-[2px] text-[11px] font-semibold ${r.id === "esim" ? "bg-black/5 text-[#111827]" : "bg-[#EEE8F6] text-[#4F1C76]"}`}>{r.tag}</span>
                     </div>
                     <div className="mt-2 text-[13px] text-[#6B6478]">{r.sub}</div>
                   </div>
-                  <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${active?"border-2 border-[#4F1C76]":"border border-[#CFC6DC]"}`}>
-                    <span className={`h-2.5 w-2.5 rounded-full ${active?"bg-[#4F1C76]":"bg-transparent"}`} />
+                  <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${active ? "border-2 border-[#4F1C76]" : "border border-[#CFC6DC]"}`}>
+                    <span className={`h-2.5 w-2.5 rounded-full ${active ? "bg-[#4F1C76]" : "bg-transparent"}`} />
                   </span>
                 </div>
               </button>

@@ -5,10 +5,10 @@ export default function WhatOurCustomersSay() {
   return (
     <section
       className="bg-cover bg-center bg-[#401B60]/10"
-      // style={{
-      //   backgroundImage:
-      //     "linear-gradient(0deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.1) 100%), url(https://api.builder.io/api/v1/image/assets/TEMP/c1a89bf878f52350be0114a9f31a36f08f13ccac?width=3840)",
-      // }}
+    // style={{
+    //   backgroundImage:
+    //     "linear-gradient(0deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.1) 100%), url(https://api.builder.io/api/v1/image/assets/TEMP/c1a89bf878f52350be0114a9f31a36f08f13ccac?width=3840)",
+    // }}
     >
       {/* Figma: padding 150px vertical, 243px horizontal. Keep canvas centered at 1434px. */}
       <div className="mx-auto max-w-[1434px] px-32 py-[150px]">

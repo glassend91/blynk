@@ -5,8 +5,8 @@ import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
 import BarActions from "@/components/shared/BarActions";
 
-export default function MobileVoiceSignup7({ onComplete, onBack, onClose }:{
-  onComplete: () => void; onBack: () => void; onClose: () => void;
+export default function MobileVoiceSignup7({ onComplete, onBack, onClose, loading, error }: {
+  onComplete: () => void; onBack: () => void; onClose: () => void; loading?: boolean; error?: string;
 }) {
   return (
     <ModalShell onClose={onClose} size="wide">
@@ -18,8 +18,8 @@ export default function MobileVoiceSignup7({ onComplete, onBack, onClose }:{
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#2F2151] text-white">
             {/* clipboard */}
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M9 4h6a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="white" strokeWidth="1.5"/>
-              <path d="M9 7h6" stroke="white" strokeWidth="1.5"/>
+              <path d="M9 4h6a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="white" strokeWidth="1.5" />
+              <path d="M9 7h6" stroke="white" strokeWidth="1.5" />
             </svg>
           </div>
           <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Final Agreement</h2>
@@ -51,7 +51,10 @@ export default function MobileVoiceSignup7({ onComplete, onBack, onClose }:{
         </div>
       </SectionPanel>
 
-      <BarActions onBack={onBack} onNext={onComplete} label="Complete Order" />
+      {error ? (
+        <div className="mx-auto mt-2 max-w-[560px] rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+      ) : null}
+      <BarActions onBack={onBack} onNext={onComplete} label={loading ? "Submitting…" : "Complete Order"} nextDisabled={!!loading} />
     </ModalShell>
   );
 }

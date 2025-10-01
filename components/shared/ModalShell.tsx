@@ -15,8 +15,8 @@ export default function ModalShell({
 }) {
   const maxW =
     size === "narrow" ? "max-w-[600px]" :
-    size === "default" ? "max-w-[820px]" :
-    "max-w-[1160px]";
+      size === "default" ? "max-w-[820px]" :
+        "max-w-[1160px]";
 
   return (
     <div className="fixed inset-0 z-[100] grid place-items-center bg-black/55 px-3 py-4 sm:px-4">
@@ -29,7 +29,7 @@ export default function ModalShell({
           maxW,
         ].join(" ")}
       >
-        {showClose && (
+        {/* {showClose && (
           <button
             onClick={onClose}
             aria-label="Close"
@@ -39,7 +39,7 @@ export default function ModalShell({
               <path d="M1 1L13 13M13 1L1 13" stroke="white" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </button>
-        )}
+        )} */}
 
         {children}
 

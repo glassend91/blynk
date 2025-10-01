@@ -1,18 +1,26 @@
 "use client";
 export default function BarActions(
-  {onBack,onNext,complete,label="Next",disabled=false}:
-  {onBack:()=>void;onNext?:()=>void;complete?:()=>void;label?:string;disabled?:boolean;}
-){
-  return(
+  { onBack, onNext, complete, label = "Next", disabled = false, nextDisabled = false }:
+    { onBack: () => void; onNext?: () => void; complete?: () => void; label?: string; disabled?: boolean; nextDisabled?: boolean; }
+) {
+  return (
     <div className="mt-10 flex items-center justify-between">
-      <button onClick={onBack} className="btn-secondary">
+      <button type="button" onClick={onBack} className="btn-secondary">
         ← Back
       </button>
-      {complete?
-        <button onClick={complete} disabled={disabled} className="btn-primary disabled:opacity-60">
+      {complete ?
+        <button type="button" onClick={complete} disabled={disabled} className="btn-primary disabled:opacity-60">
           Complete Order →
-        </button>:
-        <button onClick={onNext} className="btn-primary">{label} →</button>}
+        </button> :
+        onNext ? (
+          <button type="button" onClick={onNext} disabled={nextDisabled || disabled} className="btn-primary disabled:opacity-60">
+            {label} →
+          </button>
+        ) : (
+          <div className="text-gray-500 text-sm">
+            {disabled ? "Complete payment to continue" : "Payment required"}
+          </div>
+        )}
     </div>
   );
 }

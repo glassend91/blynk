@@ -3,14 +3,40 @@
 import { useRouter } from "next/navigation";
 import AuthShell from "@/components/auth/AuthShell";
 import { useState } from "react";
+import { login } from "@/lib/services/auth";
+import { setAuthToken, setAuthUser } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
   const [remember, setRemember] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    router.push("/login/2fa");
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await login({ email, password, remember });
+      if (res?.requires2fa) {
+        router.push("/login/otp");
+        return;
+      }
+      console.log(res);
+      if (res?.success) {
+        if (res.token) setAuthToken(res.token);
+        if (res.user) setAuthUser(res.user);
+        router.push("/dashboard");
+        return;
+      }
+      setError(res?.message || "Login failed");
+    } catch (err: any) {
+      setError(err?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -39,6 +65,10 @@ export default function LoginPage() {
           <input
             className="h-[52px] w-full rounded-[12px] border border-[#E5E2EA] bg-[#F8F8FB] px-4 text-[15px] outline-none focus:border-[#3F205F]"
             placeholder="Enter your email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
@@ -54,6 +84,9 @@ export default function LoginPage() {
             type="password"
             className="h-[52px] w-full rounded-[12px] border border-[#E5E2EA] bg-[#F8F8FB] px-4 text-[15px] outline-none focus:border-[#3F205F]"
             placeholder="Enter your password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
@@ -72,13 +105,20 @@ export default function LoginPage() {
           </button>
         </div>
 
+        {
+          error ? (
+            <div className="text-[14px] text-red-600">{error}</div>
+          ) : null
+        }
+
         <button
           type="submit"
-          className="mt-2 h-[52px] w-full rounded-[12px] bg-[#3F205F] text-[16px] font-semibold text-white"
+          disabled={loading || !email || !password}
+          className="mt-2 h-[52px] w-full rounded-[12px] bg-[#3F205F] text-[16px] font-semibold text-white disabled:opacity-60"
         >
-          Sign In
+          {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
-    </AuthShell>
+    </AuthShell >
   );
 }

@@ -6,11 +6,11 @@ import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
 import DVSVerification, { DVSSubmitPayload } from "@/components/signup/DVSVerification";
 
-export default function MobileVoiceSignup5({ onNext, onBack, onClose }:{
-  onNext: () => void; onBack: () => void; onClose: () => void;
+export default function MobileVoiceSignup5({ onNext, onBack, onClose, onIdentityVerified, canProceed }: {
+  onNext: () => void; onBack: () => void; onClose: () => void; onIdentityVerified: (payload: any) => void; canProceed?: boolean;
 }) {
-  function handleVerify(_: DVSSubmitPayload) {
-    // UI-only for now
+  function handleVerify(payload: DVSSubmitPayload) {
+    onIdentityVerified(payload);
     onNext();
   }
 
@@ -20,7 +20,7 @@ export default function MobileVoiceSignup5({ onNext, onBack, onClose }:{
       <div className="mt-6"><MVStepper active={5} /></div>
 
       <SectionPanel>
-         <div className="text-center">
+        <div className="text-center">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[#401B60] text-white">
             {/* id badge */}
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -42,7 +42,7 @@ export default function MobileVoiceSignup5({ onNext, onBack, onClose }:{
         </div>
       </SectionPanel>
 
-      <BarActions onBack={onBack} onNext={onNext} />
+      <BarActions onBack={onBack} onNext={onNext} nextDisabled={!canProceed} />
     </ModalShell>
   );
 }
