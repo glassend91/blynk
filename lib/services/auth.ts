@@ -49,4 +49,13 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
     return data;
 }
 
+export type CheckEmailResponse = {
+    exists: boolean;
+    message: string;
+};
+
+export async function checkEmail(email: string): Promise<CheckEmailResponse> {
+    const { data } = await apiClient.post<CheckEmailResponse>("/auth/check-email", { email });
+    return data;
+}
 

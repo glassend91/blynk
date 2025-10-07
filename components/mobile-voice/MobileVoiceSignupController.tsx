@@ -27,12 +27,6 @@ export default function MobileVoiceSignupController({
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Debug logging
-  console.log('Current step:', step);
-  console.log('Show success:', showSuccess);
-  console.log('Loading:', loading);
-  console.log('Error:', error);
-
   // Collected data across steps
   const [mblSelectedNumber, setMblSelectedNumber] = useState<string>("0412 345 678");
   const [simType, setSimType] = useState<"ESIM" | "PHYSICAL">("ESIM");
@@ -70,38 +64,33 @@ export default function MobileVoiceSignupController({
 
   const goNext = useCallback(() => {
     const idx = order.indexOf(step);
-    setStep(order[Math.min(idx + 1, order.length - 1)]);
-  }, [step]);
+    let nextStep = order[Math.min(idx + 1, order.length - 1)];
+    // Skip number selection (step 3) if keeping existing number
+    if (step === 2 && mblKeepExistingNumber && nextStep === 3) {
+      nextStep = 4;
+    }
+    setStep(nextStep);
+  }, [step, mblKeepExistingNumber]);
 
   const goBack = useCallback(() => {
     const idx = order.indexOf(step);
-    setStep(order[Math.max(idx - 1, 0)]);
-  }, [step]);
+    let prevStep = order[Math.max(idx - 1, 0)];
+    // Skip number selection (step 3) going back if keeping existing number
+    if (step === 4 && mblKeepExistingNumber && prevStep === 3) {
+      prevStep = 2;
+    }
+    setStep(prevStep);
+  }, [step, mblKeepExistingNumber]);
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-[90] grid place-items-center bg-black/55 p-4">
+      {/* Step 1: Plan Selection */}
       {step === 1 && <MVSignup1 onNext={goNext} onBack={closeAll} onClose={closeAll} />}
+
+      {/* Step 2: Customer Details & Porting (ask if keeping number) */}
       {step === 2 && (
-        <MVSignup2
-          onNext={goNext}
-          onBack={goBack}
-          onClose={closeAll}
-          selectedNumber={mblSelectedNumber}
-          onChangeSelectedNumber={setMblSelectedNumber}
-        />
-      )}
-      {step === 3 && (
-        <MVSignup3
-          onNext={goNext}
-          onBack={goBack}
-          onClose={closeAll}
-          simType={simType}
-          onChangeSimType={setSimType}
-        />
-      )}
-      {step === 4 && (
         <MVSignup4
           onNext={goNext}
           onBack={goBack}
@@ -126,6 +115,30 @@ export default function MobileVoiceSignupController({
           onChangeCurrentProvider={setMblCurrentProvider}
         />
       )}
+
+      {/* Step 3: Number Selection (only if NOT keeping existing) */}
+      {step === 3 && (
+        <MVSignup2
+          onNext={goNext}
+          onBack={goBack}
+          onClose={closeAll}
+          selectedNumber={mblSelectedNumber}
+          onChangeSelectedNumber={setMblSelectedNumber}
+        />
+      )}
+
+      {/* Step 4: SIM Type */}
+      {step === 4 && (
+        <MVSignup3
+          onNext={goNext}
+          onBack={goBack}
+          onClose={closeAll}
+          simType={simType}
+          onChangeSimType={setSimType}
+        />
+      )}
+
+      {/* Step 5: Identity Verification */}
       {step === 5 && (
         <MVSignup5
           onNext={goNext}
@@ -135,16 +148,18 @@ export default function MobileVoiceSignupController({
           canProceed={canProceedIdentity}
         />
       )}
+
+      {/* Step 6: Payment */}
       {step === 6 && <MVSignup6 onNext={goNext} onBack={goBack} onClose={closeAll} />}
+
+      {/* Step 7: Agreement & Submit */}
       {step === 7 && (
         <MVSignup7
           onComplete={async () => {
             try {
               setLoading(true);
               setError(null);
-              console.log('Starting signup process...');
-
-              const res = await signup({
+              await signup({
                 type: "MBL",
                 firstName,
                 lastName,
@@ -158,23 +173,9 @@ export default function MobileVoiceSignupController({
                 mblCurrentProvider,
                 identity,
               });
-
-              console.log('API Response:', res);
-
-              if (res.success) {
-                console.log('Signup successful! Setting showSuccess to true');
-                setShowSuccess(true);
-                console.log('showSuccess state set to:', true);
-              } else {
-                console.log('Signup failed:', res.message);
-                setError(res.message || "Signup failed");
-              }
-            } catch (e: any) {
-              console.error('Signup error:', e);
-              // For testing - show success modal even on error to verify it works
-              console.log('Forcing success modal for testing');
               setShowSuccess(true);
-              // setError(e?.message || "Signup failed");
+            } catch (e: any) {
+              setError(e?.message || "Signup failed");
             } finally {
               setLoading(false);
             }
@@ -184,21 +185,6 @@ export default function MobileVoiceSignupController({
           loading={loading}
           error={error || undefined}
         />
-      )}
-
-      {/* Test button for debugging */}
-      {step === 7 && !showSuccess && (
-        <div className="fixed bottom-4 right-4 z-[200]">
-          <button
-            onClick={() => {
-              console.log('Test button clicked - forcing success modal');
-              setShowSuccess(true);
-            }}
-            className="bg-red-500 text-white px-4 py-2 rounded"
-          >
-            Test Success Modal
-          </button>
-        </div>
       )}
 
       {showSuccess && (

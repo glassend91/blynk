@@ -1,6 +1,8 @@
 "use client";
+import { useEffect, useState } from "react";
 import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
+import { checkEmail } from "@/lib/services/auth";
 
 export default function BusinessSmeSignup4({
   onNext, onBack,
@@ -15,7 +17,38 @@ export default function BusinessSmeSignup4({
   onChangeBusinessName: (v: string) => void; onChangeBusinessType: (v: string) => void; onChangeAbn: (v: string) => void;
   onChangePrimaryFirstName: (v: string) => void; onChangePrimaryLastName: (v: string) => void; onChangePrimaryEmail: (v: string) => void; onChangePrimaryPhone: (v: string) => void; onChangePassword: (v: string) => void;
 }) {
-  const canProceed = Boolean(businessName && abn && primaryFirstName && primaryLastName && primaryEmail && password && password.length >= 6);
+  const [emailChecking, setEmailChecking] = useState(false);
+  const [emailExists, setEmailExists] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  useEffect(() => {
+    if (!primaryEmail || !isValidEmail(primaryEmail)) {
+      setEmailExists(false);
+      setEmailError(null);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      try {
+        setEmailChecking(true);
+        setEmailError(null);
+        const res = await checkEmail(primaryEmail);
+        setEmailExists(res.exists);
+        if (res.exists) setEmailError(res.message);
+      } catch (err: any) {
+        setEmailError(err?.message || "Could not verify email");
+      } finally {
+        setEmailChecking(false);
+      }
+    }, 600);
+    return () => clearTimeout(timeout);
+  }, [primaryEmail]);
+
+  const canProceed = Boolean(businessName && abn && primaryFirstName && primaryLastName && primaryEmail && isValidEmail(primaryEmail) && !emailExists && password && password.length >= 6);
   return (
     <SectionPanel>
       <div className="text-center">
@@ -46,7 +79,33 @@ export default function BusinessSmeSignup4({
         <div className="mt-3 grid gap-4 md:grid-cols-2">
           <div><label className="mb-1 block text-sm text-[#6B6478]">First Name</label><input value={primaryFirstName} onChange={(e) => onChangePrimaryFirstName(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3" placeholder="Enter your first name" /></div>
           <div><label className="mb-1 block text-sm text-[#6B6478]">Last Name</label><input value={primaryLastName} onChange={(e) => onChangePrimaryLastName(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3" placeholder="Enter your last name" /></div>
-          <div><label className="mb-1 block text-sm text-[#6B6478]">Business Email</label><input value={primaryEmail} onChange={(e) => onChangePrimaryEmail(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3" placeholder="Enter business email address" /></div>
+        </div>
+        <div className="mt-4">
+          <label className="mb-1 block text-sm text-[#6B6478]">Business Email</label>
+          <input
+            value={primaryEmail}
+            onChange={(e) => onChangePrimaryEmail(e.target.value)}
+            type="email"
+            className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] ${emailExists || (primaryEmail && !isValidEmail(primaryEmail))
+                ? 'border-red-300 bg-red-50'
+                : primaryEmail && isValidEmail(primaryEmail) && !emailChecking
+                  ? 'border-green-300 bg-green-50'
+                  : 'border-[#E7E4EC] bg-[#FBF9FF]'
+              }`}
+            placeholder="Enter business email address"
+          />
+          {emailChecking && <p className="mt-1 text-xs text-gray-500">Checking availability...</p>}
+          {primaryEmail && !isValidEmail(primaryEmail) && !emailChecking && (
+            <p className="mt-1 text-xs text-red-600">Please enter a valid email address</p>
+          )}
+          {emailExists && (
+            <p className="mt-1 text-xs text-red-600">{emailError || "Email already registered"}</p>
+          )}
+          {primaryEmail && isValidEmail(primaryEmail) && !emailExists && !emailChecking && (
+            <p className="mt-1 text-xs text-green-600">Email is available</p>
+          )}
+        </div>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div><label className="mb-1 block text-sm text-[#6B6478]">Business Phone</label><input value={primaryPhone} onChange={(e) => onChangePrimaryPhone(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3" placeholder="Enter business phone number" /></div>
           <div><label className="mb-1 block text-sm text-[#6B6478]">Account Password</label><input type="password" value={password} onChange={(e) => onChangePassword(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3" placeholder="Create a password (min 6 chars)" /></div>
         </div>

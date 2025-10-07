@@ -2,9 +2,9 @@
 
 const STEPS = [
   "Plan Selection",
+  "Customer Details",
   "Number Selection",
   "SIM Type",
-  "Customer Details",
   "ID Check",
   "Payment",
   "Agreement",
