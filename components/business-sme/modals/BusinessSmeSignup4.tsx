@@ -87,10 +87,10 @@ export default function BusinessSmeSignup4({
             onChange={(e) => onChangePrimaryEmail(e.target.value)}
             type="email"
             className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] ${emailExists || (primaryEmail && !isValidEmail(primaryEmail))
-                ? 'border-red-300 bg-red-50'
-                : primaryEmail && isValidEmail(primaryEmail) && !emailChecking
-                  ? 'border-green-300 bg-green-50'
-                  : 'border-[#E7E4EC] bg-[#FBF9FF]'
+              ? 'border-red-300 bg-red-50'
+              : primaryEmail && isValidEmail(primaryEmail) && !emailChecking
+                ? 'border-green-300 bg-green-50'
+                : 'border-[#E7E4EC] bg-[#FBF9FF]'
               }`}
             placeholder="Enter business email address"
           />

@@ -65,9 +65,9 @@ export default function MobileVoiceSignupController({
   const goNext = useCallback(() => {
     const idx = order.indexOf(step);
     let nextStep = order[Math.min(idx + 1, order.length - 1)];
-    // Skip number selection (step 3) if keeping existing number
-    if (step === 2 && mblKeepExistingNumber && nextStep === 3) {
-      nextStep = 4;
+    // Skip number selection (step 2) if keeping existing number
+    if (step === 1 && mblKeepExistingNumber && nextStep === 2) {
+      nextStep = 3;
     }
     setStep(nextStep);
   }, [step, mblKeepExistingNumber]);
@@ -75,9 +75,9 @@ export default function MobileVoiceSignupController({
   const goBack = useCallback(() => {
     const idx = order.indexOf(step);
     let prevStep = order[Math.max(idx - 1, 0)];
-    // Skip number selection (step 3) going back if keeping existing number
-    if (step === 4 && mblKeepExistingNumber && prevStep === 3) {
-      prevStep = 2;
+    // Skip number selection (step 2) going back if keeping existing number
+    if (step === 3 && mblKeepExistingNumber && prevStep === 2) {
+      prevStep = 1;
     }
     setStep(prevStep);
   }, [step, mblKeepExistingNumber]);
@@ -89,8 +89,41 @@ export default function MobileVoiceSignupController({
       {/* Step 1: Plan Selection */}
       {step === 1 && <MVSignup1 onNext={goNext} onBack={closeAll} onClose={closeAll} />}
 
-      {/* Step 2: Customer Details & Porting (ask if keeping number) */}
+      {/* Step 2: Number Selection (only if NOT keeping existing) */}
       {step === 2 && (
+        <MVSignup2
+          onNext={goNext}
+          onBack={goBack}
+          onClose={closeAll}
+          selectedNumber={mblSelectedNumber}
+          onChangeSelectedNumber={setMblSelectedNumber}
+        />
+      )}
+
+      {/* Step 3: SIM Type */}
+      {step === 3 && (
+        <MVSignup3
+          onNext={goNext}
+          onBack={goBack}
+          onClose={closeAll}
+          simType={simType}
+          onChangeSimType={setSimType}
+        />
+      )}
+
+      {/* Step 4: Identity Verification */}
+      {step === 4 && (
+        <MVSignup5
+          onNext={goNext}
+          onBack={goBack}
+          onClose={closeAll}
+          onIdentityVerified={setIdentity}
+          canProceed={canProceedIdentity}
+        />
+      )}
+
+      {/* Step 5: Customer Details & Porting + OTP (creates user, asks about keeping number) */}
+      {step === 5 && (
         <MVSignup4
           onNext={goNext}
           onBack={goBack}
@@ -104,6 +137,9 @@ export default function MobileVoiceSignupController({
           keepExisting={mblKeepExistingNumber}
           currentNumber={mblCurrentMobileNumber}
           currentProvider={mblCurrentProvider}
+          mblSelectedNumber={mblSelectedNumber}
+          simType={simType}
+          identity={identity}
           onChangeFirstName={setFirstName}
           onChangeLastName={setLastName}
           onChangeEmail={setEmail}
@@ -113,39 +149,6 @@ export default function MobileVoiceSignupController({
           onChangeKeepExisting={setMblKeepExistingNumber}
           onChangeCurrentNumber={setMblCurrentMobileNumber}
           onChangeCurrentProvider={setMblCurrentProvider}
-        />
-      )}
-
-      {/* Step 3: Number Selection (only if NOT keeping existing) */}
-      {step === 3 && (
-        <MVSignup2
-          onNext={goNext}
-          onBack={goBack}
-          onClose={closeAll}
-          selectedNumber={mblSelectedNumber}
-          onChangeSelectedNumber={setMblSelectedNumber}
-        />
-      )}
-
-      {/* Step 4: SIM Type */}
-      {step === 4 && (
-        <MVSignup3
-          onNext={goNext}
-          onBack={goBack}
-          onClose={closeAll}
-          simType={simType}
-          onChangeSimType={setSimType}
-        />
-      )}
-
-      {/* Step 5: Identity Verification */}
-      {step === 5 && (
-        <MVSignup5
-          onNext={goNext}
-          onBack={goBack}
-          onClose={closeAll}
-          onIdentityVerified={setIdentity}
-          canProceed={canProceedIdentity}
         />
       )}
 
@@ -159,20 +162,7 @@ export default function MobileVoiceSignupController({
             try {
               setLoading(true);
               setError(null);
-              await signup({
-                type: "MBL",
-                firstName,
-                lastName,
-                email,
-                password,
-                phone,
-                dateOfBirth,
-                mblSelectedNumber,
-                mblKeepExistingNumber,
-                mblCurrentMobileNumber,
-                mblCurrentProvider,
-                identity,
-              });
+              // User already created in step 5, just show success
               setShowSuccess(true);
             } catch (e: any) {
               setError(e?.message || "Signup failed");

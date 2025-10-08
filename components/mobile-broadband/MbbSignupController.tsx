@@ -87,6 +87,9 @@ export default function MbbSignupController({
             <MbbSignup2 onNext={goNext} onBack={goBack} onClose={closeAll} type={simType} onChangeType={setSimType} />
           )}
           {step === 3 && (
+            <MbbSignup4 onNext={goNext} onBack={goBack} onClose={closeAll} onIdentityVerified={setIdentity} canProceed={!!identity} />
+          )}
+          {step === 4 && (
             <MbbSignup3 onNext={goNext} onBack={goBack} onClose={closeAll}
               firstName={firstName}
               lastName={lastName}
@@ -94,6 +97,8 @@ export default function MbbSignupController({
               phone={phone}
               password={password}
               serviceAddress={serviceAddress}
+              simType={simType}
+              identity={identity}
               onChangeFirstName={setFirstName}
               onChangeLastName={setLastName}
               onChangeEmail={setEmail}
@@ -101,9 +106,6 @@ export default function MbbSignupController({
               onChangePassword={setPassword}
               onChangeServiceAddress={setServiceAddress}
             />
-          )}
-          {step === 4 && (
-            <MbbSignup4 onNext={goNext} onBack={goBack} onClose={closeAll} onIdentityVerified={setIdentity} canProceed={!!identity} />
           )}
           {step === 5 && (
             <MbbSignup5 onNext={goNext} onBack={goBack} onClose={closeAll} />
@@ -113,17 +115,7 @@ export default function MbbSignupController({
               try {
                 setLoading(true);
                 setError(null);
-                await signup({
-                  type: "MBB",
-                  firstName,
-                  lastName,
-                  email,
-                  password,
-                  phone,
-                  serviceAddress,
-                  identity,
-                  simType,
-                });
+                // User already created in step 4, just show success
                 setStep(6); // ensure visible
                 setShowSuccess(true);
               } catch (e: any) {

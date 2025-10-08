@@ -2,10 +2,10 @@
 
 const STEPS = [
   "Plan Selection",
-  "Customer Details",
   "Number Selection",
   "SIM Type",
   "ID Check",
+  "Customer Details",
   "Payment",
   "Agreement",
 ];

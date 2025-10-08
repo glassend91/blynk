@@ -59,3 +59,31 @@ export async function checkEmail(email: string): Promise<CheckEmailResponse> {
     return data;
 }
 
+export type OTPResponse = {
+    success: boolean;
+    message: string;
+    expiresIn?: string;
+};
+
+export async function sendOtp(email: string): Promise<OTPResponse> {
+    const { data } = await apiClient.post<OTPResponse>("/auth/otp/send", { email });
+    return data;
+}
+
+export async function resendOtp(email: string): Promise<OTPResponse> {
+    const { data } = await apiClient.post<OTPResponse>("/auth/otp/resend", { email });
+    return data;
+}
+
+export type VerifyOTPResponse = {
+    success: boolean;
+    verified: boolean;
+    message: string;
+    user?: any;
+};
+
+export async function verifyOtp(email: string, code: string): Promise<VerifyOTPResponse> {
+    const { data } = await apiClient.post<VerifyOTPResponse>("/auth/otp/verify", { email, code });
+    return data;
+}
+
