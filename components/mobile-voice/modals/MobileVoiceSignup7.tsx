@@ -44,10 +44,11 @@ export default function MobileVoiceSignup7({ onComplete, onBack, onClose, loadin
             </div>
           </div>
 
-          <label className="mt-5 flex items-start gap-3 text-[14px] text-[#2E2745]">
+          {/* Agreement already accepted on step 6 (Payment page) */}
+          {/* <label className="mt-5 flex items-start gap-3 text-[14px] text-[#2E2745]">
             <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#401B60]" />
             I agree to the <a className="text-[#401B60] underline" href="#">Terms and Conditions</a> and <a className="text-[#401B60] underline" href="#">Privacy Policy</a>
-          </label>
+          </label> */}
         </div>
       </SectionPanel>
 

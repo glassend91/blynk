@@ -9,6 +9,7 @@ import StripeCardElement from "@/components/shared/StripeCardElement";
 export default function BusinessSmeSignup6({
   onNext, onBack,
 }: { onNext: () => void; onBack: () => void }) {
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [invoiceRequested, setInvoiceRequested] = useState(false);
@@ -82,11 +83,20 @@ export default function BusinessSmeSignup6({
                 </div>
               </div>
 
+              {/* Agreement Checkbox - must agree before payment */}
+              <div className="rounded-[12px] border border-[#EEE8F6] bg-[#FBF8FF] p-4">
+                <label className="flex items-start gap-3 text-[14px] text-[#2E2745]">
+                  <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#4F1C76]" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} />
+                  <span>I agree to the <a className="text-[#4F1C76] underline" href="#" target="_blank">Business Terms and Conditions</a>, <a className="text-[#4F1C76] underline" href="#" target="_blank">SLA</a>, and <a className="text-[#4F1C76] underline" href="#" target="_blank">Privacy Policy</a></span>
+                </label>
+              </div>
+
               <StripeCardElement
                 onPaymentSuccess={handlePaymentSuccess}
                 onPaymentError={handlePaymentError}
                 amount={paymentAmount}
                 currency="aud"
+                disabled={!agreeTerms}
               />
 
               {paymentError && (

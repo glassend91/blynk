@@ -1,24 +1,52 @@
 "use client";
+import { useEffect, useState } from "react";
 import ModalShell from "@/components/shared/ModalShell";
 import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
 import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
+import { checkEmail } from "@/lib/services/auth";
 
 export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName, lastName, email, dateOfBirth, phone, password, keepExisting, currentNumber, currentProvider, onChangeFirstName, onChangeLastName, onChangeEmail, onChangeDob, onChangePhone, onChangePassword, onChangeKeepExisting, onChangeCurrentNumber, onChangeCurrentProvider }: {
   onNext: () => void; onBack: () => void; onClose: () => void;
   firstName: string; lastName: string; email: string; dateOfBirth: string; phone: string; password: string; keepExisting: boolean; currentNumber: string; currentProvider: string;
   onChangeFirstName: (v: string) => void; onChangeLastName: (v: string) => void; onChangeEmail: (v: string) => void; onChangeDob: (v: string) => void; onChangePhone: (v: string) => void; onChangePassword: (v: string) => void; onChangeKeepExisting: (v: boolean) => void; onChangeCurrentNumber: (v: string) => void; onChangeCurrentProvider: (v: string) => void;
 }) {
+  const [emailChecking, setEmailChecking] = useState(false);
+  const [emailExists, setEmailExists] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
+  useEffect(() => {
+    if (!email || !isValidEmail(email)) {
+      setEmailExists(false);
+      setEmailError(null);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      try {
+        setEmailChecking(true);
+        setEmailError(null);
+        const res = await checkEmail(email);
+        setEmailExists(res.exists);
+        if (res.exists) setEmailError(res.message);
+      } catch (err: any) {
+        setEmailError(err?.message || "Could not verify email");
+      } finally {
+        setEmailChecking(false);
+      }
+    }, 600);
+    return () => clearTimeout(timeout);
+  }, [email]);
+
   const canProceed = Boolean(
     firstName &&
     lastName &&
-    email && isValidEmail(email) &&
+    email && isValidEmail(email) && !emailExists &&
     dateOfBirth &&
     phone &&
     password && password.length >= 6 &&
@@ -27,7 +55,7 @@ export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName,
   return (
     <ModalShell onClose={onClose} size="wide">
       <MVHeaderBanner />
-      <div className="mt-6"><MVStepper active={4} /></div>
+      <div className="mt-6"><MVStepper active={2} /></div>
 
       <SectionPanel>
         <div className="text-center">
@@ -60,16 +88,23 @@ export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName,
                 type="email"
                 value={email}
                 onChange={(e) => onChangeEmail(e.target.value)}
-                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${email && !isValidEmail(email)
+                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${emailExists || (email && !isValidEmail(email))
                   ? 'border-red-300 bg-red-50'
-                  : email && isValidEmail(email)
+                  : email && isValidEmail(email) && !emailChecking
                     ? 'border-green-300 bg-green-50'
                     : 'border-[#DFDBE3]'
                   }`}
                 placeholder="Enter your email address"
               />
-              {email && !isValidEmail(email) && (
+              {emailChecking && <p className="mt-1 text-xs text-gray-500">Checking availability...</p>}
+              {email && !isValidEmail(email) && !emailChecking && (
                 <p className="mt-1 text-xs text-red-600">Please enter a valid email address</p>
+              )}
+              {emailExists && (
+                <p className="mt-1 text-xs text-red-600">{emailError || "Email already registered"}</p>
+              )}
+              {email && isValidEmail(email) && !emailExists && !emailChecking && (
+                <p className="mt-1 text-xs text-green-600">Email is available</p>
               )}
             </div>
             <div>

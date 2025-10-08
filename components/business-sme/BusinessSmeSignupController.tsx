@@ -139,6 +139,8 @@ export default function BusinessSmeSignupController({
                 }
               }}
               onBack={goBack}
+              loading={loading}
+              error={error || undefined}
             />
           )}
         </div>

@@ -41,10 +41,11 @@ export default function SignupModal7({
             <div className="font-semibold text-[#2E2745]">$69.99/mo</div>
           </div>
 
-          <label className="mt-5 flex items-center gap-3 text-[15px] text-[#2E2745]">
+          {/* Agreement already accepted on step 6 (Payment page) */}
+          {/* <label className="mt-5 flex items-center gap-3 text-[15px] text-[#2E2745]">
             <input type="checkbox" className="h-4 w-4 accent-[var(--cl-brand)]" />
             I agree to the <a className="text-[var(--cl-brand)] underline" href="#">Terms and Conditions</a>
-          </label>
+          </label> */}
 
           {error ? (
             <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>

@@ -1,9 +1,11 @@
 "use client";
+import { useEffect, useState } from "react";
 import ModalShell from "@/components/shared/ModalShell";
 import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
 import MbbHeaderBanner from "../MbbHeaderBanner";
 import MbbStepper from "../MbbStepper";
+import { checkEmail } from "@/lib/services/auth";
 
 export default function MobileBroadbandSignup3({
   onNext, onBack, onClose,
@@ -14,7 +16,38 @@ export default function MobileBroadbandSignup3({
   firstName: string; lastName: string; email: string; phone: string; password: string; serviceAddress: string;
   onChangeFirstName: (v: string) => void; onChangeLastName: (v: string) => void; onChangeEmail: (v: string) => void; onChangePhone: (v: string) => void; onChangePassword: (v: string) => void; onChangeServiceAddress: (v: string) => void;
 }) {
-  const canProceed = Boolean(firstName && lastName && email && password && password.length >= 6);
+  const [emailChecking, setEmailChecking] = useState(false);
+  const [emailExists, setEmailExists] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  useEffect(() => {
+    if (!email || !isValidEmail(email)) {
+      setEmailExists(false);
+      setEmailError(null);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      try {
+        setEmailChecking(true);
+        setEmailError(null);
+        const res = await checkEmail(email);
+        setEmailExists(res.exists);
+        if (res.exists) setEmailError(res.message);
+      } catch (err: any) {
+        setEmailError(err?.message || "Could not verify email");
+      } finally {
+        setEmailChecking(false);
+      }
+    }, 600);
+    return () => clearTimeout(timeout);
+  }, [email]);
+
+  const canProceed = Boolean(firstName && lastName && email && isValidEmail(email) && !emailExists && password && password.length >= 6);
   return (
     <ModalShell onClose={onClose} size="wide">
       <MbbHeaderBanner />
@@ -33,7 +66,31 @@ export default function MobileBroadbandSignup3({
           <div className="grid gap-4 md:grid-cols-2">
             <div><label className="mb-1 block text-sm text-[#6B6478]">First Name</label><input value={firstName} onChange={(e) => onChangeFirstName(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3 focus:border-[#4F1C76] focus:outline-none" placeholder="Enter your First name" /></div>
             <div><label className="mb-1 block text-sm text-[#6B6478]">Last Name</label><input value={lastName} onChange={(e) => onChangeLastName(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3 focus:border-[#4F1C76] focus:outline-none" placeholder="Enter your last name" /></div>
-            <div><label className="mb-1 block text-sm text-[#6B6478]">Email Address</label><input value={email} onChange={(e) => onChangeEmail(e.target.value)} type="email" className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3 focus:border-[#4F1C76]" placeholder="Enter your email" /></div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-sm text-[#6B6478]">Email Address</label>
+              <input
+                value={email}
+                onChange={(e) => onChangeEmail(e.target.value)}
+                type="email"
+                className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] ${emailExists || (email && !isValidEmail(email))
+                  ? 'border-red-300 bg-red-50'
+                  : email && isValidEmail(email) && !emailChecking
+                    ? 'border-green-300 bg-green-50'
+                    : 'border-[#E7E4EC] bg-[#FBF9FF]'
+                  }`}
+                placeholder="Enter your email"
+              />
+              {emailChecking && <p className="mt-1 text-xs text-gray-500">Checking availability...</p>}
+              {email && !isValidEmail(email) && !emailChecking && (
+                <p className="mt-1 text-xs text-red-600">Please enter a valid email address</p>
+              )}
+              {emailExists && (
+                <p className="mt-1 text-xs text-red-600">{emailError || "Email already registered"}</p>
+              )}
+              {email && isValidEmail(email) && !emailExists && !emailChecking && (
+                <p className="mt-1 text-xs text-green-600">Email is available</p>
+              )}
+            </div>
             <div><label className="mb-1 block text-sm text-[#6B6478]">Phone Number</label><input value={phone} onChange={(e) => onChangePhone(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3 focus:border-[#4F1C76]" placeholder="Enter your phone number" /></div>
             <div><label className="mb-1 block text-sm text-[#6B6478]">Password</label><input type="password" value={password} onChange={(e) => onChangePassword(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3 focus:border-[#4F1C76]" placeholder="Create a password (min 6 chars)" /></div>
           </div>
@@ -77,7 +134,7 @@ export default function MobileBroadbandSignup3({
         </div>
       </SectionPanel>
 
-      <BarActions onBack={onBack} onNext={onNext} />
+      <BarActions onBack={onBack} onNext={onNext} nextDisabled={!canProceed} />
     </ModalShell>
   );
 }

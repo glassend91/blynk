@@ -13,7 +13,7 @@ export default function MobileVoiceSignup2({ onNext, onBack, onClose, selectedNu
   return (
     <ModalShell onClose={onClose} size="wide">
       <MVHeaderBanner />
-      <div className="mt-6"><MVStepper active={2} /></div>
+      <div className="mt-6"><MVStepper active={3} /></div>
 
       <SectionPanel>
         <div className="text-center">

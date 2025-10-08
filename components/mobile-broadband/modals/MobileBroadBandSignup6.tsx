@@ -9,7 +9,6 @@ import MbbStepper from "../MbbStepper";
 export default function MobileBroadBandSignup6({
   onComplete, onBack, onClose, loading, error,
 }: { onComplete: () => void; onBack: () => void; onClose: () => void; loading?: boolean; error?: string; }) {
-  const [agree, setAgree] = useState(false);
 
   return (
     <ModalShell onClose={onClose} size="wide">
@@ -32,17 +31,18 @@ export default function MobileBroadBandSignup6({
             <div className="flex items-center justify-between"><span>Monthly Cost:</span><span>$65/month</span></div>
             <div className="flex items-center justify-between"><span>SIM Type:</span><span>eSIM (Free)</span></div>
           </div>
-          <label className="mt-6 flex items-start gap-3">
+          {/* Agreement already accepted on step 5 (Payment page) */}
+          {/* <label className="mt-6 flex items-start gap-3">
             <input type="checkbox" className="mt-1 h-4 w-4" checked={agree} onChange={e => setAgree(e.target.checked)} />
             <span className="text-[14px] text-[#3B3551]">I agree to the Terms and Conditions and Privacy Policy</span>
-          </label>
+          </label> */}
         </div>
       </SectionPanel>
 
       {error ? (
         <div className="mx-auto mt-2 max-w-[720px] rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
       ) : null}
-      <BarActions onBack={onBack} complete={onComplete} disabled={!agree || !!loading} />
+      <BarActions onBack={onBack} complete={onComplete} disabled={!!loading} label={loading ? "Submitting..." : "Complete Order"} />
     </ModalShell>
   );
 }
