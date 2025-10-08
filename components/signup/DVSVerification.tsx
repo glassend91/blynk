@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { verifyDocument, type DocumentData, type DocumentType } from "@/lib/services/dvs";
 
 type IdType = "DRIVERS_LICENCE" | "PASSPORT" | "MEDICARE";
 
@@ -29,31 +30,35 @@ type MedicareFields = CommonFields & {
 
 export type DVSSubmitPayload =
   | { idType: "DRIVERS_LICENCE"; data: DriversFields }
-  | { idType: "PASSPORT";        data: PassportFields }
-  | { idType: "MEDICARE";        data: MedicareFields };
+  | { idType: "PASSPORT"; data: PassportFields }
+  | { idType: "MEDICARE"; data: MedicareFields };
 
 export default function DVSVerification({
   onVerify,
+  onSkip,
   loading = false,
   defaultIdType = "DRIVERS_LICENCE",
   apiError,
 }: {
   onVerify: (payload: DVSSubmitPayload) => void;
+  onSkip?: () => void;
   loading?: boolean;
   defaultIdType?: IdType;
   apiError?: string | null;
 }) {
   const [idType, setIdType] = useState<IdType>(defaultIdType);
   const [consent, setConsent] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
 
   // Common
   const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName]   = useState("");
-  const [dob, setDob]             = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dob, setDob] = useState("");
 
   // Licence
   const [licenceNumber, setLicenceNumber] = useState("");
-  const [stateOfIssue, setStateOfIssue]   = useState("");
+  const [stateOfIssue, setStateOfIssue] = useState("");
 
   // Passport
   const [passportNumber, setPassportNumber] = useState("");
@@ -61,14 +66,14 @@ export default function DVSVerification({
 
   // Medicare
   const [medicareNumber, setMedicareNumber] = useState("");
-  const [irn, setIrn]                       = useState("");
-  const [expiry, setExpiry]                 = useState("");
+  const [irn, setIrn] = useState("");
+  const [expiry, setExpiry] = useState("");
 
   const canSubmit = useMemo(() => {
     if (!consent || !firstName || !lastName || !dob) return false;
-    if (idType === "DRIVERS_LICENCE")   return !!licenceNumber && !!stateOfIssue;
-    if (idType === "PASSPORT")          return !!passportNumber && !!countryOfIssue;
-    if (idType === "MEDICARE")          return !!medicareNumber && !!irn && !!expiry;
+    if (idType === "DRIVERS_LICENCE") return !!licenceNumber && !!stateOfIssue;
+    if (idType === "PASSPORT") return !!passportNumber && !!countryOfIssue;
+    if (idType === "MEDICARE") return !!medicareNumber && !!irn && !!expiry;
     return false;
   }, [
     consent, firstName, lastName, dob,
@@ -77,17 +82,58 @@ export default function DVSVerification({
     medicareNumber, irn, expiry
   ]);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit || loading) return;
-    const base: CommonFields = { firstName, lastName, dob, consent };
+    if (!canSubmit || loading || verifying) return;
 
-    if (idType === "DRIVERS_LICENCE") {
-      onVerify({ idType, data: { ...base, licenceNumber, stateOfIssue } });
-    } else if (idType === "PASSPORT") {
-      onVerify({ idType, data: { ...base, passportNumber, countryOfIssue } });
-    } else {
-      onVerify({ idType, data: { ...base, medicareNumber, irn, expiry } });
+    setVerifying(true);
+    setVerificationError(null);
+
+    try {
+      // Convert date from YYYY-MM-DD to DD/MM/YYYY format
+      const formatDateForAPI = (dateString: string) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      };
+
+      // Map to DVS API format based on your API structure
+      const documentData: DocumentData = {
+        idType: idType,
+        firstName: firstName,
+        lastName: lastName,
+        dateOfBirth: formatDateForAPI(dob),
+        documentNumber: idType === "DRIVERS_LICENCE" ? licenceNumber :
+          idType === "PASSPORT" ? passportNumber : medicareNumber,
+        countryOfIssue: idType === "PASSPORT" ? countryOfIssue : undefined,
+        stateOfIssue: idType === "DRIVERS_LICENCE" ? stateOfIssue : undefined,
+        // Note: documentImage would be added if file upload is implemented
+      };
+
+      // Call DVS API
+      const result = await verifyDocument(documentData);
+
+      if (result.verified) {
+        // Map back to original format for compatibility
+        const base: CommonFields = { firstName, lastName, dob, consent };
+
+        if (idType === "DRIVERS_LICENCE") {
+          onVerify({ idType, data: { ...base, licenceNumber, stateOfIssue } });
+        } else if (idType === "PASSPORT") {
+          onVerify({ idType, data: { ...base, passportNumber, countryOfIssue } });
+        } else {
+          onVerify({ idType, data: { ...base, medicareNumber, irn, expiry } });
+        }
+      } else {
+        setVerificationError(result.error || "Verification failed");
+      }
+    } catch (error: any) {
+      setVerificationError(error?.message || "Verification failed");
+    } finally {
+      setVerifying(false);
     }
   }
 
@@ -155,7 +201,7 @@ export default function DVSVerification({
               className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20"
             >
               <option value="">Select state…</option>
-              {["ACT","NSW","NT","QLD","SA","TAS","VIC","WA"].map(s => (
+              {["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"].map(s => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
@@ -229,18 +275,33 @@ export default function DVSVerification({
         records by a secure verification service.
       </label>
 
-      {apiError ? (
-        <p className="text-[14px] font-medium text-[#C63D3D]">{apiError}</p>
-      ) : null}
+      {(apiError || verificationError) && (
+        <div className="rounded-[10px] bg-red-50 border border-red-200 p-4">
+          <p className="text-[14px] font-medium text-[#C63D3D]">
+            {apiError || verificationError}
+          </p>
+        </div>
+      )}
 
-      <div className="pt-2">
+      <div className="pt-2 flex gap-3">
         <button
           type="submit"
-          disabled={!canSubmit || loading}
+          disabled={!canSubmit || loading || verifying}
           className="rounded-[10px] bg-[#401B60] px-5 py-2.5 text-[15px] font-semibold text-white disabled:opacity-50"
         >
-          {loading ? "Verifying…" : "Verify ID"}
+          {loading || verifying ? "Verifying…" : "Verify ID"}
         </button>
+
+        {onSkip && (
+          <button
+            type="button"
+            onClick={onSkip}
+            disabled={loading || verifying}
+            className="rounded-[10px] border border-[#DFDBE3] bg-white px-5 py-2.5 text-[15px] font-semibold text-[#401B60] hover:bg-[#F4F3F7] disabled:opacity-50"
+          >
+            Skip ID Check
+          </button>
+        )}
       </div>
     </form>
   );

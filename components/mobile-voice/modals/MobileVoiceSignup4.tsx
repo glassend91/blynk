@@ -5,16 +5,26 @@ import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
 import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
-import { checkEmail } from "@/lib/services/auth";
+import { checkEmail, sendOtp, resendOtp, verifyOtp, signup } from "@/lib/services/auth";
 
-export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName, lastName, email, dateOfBirth, phone, password, keepExisting, currentNumber, currentProvider, onChangeFirstName, onChangeLastName, onChangeEmail, onChangeDob, onChangePhone, onChangePassword, onChangeKeepExisting, onChangeCurrentNumber, onChangeCurrentProvider }: {
+export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName, lastName, email, dateOfBirth, phone, password, keepExisting, currentNumber, currentProvider, mblSelectedNumber, simType, identity, onChangeFirstName, onChangeLastName, onChangeEmail, onChangeDob, onChangePhone, onChangePassword, onChangeKeepExisting, onChangeCurrentNumber, onChangeCurrentProvider }: {
   onNext: () => void; onBack: () => void; onClose: () => void;
-  firstName: string; lastName: string; email: string; dateOfBirth: string; phone: string; password: string; keepExisting: boolean; currentNumber: string; currentProvider: string;
+  firstName: string; lastName: string; email: string; dateOfBirth: string; phone: string; password: string; keepExisting: boolean; currentNumber: string; currentProvider: string; mblSelectedNumber: string; simType: "ESIM" | "PHYSICAL"; identity: any;
   onChangeFirstName: (v: string) => void; onChangeLastName: (v: string) => void; onChangeEmail: (v: string) => void; onChangeDob: (v: string) => void; onChangePhone: (v: string) => void; onChangePassword: (v: string) => void; onChangeKeepExisting: (v: boolean) => void; onChangeCurrentNumber: (v: string) => void; onChangeCurrentProvider: (v: string) => void;
 }) {
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
+
+  // OTP states
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpMessage, setOtpMessage] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -43,6 +53,100 @@ export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName,
     return () => clearTimeout(timeout);
   }, [email]);
 
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => {
+        setResendCooldown(resendCooldown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
+  const handleSendOtp = async () => {
+    // Validate all required fields
+    if (!firstName || !lastName) {
+      setOtpError("Please enter your first and last name");
+      return;
+    }
+    if (!email || !isValidEmail(email)) {
+      setOtpError("Please enter a valid email");
+      return;
+    }
+    if (!password || password.length < 6) {
+      setOtpError("Please enter a password (min 6 characters)");
+      return;
+    }
+    if (emailExists) {
+      setOtpError("This email is already registered");
+      return;
+    }
+
+    try {
+      setOtpSending(true);
+      setOtpError(null);
+      setOtpMessage(null);
+
+      if (!otpSent) {
+        // First time: Create user + Send OTP
+        await signup({
+          type: "MBL",
+          firstName,
+          lastName,
+          email,
+          password,
+          phone,
+          dateOfBirth,
+          mblSelectedNumber,
+          mblKeepExistingNumber: keepExisting,
+          mblCurrentMobileNumber: currentNumber,
+          mblCurrentProvider: currentProvider,
+          identity,
+          simType: simType === "ESIM" ? "eSim" : "physical",
+        });
+
+        // Then send OTP
+        const response = await sendOtp(email);
+        setOtpSent(true);
+        setOtpMessage(response.message);
+
+        // Start 2-minute cooldown
+        setResendCooldown(120); // 2 minutes = 120 seconds
+      } else {
+        // Resend OTP only
+        const response = await resendOtp(email);
+        setOtpMessage(response.message);
+
+        // Start 2-minute cooldown
+        setResendCooldown(120); // 2 minutes = 120 seconds
+      }
+    } catch (err: any) {
+      setOtpError(err?.message || "Failed to send OTP. Please try again.");
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode || otpCode.length !== 6) {
+      setOtpError("Please enter a valid 6-digit OTP code");
+      return;
+    }
+    try {
+      setOtpVerifying(true);
+      setOtpError(null);
+      const response = await verifyOtp(email, otpCode);
+      if (response.verified) {
+        setOtpVerified(true);
+        setOtpMessage("Email verified successfully!");
+      }
+    } catch (err: any) {
+      setOtpError(err?.message || "Invalid OTP code. Please try again.");
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
   const canProceed = Boolean(
     firstName &&
     lastName &&
@@ -50,7 +154,8 @@ export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName,
     dateOfBirth &&
     phone &&
     password && password.length >= 6 &&
-    (!keepExisting || (currentNumber && currentProvider))
+    (!keepExisting || (currentNumber && currentProvider)) &&
+    otpVerified
   );
   return (
     <ModalShell onClose={onClose} size="wide">
@@ -138,10 +243,21 @@ export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName,
           </div>
 
           <div className="mt-4 rounded-[12px] border border-[#DFDBE3] bg-[#F9F8FB] p-4">
-            <div className="text-[14px] font-semibold text-[#0A0A0A]">Verify Ownership</div>
+            <div className="text-[14px] font-semibold text-[#0A0A0A]">Verify Email Ownership</div>
             <p className="mt-1 text-[12px] text-[#8A84A3]">
-              We&apos;ve sent a one-time passcode (OTP) to the number you want to port. Enter it below to confirm ownership.
+              {otpSent
+                ? "We've sent a one-time passcode (OTP) to your email. Enter it below to confirm ownership."
+                : "Click 'Send OTP' to receive a verification code on your email."}
             </p>
+
+            {otpMessage && (
+              <p className={`mt-2 text-[12px] ${otpVerified ? 'text-green-600' : 'text-blue-600'}`}>
+                {otpMessage}
+              </p>
+            )}
+            {otpError && (
+              <p className="mt-2 text-[12px] text-red-600">{otpError}</p>
+            )}
 
             <div className="mt-3 flex flex-wrap items-end gap-3">
               <div className="grow">
@@ -149,24 +265,43 @@ export default function MobileVoiceSignup4({ onNext, onBack, onClose, firstName,
                 <input
                   inputMode="numeric"
                   placeholder="6-digit code"
-                  className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[16px] tracking-[4px] outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  disabled={!otpSent || otpVerified}
+                  className={`w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[16px] tracking-[4px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${(!otpSent || otpVerified) ? 'bg-gray-100 cursor-not-allowed' : ''
+                    } ${otpVerified ? 'border-green-500' : ''}`}
                 />
               </div>
 
               <button
                 type="button"
-                className="h-[48px] rounded-[10px] border border-[#DFDBE3] bg-white px-4 text-[15px] font-semibold text-[#401B60] hover:bg-[#F4F3F7]"
-              // onClick={() => /* resend */ null}
+                onClick={handleSendOtp}
+                disabled={
+                  otpSending ||
+                  !firstName ||
+                  !lastName ||
+                  !email ||
+                  !isValidEmail(email) ||
+                  emailExists ||
+                  !password ||
+                  password.length < 6 ||
+                  otpVerified ||
+                  resendCooldown > 0
+                }
+                className="h-[48px] rounded-[10px] border border-[#DFDBE3] bg-white px-4 text-[15px] font-semibold text-[#401B60] hover:bg-[#F4F3F7] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Resend OTP
+                {otpSending ? 'Sending...' :
+                  resendCooldown > 0 ? `Resend OTP (${Math.floor(resendCooldown / 60)}:${(resendCooldown % 60).toString().padStart(2, '0')})` :
+                    otpSent ? 'Resend OTP' : 'Send OTP'}
               </button>
 
               <button
                 type="button"
-                className="h-[48px] rounded-[10px] bg-[#401B60] px-5 text-[15px] font-semibold text-white"
-              // onClick={() => /* verify */ null}
+                onClick={handleVerifyOtp}
+                disabled={!otpSent || otpVerifying || otpCode.length !== 6 || otpVerified}
+                className="h-[48px] rounded-[10px] bg-[#401B60] px-5 text-[15px] font-semibold text-white hover:bg-[#401B60]/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Verify
+                {otpVerifying ? 'Verifying...' : otpVerified ? 'Verified ✓' : 'Verify'}
               </button>
             </div>
           </div>

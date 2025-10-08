@@ -14,6 +14,11 @@ export default function MobileBroadbandSignup4({
     onNext();
   }
 
+  function handleSkip() {
+    // Skip ID verification and proceed
+    onNext();
+  }
+
   return (
     <ModalShell onClose={onClose} size="wide">
       <MbbHeaderBanner />
@@ -38,7 +43,7 @@ export default function MobileBroadbandSignup4({
         </div>
 
         <div className="mx-auto mt-6 max-w-[880px]">
-          <DVSVerification onVerify={handleVerify} />
+          <DVSVerification onVerify={handleVerify} onSkip={handleSkip} />
         </div>
       </SectionPanel>
 
