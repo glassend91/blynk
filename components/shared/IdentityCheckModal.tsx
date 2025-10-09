@@ -35,6 +35,8 @@ export default function IdentityCheckModal({
     const [verificationResult, setVerificationResult] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
     const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     // Load document fields when document type changes
     useEffect(() => {
@@ -56,23 +58,36 @@ export default function IdentityCheckModal({
     };
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(event.target.files || []);
-        const newImages: string[] = [];
+        const file = event.target.files?.[0];
+        if (!file) return;
 
-        files.forEach(file => {
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                setError("File size must be less than 5MB");
-                return;
-            }
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            setError("File size must be less than 5MB");
+            return;
+        }
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const base64 = e.target?.result as string;
-                newImages.push(base64);
-                setUploadedImages(prev => [...prev, ...newImages]);
-            };
-            reader.readAsDataURL(file);
-        });
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+            setError("Please select an image file");
+            return;
+        }
+
+        setSelectedFile(file);
+        setError(null);
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const result = e.target?.result as string;
+            setImagePreview(result);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const removeFile = () => {
+        setSelectedFile(null);
+        setImagePreview(null);
+        setError(null);
     };
 
     const handleVerify = async () => {
@@ -81,8 +96,8 @@ export default function IdentityCheckModal({
             return;
         }
 
-        if (uploadedImages.length === 0) {
-            setError("Please upload at least one document image");
+        if (!selectedFile) {
+            setError("Please upload a document image");
             return;
         }
 
@@ -94,14 +109,11 @@ export default function IdentityCheckModal({
                 idType: documentType,
                 firstName: formData.firstName || "",
                 lastName: formData.lastName || "",
-                documentType,
-                documentNumber: formData.documentNumber || "",
-                state: formData.state,
-                country: formData.country,
-                expiryDate: formData.expiryDate || "",
-                fullName: formData.fullName || "",
                 dateOfBirth: formData.dateOfBirth || "",
-                images: uploadedImages
+                documentNumber: formData.documentNumber || "",
+                stateOfIssue: formData.state,
+                countryOfIssue: formData.country,
+                documentImage: selectedFile
             };
 
             const result = await verifyDocument(documentData);
@@ -120,9 +132,15 @@ export default function IdentityCheckModal({
     const isFormValid = () => {
         if (!documentFields) return false;
 
-        return documentFields.required.every((field: string) => {
+        // Check document fields
+        const documentFieldsValid = documentFields.required.every((field: string) => {
             return formData[field] && formData[field].trim() !== "";
         });
+
+        // Check if file is uploaded
+        const fileUploaded = !!selectedFile;
+
+        return documentFieldsValid && fileUploaded;
     };
 
     return (
@@ -205,22 +223,67 @@ export default function IdentityCheckModal({
                     {/* File Upload */}
                     <div>
                         <label className="block text-sm font-semibold text-[#3B3551] mb-2">
-                            Document Images
+                            Document Image <span className="text-red-500">*</span>
                         </label>
-                        <input
-                            type="file"
-                            multiple
-                            accept="image/*,.pdf"
-                            onChange={handleFileUpload}
-                            className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20"
-                        />
-                        <p className="mt-1 text-xs text-[#8A84A3]">
-                            Upload clear images of your document (JPG, PNG, PDF - max 5MB each)
-                        </p>
-                        {uploadedImages.length > 0 && (
-                            <p className="mt-1 text-xs text-green-600">
-                                {uploadedImages.length} image(s) uploaded
-                            </p>
+
+                        {!selectedFile ? (
+                            <div className="border-2 border-dashed border-[#DFDBE3] rounded-[10px] p-6 text-center hover:border-[#401B60] transition-colors">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileUpload}
+                                    className="hidden"
+                                    id="document-upload"
+                                />
+                                <label
+                                    htmlFor="document-upload"
+                                    className="cursor-pointer flex flex-col items-center gap-2"
+                                >
+                                    <div className="w-12 h-12 bg-[#F4F3F7] rounded-full flex items-center justify-center">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#401B60" strokeWidth="2" />
+                                            <polyline points="14,2 14,8 20,8" stroke="#401B60" strokeWidth="2" />
+                                            <line x1="16" y1="13" x2="8" y2="13" stroke="#401B60" strokeWidth="2" />
+                                            <line x1="16" y1="17" x2="8" y2="17" stroke="#401B60" strokeWidth="2" />
+                                            <polyline points="10,9 9,9 8,9" stroke="#401B60" strokeWidth="2" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-[#401B60]">Click to upload document image</p>
+                                        <p className="text-xs text-[#8A84A3]">JPG, PNG - max 5MB</p>
+                                    </div>
+                                </label>
+                            </div>
+                        ) : (
+                            <div className="border border-[#DFDBE3] rounded-[10px] p-4">
+                                <div className="flex items-center gap-4">
+                                    {imagePreview && (
+                                        <div className="w-16 h-16 border border-[#DFDBE3] rounded-lg overflow-hidden">
+                                            <img
+                                                src={imagePreview}
+                                                alt="Document preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium text-[#3B3551]">{selectedFile.name}</p>
+                                        <p className="text-xs text-[#8A84A3]">
+                                            {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={removeFile}
+                                        className="text-red-500 hover:text-red-700 p-1"
+                                    >
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" />
+                                            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
                         )}
                     </div>
 
