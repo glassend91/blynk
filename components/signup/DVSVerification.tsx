@@ -50,6 +50,8 @@ export default function DVSVerification({
   const [consent, setConsent] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Common
   const [firstName, setFirstName] = useState("");
@@ -70,13 +72,13 @@ export default function DVSVerification({
   const [expiry, setExpiry] = useState("");
 
   const canSubmit = useMemo(() => {
-    if (!consent || !firstName || !lastName || !dob) return false;
+    if (!consent || !firstName || !lastName || !dob || !selectedFile) return false;
     if (idType === "DRIVERS_LICENCE") return !!licenceNumber && !!stateOfIssue;
     if (idType === "PASSPORT") return !!passportNumber && !!countryOfIssue;
     if (idType === "MEDICARE") return !!medicareNumber && !!irn && !!expiry;
     return false;
   }, [
-    consent, firstName, lastName, dob,
+    consent, firstName, lastName, dob, selectedFile,
     idType, licenceNumber, stateOfIssue,
     passportNumber, countryOfIssue,
     medicareNumber, irn, expiry
@@ -110,7 +112,7 @@ export default function DVSVerification({
           idType === "PASSPORT" ? passportNumber : medicareNumber,
         countryOfIssue: idType === "PASSPORT" ? countryOfIssue : undefined,
         stateOfIssue: idType === "DRIVERS_LICENCE" ? stateOfIssue : undefined,
-        // Note: documentImage would be added if file upload is implemented
+        documentImage: selectedFile
       };
 
       // Call DVS API
@@ -136,6 +138,39 @@ export default function DVSVerification({
       setVerifying(false);
     }
   }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      setVerificationError("File size must be less than 5MB");
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      setVerificationError("Please select an image file");
+      return;
+    }
+
+    setSelectedFile(file);
+    setVerificationError(null);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      setImagePreview(result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeFile = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
+    setVerificationError(null);
+  };
 
   return (
     <form onSubmit={submit} className="space-y-4">
@@ -262,6 +297,73 @@ export default function DVSVerification({
           </div>
         </div>
       )}
+
+      {/* File Upload */}
+      <div>
+        <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+          Document Image <span className="text-red-500">*</span>
+        </label>
+
+        {!selectedFile ? (
+          <div className="border-2 border-dashed border-[#DFDBE3] rounded-[10px] p-6 text-center hover:border-[#401B60] transition-colors">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+              id="document-upload"
+            />
+            <label
+              htmlFor="document-upload"
+              className="cursor-pointer flex flex-col items-center gap-2"
+            >
+              <div className="w-12 h-12 bg-[#F4F3F7] rounded-full flex items-center justify-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#401B60" strokeWidth="2" />
+                  <polyline points="14,2 14,8 20,8" stroke="#401B60" strokeWidth="2" />
+                  <line x1="16" y1="13" x2="8" y2="13" stroke="#401B60" strokeWidth="2" />
+                  <line x1="16" y1="17" x2="8" y2="17" stroke="#401B60" strokeWidth="2" />
+                  <polyline points="10,9 9,9 8,9" stroke="#401B60" strokeWidth="2" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-[#401B60]">Click to upload document image</p>
+                <p className="text-xs text-[#8A84A3]">JPG, PNG - max 5MB</p>
+              </div>
+            </label>
+          </div>
+        ) : (
+          <div className="border border-[#DFDBE3] rounded-[10px] p-4">
+            <div className="flex items-center gap-4">
+              {imagePreview && (
+                <div className="w-16 h-16 border border-[#DFDBE3] rounded-lg overflow-hidden">
+                  <img
+                    src={imagePreview}
+                    alt="Document preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="flex-1">
+                <p className="text-sm font-medium text-[#3B3551]">{selectedFile.name}</p>
+                <p className="text-xs text-[#8A84A3]">
+                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={removeFile}
+                className="text-red-500 hover:text-red-700 p-1"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" />
+                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Consent */}
       <label className="mt-1 flex items-start gap-3 text-[14px] font-semibold text-[#401B60]">
