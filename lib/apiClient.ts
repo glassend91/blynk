@@ -2,13 +2,14 @@ import axios from "axios";
 
 export const apiClient = axios.create({
     baseURL: "https://blynk-backend.onrender.com/api",
+    // baseURL: "http://localhost:5000/api",
     headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
     },
     // Using localStorage for auth; no cookies required
     withCredentials: false,
-    timeout: 15000,
+    timeout: 150000,
 });
 
 // Attach auth token from cookie for browser requests
@@ -26,6 +27,11 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
+        // For validation errors, preserve the original error structure
+        if (error?.response?.data?.success === false && error?.response?.data?.errors) {
+            return Promise.reject(error);
+        }
+
         const message =
             error?.response?.data?.message ||
             error?.response?.data?.error ||
