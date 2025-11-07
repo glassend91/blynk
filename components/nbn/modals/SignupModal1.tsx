@@ -45,6 +45,24 @@ export default function SignupModal1({
               Check
             </button>
           </div>
+
+          {/* FTTP Upgrade Message - Displayed after address check */}
+          <div className="mt-6 rounded-lg border border-[#E9E3F2] bg-[#FBF8FF] p-4 text-left">
+            <div className="flex items-start gap-3">
+              <div className="grid h-6 w-6 flex-shrink-0 place-items-center rounded-full bg-[#401B60] text-white mt-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
+                </svg>
+              </div>
+              <div className="text-[14px] text-[#3B3551]">
+                <p className="font-semibold text-[#401B60] mb-1">Did you know?</p>
+                <p className="text-[#6A6486]">
+                  Some properties are eligible for a free Fibre to the Premises (FTTP) upgrade. Contact our team on{" "}
+                  <span className="font-semibold text-[#401B60]">(Number will be provided soon)</span> to find out if your address qualifies.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </SectionPanel>
 

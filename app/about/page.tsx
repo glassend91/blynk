@@ -6,11 +6,12 @@ import AlwaysImproving from "@/components/AlwaysImproving";
 import MoreThanProvider from "@/components/MoreThanProvider";
 import AboutCTA from "@/components/AboutCTA";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 
 export default function AboutPage() {
   return (
     <main className="min-h-screen">
-      <AboutNavbar />
+      <Navbar />
       <AboutHero />
       <OurVision />
       <BlynkDifference />

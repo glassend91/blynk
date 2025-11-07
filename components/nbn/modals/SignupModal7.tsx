@@ -10,13 +10,19 @@ export default function SignupModal7({
   onClose,
   loading,
   error,
+  selectedPlan,
 }: {
   onComplete: () => void;
   onBack: () => void;
   onClose: () => void;
   loading?: boolean;
   error?: string;
+  selectedPlan?: { name: string; price: number } | null;
 }) {
+  // Get plan details from selected plan, default to fallback values
+  const planName = selectedPlan?.name || "NBN Plan";
+  const planPrice = selectedPlan?.price || 69.99;
+
   return (
     <ModalShell onClose={onClose} size="wide">
       <Stepper active={7} />
@@ -33,12 +39,12 @@ export default function SignupModal7({
         <div className="card mx-auto mt-8 max-w-[640px] p-6">
           <div className="text-[15px] font-semibold text-[#2E2745]">Order Summary</div>
           <div className="mt-4 flex items-center justify-between border-b border-[#E9E3F2] pb-3 text-[15px]">
-            <div className="text-[#6A6486]">NBN Plan</div>
-            <div className="font-semibold text-[#2E2745]">$69.99/mo</div>
+            <div className="text-[#6A6486]">{planName}</div>
+            <div className="font-semibold text-[#2E2745]">${planPrice.toFixed(2)}/mo</div>
           </div>
           <div className="mt-3 flex items-center justify-between text-[15px]">
             <div className="font-semibold text-[#2E2745]">Total</div>
-            <div className="font-semibold text-[#2E2745]">$69.99/mo</div>
+            <div className="font-semibold text-[#2E2745]">${planPrice.toFixed(2)}/mo</div>
           </div>
 
           {/* Agreement already accepted on step 6 (Payment page) */}
