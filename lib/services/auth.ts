@@ -16,6 +16,11 @@ export type SignupPayload = {
     identity?: any;
     businessDetails?: any;
     simType?: "eSim" | "physical";
+    selectedPlan?: {
+        name: string;
+        price: number;
+    };
+    billingAddress?: string;
 };
 
 export type SignupResponse = {

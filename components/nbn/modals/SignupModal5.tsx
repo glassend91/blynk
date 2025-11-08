@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import ModalShell from "@/components/shared/ModalShell";
 import Stepper from "@/components/shared/Stepper";
 import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
+import DVSVerification, { DVSSubmitPayload } from "@/components/signup/DVSVerification";
 
 export default function SignupModal5({
   onNext,
@@ -14,6 +16,30 @@ export default function SignupModal5({
   onBack: () => void;
   onClose: () => void;
 }) {
+  const [verificationComplete, setVerificationComplete] = useState(false);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+
+  const handleVerify = async (payload: DVSSubmitPayload) => {
+    try {
+      // Verification is handled by DVSVerification component
+      // This callback is called when verification succeeds
+      setVerificationComplete(true);
+      setVerificationError(null);
+      // Auto-advance to next step after successful verification
+      setTimeout(() => {
+        onNext();
+      }, 1000);
+    } catch (error: any) {
+      setVerificationError(error?.message || "Verification failed");
+      setVerificationComplete(false);
+    }
+  };
+
+  const handleSkip = () => {
+    // Allow skipping verification (if needed)
+    onNext();
+  };
+
   return (
     <ModalShell onClose={onClose} size="wide">
       <Stepper active={5} />
@@ -27,19 +53,16 @@ export default function SignupModal5({
           <p className="modal-sub mt-1">We need to verify your identity for security purposes</p>
         </div>
 
-        <div className="card mx-auto mt-8 max-w-[720px] p-6">
-          <p className="text-[14px] text-[var(--cl-sub)]">
-            To keep your account secure and protect you from fraud, I confirm I am authorised to provide these details and I consent to them
-            being checked against official records by a secure verification service.
-          </p>
-          <label className="mt-4 flex items-center gap-3 text-[15px] text-[#2E2745]">
-            <input type="checkbox" className="h-4 w-4 accent-[var(--cl-brand)]" />
-            I consent to the identity verification process and understand that valid ID will be required
-          </label>
+        <div className="mx-auto mt-8 max-w-[720px]">
+          <DVSVerification 
+            onVerify={handleVerify} 
+            onSkip={handleSkip}
+            apiError={verificationError}
+          />
         </div>
       </SectionPanel>
 
-      <BarActions onBack={onBack} onNext={onNext} />
+      <BarActions onBack={onBack} onNext={verificationComplete ? onNext : undefined} nextDisabled={!verificationComplete} />
     </ModalShell>
   );
 }

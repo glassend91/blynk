@@ -44,6 +44,9 @@ export default function SignupModal4({
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [billingSameAsService, setBillingSameAsService] = useState(true);
+  const [billingAddress, setBillingAddress] = useState("");
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -72,7 +75,20 @@ export default function SignupModal4({
     return () => clearTimeout(timeout);
   }, [email]);
 
-  const canProceed = Boolean(firstName && lastName && email && isValidEmail(email) && !emailExists && phone && serviceAddress && password && password.length >= 6);
+  const canProceed = Boolean(
+    firstName && 
+    lastName && 
+    email && 
+    isValidEmail(email) && 
+    !emailExists && 
+    phone && 
+    serviceAddress && 
+    password && 
+    password.length >= 6 &&
+    dateOfBirth &&
+    (billingSameAsService || billingAddress)
+  );
+
   return (
     <ModalShell onClose={onClose} size="wide">
       <Stepper active={4} />
@@ -120,9 +136,59 @@ export default function SignupModal4({
             </FormField>
           </div>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <FormField label="Phone Number"><input id="phone" name="phone" className="input w-full" value={phone} onChange={(e) => onChangePhone(e.target.value)} /></FormField>
-            <FormField label="Service Address"><input id="serviceAddress" name="serviceAddress" autoComplete="street-address" className="input w-full" value={serviceAddress} onChange={(e) => onChangeServiceAddress(e.target.value)} /></FormField>
-            <FormField label="Password"><input id="password" name="password" type="password" className="input w-full" value={password} onChange={(e) => onChangePassword(e.target.value)} /></FormField>
+            <FormField label="Contact Phone Number">
+              <input id="phone" name="phone" type="tel" className="input w-full" value={phone} onChange={(e) => onChangePhone(e.target.value)} />
+            </FormField>
+            <FormField label="Date of Birth">
+              <input 
+                id="dateOfBirth" 
+                name="dateOfBirth" 
+                type="date" 
+                className="input w-full" 
+                value={dateOfBirth} 
+                onChange={(e) => setDateOfBirth(e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
+              />
+            </FormField>
+          </div>
+          <div className="mt-4">
+            <FormField label="Service Address">
+              <input id="serviceAddress" name="serviceAddress" autoComplete="street-address" className="input w-full" value={serviceAddress} onChange={(e) => onChangeServiceAddress(e.target.value)} />
+            </FormField>
+          </div>
+          <div className="mt-4">
+            <FormField label="Password">
+              <input id="password" name="password" type="password" className="input w-full" value={password} onChange={(e) => onChangePassword(e.target.value)} />
+            </FormField>
+          </div>
+
+          {/* Billing Address Section */}
+          <div className="mt-6 border-t border-[#E9E3F2] pt-6">
+            <label className="flex items-center gap-3 text-[15px] font-semibold text-[#2E2745]">
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-[var(--cl-brand)]"
+                checked={billingSameAsService}
+                onChange={(e) => setBillingSameAsService(e.target.checked)}
+              />
+              Billing address is the same as my service address.
+            </label>
+
+            {!billingSameAsService && (
+              <div className="mt-4">
+                <FormField label="Billing Address">
+                  <input
+                    id="billingAddress"
+                    name="billingAddress"
+                    autoComplete="street-address"
+                    className="input w-full"
+                    placeholder="Enter your billing address"
+                    value={billingAddress}
+                    onChange={(e) => setBillingAddress(e.target.value)}
+                  />
+                </FormField>
+              </div>
+            )}
           </div>
         </div>
       </SectionPanel>
