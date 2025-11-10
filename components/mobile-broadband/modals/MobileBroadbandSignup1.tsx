@@ -6,16 +6,43 @@ import BarActions from "@/components/shared/BarActions";
 import MbbHeaderBanner from "../MbbHeaderBanner";
 import MbbStepper from "../MbbStepper";
 
-export default function MobileBroadbandSignup1({
-  onNext, onBack, onClose,
-}: { onNext: () => void; onBack: () => void; onClose: () => void; }) {
-  const [plan, setPlan] = useState<"light" | "standard" | "unlimited">("standard");
+type Plan = {
+  id: "light" | "standard" | "unlimited";
+  title: string;
+  price: number;
+  bullets: string[];
+  badge?: string;
+};
 
-  const cards = [
-    { id: "light" as const, title: "Data Light", price: "$20/month", bullets: ["10GB Data", "4G/5G Network", "30 days validity"] },
-    { id: "standard" as const, title: "Data Standard", price: "$35/month", badge: "Most Popular", bullets: ["50GB Data", "4G/5G Network", "30 days validity"] },
-    { id: "unlimited" as const, title: "Data Unlimited", price: "$65/month", bullets: ["Unlimited Data", "4G/5G Network", "30 days validity"] },
-  ];
+const plans: Plan[] = [
+  { id: "light", title: "Data Light", price: 20, bullets: ["10GB Data", "4G/5G Network", "30 days validity"] },
+  { id: "standard", title: "Data Standard", price: 35, badge: "Most Popular", bullets: ["50GB Data", "4G/5G Network", "30 days validity"] },
+  { id: "unlimited", title: "Data Unlimited", price: 65, bullets: ["Unlimited Data", "4G/5G Network", "30 days validity"] },
+];
+
+export default function MobileBroadbandSignup1({
+  onNext,
+  onBack,
+  onClose,
+  selectedPlan: initialSelectedPlan,
+  onPlanSelect,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  onClose: () => void;
+  selectedPlan?: { name: string; price: number } | null;
+  onPlanSelect?: (plan: { name: string; price: number }) => void;
+}) {
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(
+    initialSelectedPlan ? plans.find(p => p.title === initialSelectedPlan.name) || null : null
+  );
+
+  const handlePlanSelect = (plan: Plan) => {
+    setSelectedPlan(plan);
+    if (onPlanSelect) {
+      onPlanSelect({ name: plan.title, price: plan.price });
+    }
+  };
 
   return (
     <ModalShell onClose={onClose} size="wide">
@@ -32,35 +59,53 @@ export default function MobileBroadbandSignup1({
         </div>
 
         <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {cards.map(c => {
-            const active = plan === c.id;
+          {plans.map(plan => {
+            const isSelected = selectedPlan?.id === plan.id;
             return (
               <button
-                key={c.id}
+                key={plan.id}
                 type="button"
-                onClick={() => setPlan(c.id)}
+                onClick={() => handlePlanSelect(plan)}
                 className={[
-                  "text-left rounded-[16px] border bg-white p-6 shadow-[0_24px_60px_rgba(64,27,118,0.10)]",
-                  active ? "border-[#4F1C76]" : "border-[#E7E4EC] hover:border-[#CFC6DC]",
+                  "text-left rounded-[16px] border bg-white p-6 shadow-[0_24px_60px_rgba(64,27,118,0.10)] transition-all",
+                  isSelected ? "border-2 border-[#4F1C76] bg-[#FBF8FF]" : "border border-[#E7E4EC] hover:border-[#CFC6DC]",
                 ].join(" ")}
               >
+                {isSelected && (
+                  <div className="mb-3 flex items-center justify-end">
+                    <div className="grid h-6 w-6 place-items-center rounded-full bg-[#4F1C76] text-white">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="text-[18px] font-semibold text-[#3B3551]">{c.title}</div>
-                    <div className="mt-2 text-[32px] font-extrabold text-[#4F1C76]">{c.price}</div>
+                    <div className={["text-[18px] font-semibold", isSelected ? "text-[#4F1C76]" : "text-[#3B3551]"].join(" ")}>
+                      {plan.title}
+                    </div>
+                    <div className="mt-2 text-[32px] font-extrabold text-[#4F1C76]">
+                      ${plan.price}
+                      <span className="ml-1 text-[16px] font-semibold">/month</span>
+                    </div>
                   </div>
-                  <span className={`mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full ${active ? "border-2 border-[#4F1C76]" : "border border-[#CFC6DC]"}`}>
-                    <span className={`h-2.5 w-2.5 rounded-full ${active ? "bg-[#4F1C76]" : "bg-transparent"}`} />
-                  </span>
+                  {!isSelected && (
+                    <span className="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#CFC6DC]">
+                      <span className="h-2.5 w-2.5 rounded-full bg-transparent" />
+                    </span>
+                  )}
                 </div>
 
-                {c.badge && (
-                  <span className="mt-2 inline-block rounded-[8px] bg-[#EEE8F6] px-2 py-[2px] text-[11px] font-semibold text-[#3B3551]">{c.badge}</span>
+                {plan.badge && (
+                  <span className="mt-2 inline-block rounded-[8px] bg-[#EEE8F6] px-2 py-[2px] text-[11px] font-semibold text-[#3B3551]">
+                    {plan.badge}
+                  </span>
                 )}
 
                 <ul className="mt-4 space-y-2 text-[14px] text-[#5B5668]">
-                  {c.bullets.map(b => (
-                    <li key={b} className="flex items-center gap-2">
+                  {plan.bullets.map((b, idx) => (
+                    <li key={idx} className="flex items-center gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
                         <path d="M20 6 9 17l-5-5" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
@@ -74,7 +119,7 @@ export default function MobileBroadbandSignup1({
         </div>
       </SectionPanel>
 
-      <BarActions onBack={onBack} onNext={onNext} />
+      <BarActions onBack={onBack} onNext={onNext} nextDisabled={!selectedPlan} />
     </ModalShell>
   );
 }
