@@ -82,7 +82,7 @@ export default function MbbSignupController({
 
   return (
     <>
-      <div className="fixed inset-0 z-[1000] flex items-start justify-center bg-black/70 p-6">
+    <div className="fixed inset-0 z-[1000] flex items-start justify-center bg-black/70 p-6">
         <ModalShell onClose={handleCloseClick}>
         {/* Header inside the white modal */}
         <div className="px-8 pt-8">
@@ -163,16 +163,16 @@ export default function MbbSignupController({
           {step === 6 && (
             <MbbSignup6
               onComplete={async () => {
-                try {
-                  setLoading(true);
-                  setError(null);
+              try {
+                setLoading(true);
+                setError(null);
                   // User already created in step 3, just show success
-                  setShowSuccess(true);
-                } catch (e: any) {
-                  setError(e?.message || "Signup failed");
-                } finally {
-                  setLoading(false);
-                }
+                setShowSuccess(true);
+              } catch (e: any) {
+                setError(e?.message || "Signup failed");
+              } finally {
+                setLoading(false);
+              }
               }}
               onBack={goBack}
               onClose={handleCloseClick}
@@ -204,7 +204,7 @@ export default function MbbSignupController({
           </ModalShell>
         </div>
       )}
-      </div>
+    </div>
       <ExitConfirmationDialog
         open={showExitConfirmation}
         onStay={() => setShowExitConfirmation(false)}

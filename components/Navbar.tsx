@@ -58,7 +58,7 @@ export default function Navbar() {
                   aria-label="Internet options"
                   aria-expanded={internetDropdownOpen}
                 >
-                  Internet
+                Internet
                   <svg
                     width="20"
                     height="20"
@@ -68,7 +68,7 @@ export default function Navbar() {
                     className={`transition-transform ${internetDropdownOpen ? "rotate-180" : ""}`}
                   >
                     <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                </svg>
                 </button>
 
                 {internetDropdownOpen && (

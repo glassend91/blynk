@@ -11,23 +11,28 @@ export default function WhatOurCustomersSay() {
     // }}
     >
       {/* Figma: padding 150px vertical, 243px horizontal. Keep canvas centered at 1434px. */}
-      <div className="mx-auto max-w-[1434px] px-32 py-[150px]">
+      <div className="mx-auto max-w-[1434px] px-4 md:px-32 py-12 md:py-[150px]">
         {/* Header row: left text (609px) + right rating (559px), gap 266px */}
-        <div className="flex flex-col items-center gap-12 md:flex-row md:items-center md:justify-center md:gap-[266px]">
+        <div className="flex flex-col items-center gap-8 md:gap-12 md:flex-row md:items-center md:justify-center md:gap-[266px]">
           {/* Left copy block */}
           <div className="w-full max-w-[609px]">
-            <h2 className="text-black font-bold text-[36px] leading-[72px]">
+            <h2 className="text-black font-bold text-[28px] leading-[40px] md:text-[36px] md:leading-[72px]">
               What Our Customers Say
             </h2>
-            <p className="mt-2 text-[#6F6C90] text-[18px] leading-[27px]">
+            <p className="mt-2 text-[#6F6C90] text-[14px] leading-[22px] md:text-[18px] md:leading-[27px]">
               Real stories from real customers who&apos;ve experienced the Blynk difference
             </p>
           </div>
 
           {/* Right rating block */}
           <div className="w-full max-w-[559px] flex flex-col items-center gap-1">
-            <Stars width={263} height={52} fill="currentColor" className="text-[#F9C01D]" />
-            <div className="text-black text-[20px] leading-[46px] font-bold text-center">
+            <div className="md:hidden">
+              <Stars width={180} height={36} fill="currentColor" className="text-[#F9C01D]" />
+            </div>
+            <div className="hidden md:block">
+              <Stars width={263} height={52} fill="currentColor" className="text-[#F9C01D]" />
+            </div>
+            <div className="text-black text-[16px] leading-[28px] md:text-[20px] md:leading-[46px] font-bold text-center">
               4.8 average rating from 1,000+ customers
             </div>
           </div>
@@ -84,14 +89,19 @@ function TestimonialCard(props: {
   return (
     <div
       className={[
-        "flex w-full max-w-[458px] h-[284px] flex-col justify-center items-start rounded-[24px] border px-[30px] py-[44px]",
+        "flex w-full max-w-[458px] h-auto md:h-[284px] flex-col justify-center items-start rounded-[24px] border px-5 py-6 md:px-[30px] md:py-[44px]",
         primary ? "bg-[#401B60] border-[#401B60]" : "bg-white border-[rgba(64,27,96,0.05)]",
       ].join(" ")}
     >
-      <Stars width={158} height={31} fill={primary ? "#F9C01D" : "#F9C01D"} />
+      <div className="md:hidden">
+        <Stars width={120} height={24} fill={primary ? "#F9C01D" : "#F9C01D"} />
+      </div>
+      <div className="hidden md:block">
+        <Stars width={158} height={31} fill={primary ? "#F9C01D" : "#F9C01D"} />
+      </div>
       <p
         className={[
-          "mt-4 text-[16px] leading-[24px]",
+          "mt-4 text-[14px] leading-[22px] md:text-[16px] md:leading-[24px]",
           primary ? "text-white" : "text-[#6F6C90]",
         ].join(" ")}
       >
@@ -108,10 +118,10 @@ function TestimonialCard(props: {
             className="h-[44px] w-[44px] rounded-full object-cover"
           />
           <div>
-            <div className={["text-[16px] leading-[24px] font-bold", primary ? "text-white" : "text-black"].join(" ")}>
+            <div className={["text-[15px] leading-[22px] md:text-[16px] md:leading-[24px] font-bold", primary ? "text-white" : "text-black"].join(" ")}>
               {props.name}
             </div>
-            <div className={["text-[14px] leading-[21px]", primary ? "text-white" : "text-black"].join(" ")}>
+            <div className={["text-[13px] leading-[20px] md:text-[14px] md:leading-[21px]", primary ? "text-white" : "text-black"].join(" ")}>
               {props.location}
             </div>
           </div>
@@ -124,7 +134,7 @@ function TestimonialCard(props: {
               primary ? "bg-white" : "bg-[#401B60]",
             ].join(" ")}
           />
-          <span className={["text-[14px] leading-[21px] font-bold", primary ? "text-white" : "text-[#401B60]"].join(" ")}>
+          <span className={["text-[12px] leading-[18px] md:text-[14px] md:leading-[21px] font-bold", primary ? "text-white" : "text-[#401B60]"].join(" ")}>
             {props.tag}
           </span>
         </div>

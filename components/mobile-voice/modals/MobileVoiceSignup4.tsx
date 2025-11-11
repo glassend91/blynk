@@ -66,6 +66,17 @@ export default function MobileVoiceSignup4({
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+
+  // Validation error states
+  const [firstNameError, setFirstNameError] = useState<string | null>(null);
+  const [lastNameError, setLastNameError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [dobError, setDobError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [billingAddressError, setBillingAddressError] = useState<string | null>(null);
+  const [currentNumberError, setCurrentNumberError] = useState<string | null>(null);
+  const [currentProviderError, setCurrentProviderError] = useState<string | null>(null);
 
   // OTP states
   const [otpCode, setOtpCode] = useState("");
@@ -80,6 +91,53 @@ export default function MobileVoiceSignup4({
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  const isValidName = (value: string) => /^[a-zA-Z\s'-]{2,}$/.test(value.trim());
+
+  const isValidPhone = (value: string) => {
+    const digits = value.replace(/[^\d+]/g, "");
+    return digits.length >= 8;
+  };
+
+  const getAge = (isoDate: string) => {
+    if (!isoDate) return 0;
+    const dob = new Date(isoDate);
+    const now = new Date();
+    let age = now.getFullYear() - dob.getFullYear();
+    const m = now.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
+    return age;
+  };
+
+  const isAdult = (isoDate: string) => getAge(isoDate) >= 18;
+
+  // Validate function - runs on Next click
+  const validate = (): boolean => {
+    const fnErr = !firstName ? "First name is required" : !isValidName(firstName) ? "Enter a valid first name" : null;
+    const lnErr = !lastName ? "Last name is required" : !isValidName(lastName) ? "Enter a valid last name" : null;
+    const phErr = !phone ? "Phone number is required" : !isValidPhone(phone) ? "Enter a valid phone number" : null;
+    const dbErr = !dateOfBirth ? "Date of birth is required" : !isAdult(dateOfBirth) ? "You must be at least 18 years old" : null;
+    const pwErr = !password ? "Password is required" : password.length < 6 ? "Password must be at least 6 characters" : null;
+    const baErr = !billingAddress ? "Billing address is required" : null;
+    const emErr = !email ? "Email is required" : !isValidEmail(email) ? "Please enter a valid email address" : emailExists ? (emailError || "Email already registered") : null;
+
+    // Porting validation (only if keeping existing number)
+    const cnErr = keepExisting && !currentNumber ? "Current mobile number is required for porting" : null;
+    const cpErr = keepExisting && !currentProvider ? "Current provider is required for porting" : null;
+    const otpErr = keepExisting && !otpVerified ? "Please verify number ownership with OTP" : null;
+
+    setFirstNameError(fnErr);
+    setLastNameError(lnErr);
+    setPhoneError(phErr);
+    setDobError(dbErr);
+    setPasswordError(pwErr);
+    setBillingAddressError(baErr);
+    setEmailError(emErr);
+    setCurrentNumberError(cnErr);
+    setCurrentProviderError(cpErr);
+
+    return !fnErr && !lnErr && !phErr && !dbErr && !pwErr && !baErr && !emErr && !cnErr && !cpErr && !otpErr;
   };
 
   useEffect(() => {
@@ -309,19 +367,40 @@ export default function MobileVoiceSignup4({
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="text-[12px] font-semibold text-[#3B3551]">First Name</label>
-              <input value={firstName} onChange={(e) => onChangeFirstName(e.target.value)} className="mt-2 w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20" placeholder="Enter your First name" />
+              <input
+                value={firstName}
+                onChange={(e) => {
+                  onChangeFirstName(e.target.value);
+                  if (submitted) setFirstNameError(null);
+                }}
+                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${firstNameError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
+                placeholder="Enter your First name"
+              />
+              {firstNameError && <p className="mt-1 text-xs text-red-600">{firstNameError}</p>}
             </div>
             <div>
               <label className="text-[12px] font-semibold text-[#3B3551]">Last Name</label>
-              <input value={lastName} onChange={(e) => onChangeLastName(e.target.value)} className="mt-2 w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20" placeholder="Enter your last name" />
+              <input
+                value={lastName}
+                onChange={(e) => {
+                  onChangeLastName(e.target.value);
+                  if (submitted) setLastNameError(null);
+                }}
+                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${lastNameError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
+                placeholder="Enter your last name"
+              />
+              {lastNameError && <p className="mt-1 text-xs text-red-600">{lastNameError}</p>}
             </div>
             <div className="md:col-span-2">
               <label className="text-[12px] font-semibold text-[#3B3551]">Email Address</label>
               <input
                 type="email"
                 value={email}
-                onChange={(e) => onChangeEmail(e.target.value)}
-                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${emailExists || (email && !isValidEmail(email))
+                onChange={(e) => {
+                  onChangeEmail(e.target.value);
+                  if (submitted) setEmailError(null);
+                }}
+                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${emailError || emailExists || (email && !isValidEmail(email))
                   ? 'border-red-300 bg-red-50'
                   : email && isValidEmail(email) && !emailChecking
                     ? 'border-green-300 bg-green-50'
@@ -330,36 +409,72 @@ export default function MobileVoiceSignup4({
                 placeholder="Enter your email address"
               />
               {emailChecking && <p className="mt-1 text-xs text-gray-500">Checking availability...</p>}
-              {email && !isValidEmail(email) && !emailChecking && (
+              {emailError && !emailChecking && (
+                <p className="mt-1 text-xs text-red-600">{emailError}</p>
+              )}
+              {!emailError && email && !isValidEmail(email) && !emailChecking && (
                 <p className="mt-1 text-xs text-red-600">Please enter a valid email address</p>
               )}
-              {emailExists && (
+              {!emailError && emailExists && !emailChecking && (
                 <p className="mt-1 text-xs text-red-600">{emailError || "Email already registered"}</p>
               )}
-              {email && isValidEmail(email) && !emailExists && !emailChecking && (
+              {!emailError && email && isValidEmail(email) && !emailExists && !emailChecking && (
                 <p className="mt-1 text-xs text-green-600">Email is available</p>
               )}
             </div>
             <div>
               <label className="text-[12px] font-semibold text-[#3B3551]">Date of Birth</label>
-              <input value={dateOfBirth} onChange={(e) => onChangeDob(e.target.value)} className="mt-2 w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20" placeholder="YYYY-MM-DD" />
+              <input
+                type="date"
+                value={dateOfBirth}
+                onChange={(e) => {
+                  onChangeDob(e.target.value);
+                  if (submitted) setDobError(null);
+                }}
+                max={new Date().toISOString().split('T')[0]}
+                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${dobError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
+              />
+              {dobError && <p className="mt-1 text-xs text-red-600">{dobError}</p>}
             </div>
             <div>
               <label className="text-[12px] font-semibold text-[#3B3551]">Phone Number</label>
-              <input value={phone} onChange={(e) => onChangePhone(e.target.value)} className="mt-2 w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20" placeholder="Enter your phone number" />
+              <input
+                value={phone}
+                onChange={(e) => {
+                  onChangePhone(e.target.value);
+                  if (submitted) setPhoneError(null);
+                }}
+                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${phoneError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
+                placeholder="Enter your phone number"
+              />
+              {phoneError && <p className="mt-1 text-xs text-red-600">{phoneError}</p>}
             </div>
             <div>
               <label className="text-[12px] font-semibold text-[#3B3551]">Password</label>
-              <input type="password" value={password} onChange={(e) => onChangePassword(e.target.value)} className="mt-2 w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20" placeholder="Create a password (min 6 chars)" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  onChangePassword(e.target.value);
+                  if (submitted) setPasswordError(null);
+                }}
+                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${passwordError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
+                placeholder="Create a password (min 6 chars)"
+              />
+              {passwordError && <p className="mt-1 text-xs text-red-600">{passwordError}</p>}
             </div>
             <div className="md:col-span-2">
               <label className="text-[12px] font-semibold text-[#3B3551]">Billing Address</label>
               <input
                 value={billingAddress}
-                onChange={(e) => onChangeBillingAddress(e.target.value)}
-                className="mt-2 w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                onChange={(e) => {
+                  onChangeBillingAddress(e.target.value);
+                  if (submitted) setBillingAddressError(null);
+                }}
+                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${billingAddressError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
                 placeholder="Enter your full billing address"
               />
+              {billingAddressError && <p className="mt-1 text-xs text-red-600">{billingAddressError}</p>}
             </div>
           </div>
 
@@ -373,19 +488,27 @@ export default function MobileVoiceSignup4({
                     <label className="text-[12px] font-semibold text-[#3B3551]">Current Mobile Number</label>
                     <input
                       value={currentNumber}
-                      onChange={(e) => onChangeCurrentNumber(e.target.value)}
-                      className="mt-2 w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                      onChange={(e) => {
+                        onChangeCurrentNumber(e.target.value);
+                        if (submitted) setCurrentNumberError(null);
+                      }}
+                      className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${currentNumberError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
                       placeholder="Enter your current mobile number"
                     />
+                    {currentNumberError && <p className="mt-1 text-xs text-red-600">{currentNumberError}</p>}
                   </div>
                   <div>
                     <label className="text-[12px] font-semibold text-[#3B3551]">Current Provider</label>
                     <input
                       value={currentProvider}
-                      onChange={(e) => onChangeCurrentProvider(e.target.value)}
-                      className="mt-2 w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                      onChange={(e) => {
+                        onChangeCurrentProvider(e.target.value);
+                        if (submitted) setCurrentProviderError(null);
+                      }}
+                      className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${currentProviderError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
                       placeholder="Enter your current provider name"
                     />
+                    {currentProviderError && <p className="mt-1 text-xs text-red-600">{currentProviderError}</p>}
                   </div>
                 </div>
               </div>
@@ -406,6 +529,9 @@ export default function MobileVoiceSignup4({
                 )}
                 {otpError && (
                   <p className="mt-2 text-[12px] text-red-600">{otpError}</p>
+                )}
+                {submitted && keepExisting && !otpVerified && (
+                  <p className="mt-2 text-[12px] text-red-600">Please verify number ownership with OTP</p>
                 )}
 
                 <div className="mt-3 flex flex-wrap items-end gap-3">
@@ -461,7 +587,14 @@ export default function MobileVoiceSignup4({
         </div>
       </SectionPanel>
 
-      <BarActions onBack={onBack} onNext={onNext} nextDisabled={!canProceed} />
+      <BarActions
+        onBack={onBack}
+        onNext={() => {
+          setSubmitted(true);
+          if (validate()) onNext();
+        }}
+        nextDisabled={false}
+      />
     </ModalShell>
   );
 }
