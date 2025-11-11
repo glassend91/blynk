@@ -24,7 +24,7 @@ export default function ModalShell({
         className={[
           "relative w-full bg-white shadow-[0_30px_80px_rgba(22,9,41,0.18)]",
           "p-4 sm:p-6 md:p-8 lg:p-10",
-          "max-h-[min(100vh-1rem,980px)] overflow-y-auto",
+          "max-h-[min(100vh-1rem,980px)] overflow-y-auto hide-scrollbar",
           "rounded-none sm:rounded-[20px] md:rounded-[24px] lg:rounded-[28px]",
           maxW,
         ].join(" ")}
@@ -45,6 +45,17 @@ export default function ModalShell({
 
         <div className="h-4 sm:h-5 md:h-6" />
       </div>
+      <style jsx global>{`
+        /* Hide scrollbars but keep scrolling functional */
+        .hide-scrollbar {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+          width: 0;
+          height: 0;
+        }
+      `}</style>
     </div>
   );
 }
