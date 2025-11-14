@@ -196,7 +196,7 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
           </div>
           <div className="flex items-center gap-2">
             <Pill tone={getStatusTone(ticket.status)}>{ticket.status}</Pill>
-            <Pill tone={getPriorityTone(ticket.priority)}>{ticket.priority}</Pill>
+            {/* <Pill tone={getPriorityTone(ticket.priority)}>{ticket.priority}</Pill> */}
           </div>
         </div>
 
@@ -238,7 +238,6 @@ function CreateTicketModal({
     subject: "",
     description: "",
     category: "Technical",
-    priority: "Medium",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -310,47 +309,25 @@ function CreateTicketModal({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1 block text-[14px] font-semibold text-[#0A0A0A]">Category</label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className={`w-full rounded-[8px] border px-3 py-2 text-[14px] focus:outline-none ${hasFieldError("category")
-                  ? "border-red-500 focus:border-red-600"
-                  : "border-[#EEEAF4] focus:border-[#3F205F]"
-                  }`}
-                disabled={isCreating}
-              >
-                <option value="Technical">Technical</option>
-                <option value="Billing">Billing</option>
-                <option value="Service">Service</option>
-                <option value="General">General</option>
-              </select>
-              {getFieldError("category") && (
-                <p className="mt-1 text-[12px] text-red-600">{getFieldError("category")}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="mb-1 block text-[14px] font-semibold text-[#0A0A0A]">Priority</label>
-              <select
-                value={formData.priority}
-                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                className={`w-full rounded-[8px] border px-3 py-2 text-[14px] focus:outline-none ${hasFieldError("priority")
-                  ? "border-red-500 focus:border-red-600"
-                  : "border-[#EEEAF4] focus:border-[#3F205F]"
-                  }`}
-                disabled={isCreating}
-              >
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-              </select>
-              {getFieldError("priority") && (
-                <p className="mt-1 text-[12px] text-red-600">{getFieldError("priority")}</p>
-              )}
-            </div>
+          <div>
+            <label className="mb-1 block text-[14px] font-semibold text-[#0A0A0A]">Category</label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className={`w-full rounded-[8px] border px-3 py-2 text-[14px] focus:outline-none ${hasFieldError("category")
+                ? "border-red-500 focus:border-red-600"
+                : "border-[#EEEAF4] focus:border-[#3F205F]"
+                }`}
+              disabled={isCreating}
+            >
+              <option value="Technical">Technical</option>
+              <option value="Billing">Billing</option>
+              <option value="Service">Service</option>
+              <option value="General">General</option>
+            </select>
+            {getFieldError("category") && (
+              <p className="mt-1 text-[12px] text-red-600">{getFieldError("category")}</p>
+            )}
           </div>
 
           {/* {validationErrors.length > 0 && (

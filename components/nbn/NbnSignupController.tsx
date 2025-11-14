@@ -11,9 +11,7 @@ import SignupModal3 from "./modals/SignupModal3";
 import SignupModal4 from "./modals/SignupModal4";
 import SignupModal5 from "./modals/SignupModal5";
 import SignupModal6 from "./modals/SignupModal6";
-import SignupModal7 from "./modals/SignupModal7";
 import StaticIPInfoModal from "./modals/StaticIPInfoModal";
-import LetsGetYourConnectionModal from "./modals/LetsGetYourConnectionModal";
 
 // export type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
@@ -26,7 +24,6 @@ export default function NbnSignupController({
 }) {
   const [step, setStep] = useState<any>(1);
   const [showStaticIpInfo, setShowStaticIpInfo] = useState(false);
-  const [showLetsGetConn, setShowLetsGetConn] = useState(false);
   const [apiLoading, setApiLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -43,7 +40,6 @@ export default function NbnSignupController({
 
   const closeAll = useCallback(() => {
     setShowStaticIpInfo(false);
-    setShowLetsGetConn(false);
     setStep(1);
     setApiLoading(false);
     setApiError(null);
@@ -63,13 +59,6 @@ export default function NbnSignupController({
     setShowExitConfirmation(true);
   }, []);
 
-  const goNext = useCallback(() => {
-    if (step === 6) {
-      setShowLetsGetConn(true);
-      return;
-    }
-    setStep((s: any) => Math.min(7, (s + 1)));
-  }, [step]);
   const handleComplete = useCallback(async () => {
     try {
       setApiLoading(true);
@@ -90,15 +79,20 @@ export default function NbnSignupController({
     } finally {
       setApiLoading(false);
     }
-  }, [firstName, lastName, email, password, phone, serviceAddress, selectedPlan, closeAll]);
+  }, [firstName, lastName, email, password, phone, serviceAddress, selectedPlan]);
 
-  const goBack = useCallback(() => {
-    if (showLetsGetConn) {
-      setShowLetsGetConn(false);
+  const goNext = useCallback(() => {
+    if (step === 6) {
+      // After Payment & Agreement, go directly to completion (skip obsolete Agreements step)
+      handleComplete();
       return;
     }
+    setStep((s: any) => Math.min(6, (s + 1)));
+  }, [step, handleComplete]);
+
+  const goBack = useCallback(() => {
     setStep((s: any) => Math.max(1, (s - 1)));
-  }, [showLetsGetConn]);
+  }, []);
 
   if (!open) return null;
 
@@ -159,29 +153,8 @@ export default function NbnSignupController({
             selectedPlan={selectedPlan}
           />
         )}
-        {step === 7 && (
-          <SignupModal7
-            onComplete={handleComplete}
-            onBack={goBack}
-            onClose={handleCloseClick}
-            loading={apiLoading}
-            error={apiError || undefined}
-            selectedPlan={selectedPlan}
-          />
-        )}
 
         {showStaticIpInfo && <StaticIPInfoModal onClose={() => setShowStaticIpInfo(false)} />}
-
-        {showLetsGetConn && (
-          <LetsGetYourConnectionModal
-            onNext={() => {
-              setShowLetsGetConn(false);
-              setStep(7);
-            }}
-            onBack={() => setShowLetsGetConn(false)}
-            onClose={handleCloseClick}
-          />
-        )}
 
         {showSuccess && (
           <ModalShell onClose={closeAll} size="default">

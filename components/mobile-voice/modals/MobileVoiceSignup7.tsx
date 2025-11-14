@@ -69,11 +69,10 @@ export default function MobileVoiceSignup7({
         <div className="mx-auto mt-6 max-w-[560px]">
           <button
             type="button"
-            onClick={onComplete}
-            disabled={loading}
-            className="w-full rounded-[10px] bg-[#401B60] px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#3F205F] transition-colors"
+            onClick={onClose}
+            className="w-full rounded-[10px] bg-[#401B60] px-5 py-3 text-[15px] font-semibold text-white hover:bg-[#3F205F] transition-colors"
           >
-            {loading ? "Processing..." : "Close"}
+            Close
           </button>
         </div>
       </SectionPanel>

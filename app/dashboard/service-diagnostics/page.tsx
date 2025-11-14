@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Panel from "../Panel";
 import { Pill } from "../Pill";
 import { getUserSubscriptions, type ServiceSubscription } from "../../../lib/services/services";
+import { parseAndFormatDateTime } from "@/lib/dateUtils";
 
 export default function Diagnostics() {
   const [subscriptions, setSubscriptions] = useState<ServiceSubscription[]>([]);
@@ -129,13 +130,13 @@ export default function Diagnostics() {
           <div className="mt-4 space-y-3">
             <OutageRow
               place="Sydney CBD"
-              meta="NBN • Reported: 2025-02-03 14:30 • Resolved: 2025-02-03 16:45"
+              meta={`NBN • Reported: ${parseAndFormatDateTime("2025-02-03 14:30")} • Resolved: ${parseAndFormatDateTime("2025-02-03 16:45")}`}
               action="Resolve"
               tone="grey"
             />
             <OutageRow
               place="Parramatta"
-              meta="Mobile • Reported: 2025-02-04 09:15"
+              meta={`Mobile • Reported: ${parseAndFormatDateTime("2025-02-04 09:15")}`}
               action="Investigating"
               tone="purple"
             />

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import ModalShell from "@/components/shared/ModalShell";
 import SectionPanel from "@/components/shared/SectionPanel";
-import BarActions from "@/components/shared/BarActions";
 import StripeProvider from "@/components/shared/StripeProvider";
 import StripeCardElement from "@/components/shared/StripeCardElement";
 import MVHeaderBanner from "../MVHeaderBanner";
@@ -14,11 +13,15 @@ export default function MobileVoiceSignup6({
   onBack,
   onClose,
   selectedPlan,
+  onPaymentSuccess,
+  loading,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
   selectedPlan?: { name: string; price: number } | null;
+  onPaymentSuccess?: () => Promise<void>;
+  loading?: boolean;
 }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -30,14 +33,30 @@ export default function MobileVoiceSignup6({
   const paymentAmount = selectedPlan?.price || 35.00;
   const planName = selectedPlan?.name || "Mobile Standard";
 
-  const handlePaymentSuccess = (paymentIntent: any) => {
+  const handlePaymentSuccess = async (paymentIntent: any) => {
     console.log('Payment succeeded:', paymentIntent);
     setPaymentSuccess(true);
     setPaymentError(null);
     setIsProcessing(false);
-    setTimeout(() => {
-      onNext();
-    }, 2000);
+    
+    // Call signup API after payment success
+    if (onPaymentSuccess) {
+      try {
+        await onPaymentSuccess();
+        // After signup succeeds, go to confirmation screen
+        setTimeout(() => {
+          onNext();
+        }, 1000);
+      } catch (error: any) {
+        setPaymentError(error?.message || "Failed to complete signup. Please contact support.");
+        setPaymentSuccess(false);
+      }
+    } else {
+      // Fallback: just go to next step if no callback provided
+      setTimeout(() => {
+        onNext();
+      }, 2000);
+    }
   };
 
   const handlePaymentError = (error: any) => {
@@ -176,10 +195,10 @@ export default function MobileVoiceSignup6({
                     <button
                       type="button"
                       onClick={handleProcessPayment}
-                      disabled={!agreeTerms || isProcessing || !submitPaymentFn}
+                      disabled={!agreeTerms || isProcessing || paymentSuccess || loading || !submitPaymentFn}
                       className="w-full rounded-[10px] bg-[#401B60] px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#3F205F] transition-colors"
                     >
-                      {isProcessing ? "Processing Payment..." : "Process Payment"}
+                      {loading ? "Creating Account..." : isProcessing ? "Processing Payment..." : paymentSuccess ? "Payment Successful!" : "Process Payment"}
                     </button>
 
                     {paymentError && (
@@ -205,12 +224,7 @@ export default function MobileVoiceSignup6({
         </div>
       </SectionPanel>
 
-      <BarActions
-        onBack={onBack}
-        onNext={paymentSuccess ? onNext : undefined}
-        disabled={!paymentSuccess}
-        label={paymentSuccess ? "Continue" : undefined}
-      />
+      {/* BarActions removed - flow is handled automatically after payment success */}
     </ModalShell>
   );
 }

@@ -14,15 +14,14 @@ import BusinessSmeSignup3 from "./modals/BusinessSmeSignup3";
 import BusinessSmeSignup4 from "./modals/BusinessSmeSignup4";
 import BusinessSmeSignup5 from "./modals/BusinessSmeSignup5";
 import BusinessSmeSignup6 from "./modals/BusinessSmeSignup6";
-import BusinessSmeSignup7 from "./modals/BusinessSmeSignup7";
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
 export default function BusinessSmeSignupController({
   open,
   onClose,
 }: any) {
-  const order: Step[] = [1, 2, 3, 4, 5, 6, 7];
+  const order: Step[] = [1, 2, 3, 4, 5, 6];
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,10 +111,10 @@ export default function BusinessSmeSignupController({
               />
             )}
             {/* {step === 5 && <BusinessSmeSignup5 onNext={goNext} onBack={goBack} onClose={handleCloseClick} />} */}
-            {/* {step === 6 && <BusinessSmeSignup6 onNext={goNext} onBack={goBack} onClose={handleCloseClick} />} */}
-            {step === 7 && (
-              <BusinessSmeSignup7
-                onComplete={async () => {
+            {step === 6 && (
+              <BusinessSmeSignup6
+                onNext={async () => {
+                  // After Payment & Agreement, go directly to confirmation
                   try {
                     setLoading(true);
                     setError(null);
@@ -148,9 +147,6 @@ export default function BusinessSmeSignupController({
                   }
                 }}
                 onBack={goBack}
-                // onClose={handleCloseClick}
-                loading={loading}
-                error={error || undefined}
               />
             )}
           </div>

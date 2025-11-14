@@ -58,7 +58,7 @@ export default function Navbar() {
                   aria-label="Internet options"
                   aria-expanded={internetDropdownOpen}
                 >
-                Internet
+                  Internet
                   <svg
                     width="20"
                     height="20"
@@ -68,7 +68,7 @@ export default function Navbar() {
                     className={`transition-transform ${internetDropdownOpen ? "rotate-180" : ""}`}
                   >
                     <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                  </svg>
                 </button>
 
                 {internetDropdownOpen && (
@@ -80,14 +80,14 @@ export default function Navbar() {
                       }}
                       className="w-full text-left px-4 py-2 text-[16px] font-semibold text-black hover:bg-[#401B60] hover:text-white transition-colors"
                     >
-                      MBB internet
+                      Mobile Broadband
                     </button>
                     <Link
                       href="/business"
                       onClick={() => setInternetDropdownOpen(false)}
                       className="block w-full text-left px-4 py-2 text-[16px] font-semibold text-black hover:bg-[#401B60] hover:text-white transition-colors"
                     >
-                      SME internet
+                      Business NBN
                     </Link>
                     <button
                       onClick={() => {
@@ -96,16 +96,7 @@ export default function Navbar() {
                       }}
                       className="w-full text-left px-4 py-2 text-[16px] font-semibold text-black hover:bg-[#401B60] hover:text-white transition-colors"
                     >
-                      NBN plan
-                    </button>
-                    <button
-                      onClick={() => {
-                        setInternetDropdownOpen(false);
-                        setOpenMobileFlow(true);
-                      }}
-                      className="w-full text-left px-4 py-2 text-[16px] font-semibold text-black hover:bg-[#401B60] hover:text-white transition-colors"
-                    >
-                      Mobile plan
+                      NBN
                     </button>
                   </div>
                 )}
@@ -192,26 +183,20 @@ export default function Navbar() {
                   onClick={() => { setOpen(false); setOpenMbbFlow(true); }}
                   className="block w-full text-left px-4 py-2 text-sm font-semibold text-[#401B60] hover:bg-[#401B60]/10 rounded-lg"
                 >
-                  MBB internet
+                  Mobile Broadband
                 </button>
                 <Link
                   href="/business"
                   onClick={() => setOpen(false)}
                   className="block w-full text-left px-4 py-2 text-sm font-semibold text-[#401B60] hover:bg-[#401B60]/10 rounded-lg"
                 >
-                  SME internet
+                  Business NBN
                 </Link>
                 <button
                   onClick={() => { setOpen(false); setOpenNbnFlow(true); }}
                   className="block w-full text-left px-4 py-2 text-sm font-semibold text-[#401B60] hover:bg-[#401B60]/10 rounded-lg"
                 >
-                  NBN plan
-                </button>
-                <button
-                  onClick={() => { setOpen(false); setOpenMobileFlow(true); }}
-                  className="block w-full text-left px-4 py-2 text-sm font-semibold text-[#401B60] hover:bg-[#401B60]/10 rounded-lg"
-                >
-                  Mobile plan
+                  NBN
                 </button>
               </div>
               <button

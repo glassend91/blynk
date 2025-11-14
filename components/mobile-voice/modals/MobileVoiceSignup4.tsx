@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import ModalShell from "@/components/shared/ModalShell";
 import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
+import FormField from "@/components/shared/FormField";
 import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
-import { checkEmail, signup } from "@/lib/services/auth";
+import { checkEmail } from "@/lib/services/auth";
 import apiClient from "@/lib/apiClient";
 
 export default function MobileVoiceSignup4({
@@ -25,6 +26,7 @@ export default function MobileVoiceSignup4({
   mblSelectedNumber,
   simType,
   identity,
+  otpVerified: initialOtpVerified,
   onChangeFirstName,
   onChangeLastName,
   onChangeEmail,
@@ -35,6 +37,7 @@ export default function MobileVoiceSignup4({
   onChangeKeepExisting,
   onChangeCurrentNumber,
   onChangeCurrentProvider,
+  onOtpVerified,
 }: {
   onNext: () => void;
   onBack: () => void;
@@ -52,6 +55,7 @@ export default function MobileVoiceSignup4({
   mblSelectedNumber: string;
   simType: "ESIM" | "PHYSICAL";
   identity: any;
+  otpVerified?: boolean;
   onChangeFirstName: (v: string) => void;
   onChangeLastName: (v: string) => void;
   onChangeEmail: (v: string) => void;
@@ -62,6 +66,7 @@ export default function MobileVoiceSignup4({
   onChangeKeepExisting: (v: boolean) => void;
   onChangeCurrentNumber: (v: string) => void;
   onChangeCurrentProvider: (v: string) => void;
+  onOtpVerified?: (verified: boolean) => void;
 }) {
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
@@ -81,12 +86,35 @@ export default function MobileVoiceSignup4({
   // OTP states
   const [otpCode, setOtpCode] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(initialOtpVerified || false);
   const [otpSending, setOtpSending] = useState(false);
   const [otpVerifying, setOtpVerifying] = useState(false);
   const [otpError, setOtpError] = useState<string | null>(null);
   const [otpMessage, setOtpMessage] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
+
+  // Sync local state with prop when it changes
+  useEffect(() => {
+    if (initialOtpVerified !== undefined) {
+      setOtpVerified(initialOtpVerified);
+    }
+  }, [initialOtpVerified]);
+
+  // Reset OTP verification if phone number changes (use ref to track previous value)
+  const prevNumberRef = useRef<string>(currentNumber);
+  useEffect(() => {
+    // Only reset if number actually changed (not on initial mount)
+    if (prevNumberRef.current !== currentNumber && prevNumberRef.current && otpVerified) {
+      setOtpVerified(false);
+      if (onOtpVerified) {
+        onOtpVerified(false);
+      }
+      setOtpSent(false);
+      setOtpCode("");
+      setOtpMessage(null);
+    }
+    prevNumberRef.current = currentNumber;
+  }, [currentNumber, otpVerified, onOtpVerified]);
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -116,7 +144,7 @@ export default function MobileVoiceSignup4({
   const validate = (): boolean => {
     const fnErr = !firstName ? "First name is required" : !isValidName(firstName) ? "Enter a valid first name" : null;
     const lnErr = !lastName ? "Last name is required" : !isValidName(lastName) ? "Enter a valid last name" : null;
-    const phErr = !phone ? "Phone number is required" : !isValidPhone(phone) ? "Enter a valid phone number" : null;
+    const phErr = phone && !isValidPhone(phone) ? "Enter a valid phone number" : null; // Phone is now optional
     const dbErr = !dateOfBirth ? "Date of birth is required" : !isAdult(dateOfBirth) ? "You must be at least 18 years old" : null;
     const pwErr = !password ? "Password is required" : password.length < 6 ? "Password must be at least 6 characters" : null;
     const baErr = !billingAddress ? "Billing address is required" : null;
@@ -242,29 +270,11 @@ export default function MobileVoiceSignup4({
       if (response.data?.verified || response.data?.success) {
         setOtpVerified(true);
         setOtpMessage("Number ownership verified successfully!");
-
-        // Create user account after OTP verification
-        try {
-          await signup({
-            type: "MBL",
-            firstName,
-            lastName,
-            email,
-            password,
-            phone,
-            dateOfBirth,
-            mblSelectedNumber: keepExisting ? currentNumber : mblSelectedNumber,
-            mblKeepExistingNumber: keepExisting,
-            mblCurrentMobileNumber: currentNumber,
-            mblCurrentProvider: currentProvider,
-            identity,
-            simType: simType === "ESIM" ? "eSim" : "physical",
-            billingAddress,
-          });
-        } catch (signupErr: any) {
-          console.error("Signup error:", signupErr);
-          // Don't fail if user already exists, just continue
+        // Update parent component state to persist verification
+        if (onOtpVerified) {
+          onOtpVerified(true);
         }
+        // User account will be created after payment success, not here
       } else {
         setOtpError("Invalid OTP code. Please try again.");
       }
@@ -275,68 +285,14 @@ export default function MobileVoiceSignup4({
     }
   };
 
-  // Handle account creation for users who don't keep existing number
-  useEffect(() => {
-    const createAccountIfNeeded = async () => {
-      // Only create account if not keeping existing number and all required fields are filled
-      if (
-        !keepExisting &&
-        firstName &&
-        lastName &&
-        email &&
-        isValidEmail(email) &&
-        !emailExists &&
-        dateOfBirth &&
-        phone &&
-        password &&
-        password.length >= 6 &&
-        billingAddress &&
-        mblSelectedNumber
-      ) {
-        try {
-          await signup({
-            type: "MBL",
-            firstName,
-            lastName,
-            email,
-            password,
-            phone,
-            dateOfBirth,
-            mblSelectedNumber,
-            mblKeepExistingNumber: false,
-            identity,
-            simType: simType === "ESIM" ? "eSim" : "physical",
-            billingAddress,
-          });
-        } catch (signupErr: any) {
-          console.error("Signup error:", signupErr);
-          // Don't fail if user already exists, just continue
-        }
-      }
-    };
-
-    createAccountIfNeeded();
-  }, [
-    keepExisting,
-    firstName,
-    lastName,
-    email,
-    emailExists,
-    dateOfBirth,
-    phone,
-    password,
-    billingAddress,
-    mblSelectedNumber,
-    identity,
-    simType,
-  ]);
+  // User account will be created after payment success, not here
+  // Removed automatic signup call - signup happens only after payment
 
   const canProceed = Boolean(
     firstName &&
     lastName &&
     email && isValidEmail(email) && !emailExists &&
     dateOfBirth &&
-    phone &&
     password && password.length >= 6 &&
     billingAddress &&
     (!keepExisting || (currentNumber && currentProvider && otpVerified)) &&
@@ -422,22 +378,23 @@ export default function MobileVoiceSignup4({
                 <p className="mt-1 text-xs text-green-600">Email is available</p>
               )}
             </div>
-            <div>
-              <label className="text-[12px] font-semibold text-[#3B3551]">Date of Birth</label>
+            <FormField label="Date of Birth">
               <input
+                id="dateOfBirth"
+                name="dateOfBirth"
                 type="date"
+                className={`input w-full ${dobError ? "border-red-300 bg-red-50" : ""}`}
                 value={dateOfBirth}
                 onChange={(e) => {
                   onChangeDob(e.target.value);
                   if (submitted) setDobError(null);
                 }}
                 max={new Date().toISOString().split('T')[0]}
-                className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${dobError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
               />
               {dobError && <p className="mt-1 text-xs text-red-600">{dobError}</p>}
-            </div>
+            </FormField>
             <div>
-              <label className="text-[12px] font-semibold text-[#3B3551]">Phone Number</label>
+              <label className="text-[12px] font-semibold text-[#3B3551]">Contact Phone Number <span className="text-[#6F6C90] font-normal">(Optional)</span></label>
               <input
                 value={phone}
                 onChange={(e) => {
@@ -445,7 +402,7 @@ export default function MobileVoiceSignup4({
                   if (submitted) setPhoneError(null);
                 }}
                 className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${phoneError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
-                placeholder="Enter your phone number"
+                placeholder="Enter your phone number (optional)"
               />
               {phoneError && <p className="mt-1 text-xs text-red-600">{phoneError}</p>}
             </div>

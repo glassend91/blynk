@@ -13,9 +13,8 @@ import MbbSignup2 from "./modals/MobileBroadbandSignup2";
 import MbbSignup3 from "./modals/MobileBroadbandSignup3";
 import MbbSignup4 from "./modals/MobileBroadbandSignup4";
 import MbbSignup5 from "./modals/MobileBroadbandSignup5";
-import MbbSignup6 from "./modals/MobileBroadBandSignup6";
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6;
+type Step = 1 | 2 | 3 | 4 | 5;
 
 export default function MbbSignupController({
   open,
@@ -24,7 +23,7 @@ export default function MbbSignupController({
   open: boolean;
   onClose: () => void;
 }) {
-  const order: Step[] = [1, 2, 3, 4, 5, 6];
+  const order: Step[] = [1, 2, 3, 4, 5];
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,10 +67,44 @@ export default function MbbSignupController({
     setShowExitConfirmation(true);
   }, []);
 
+  const handleComplete = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Create user account after payment success
+      await signup({
+        type: "MBB",
+        firstName,
+        lastName,
+        email,
+        password,
+        phone,
+        dateOfBirth,
+        billingAddress,
+        serviceAddress,
+        identity,
+        simType,
+        selectedPlan: selectedPlan || undefined,
+      });
+      
+      setShowSuccess(true);
+    } catch (e: any) {
+      setError(e?.message || "Signup failed");
+    } finally {
+      setLoading(false);
+    }
+  }, [firstName, lastName, email, password, phone, dateOfBirth, billingAddress, serviceAddress, identity, simType, selectedPlan]);
+
   const goNext = useCallback(() => {
+    if (step === 5) {
+      // After Payment & Agreement, go directly to completion (skip obsolete Confirmation step)
+      handleComplete();
+      return;
+    }
     const idx = order.indexOf(step);
     setStep(order[Math.min(idx + 1, order.length - 1)]);
-  }, [step]);
+  }, [step, handleComplete]);
 
   const goBack = useCallback(() => {
     const idx = order.indexOf(step);
@@ -156,28 +189,6 @@ export default function MbbSignupController({
               onNext={goNext}
               onBack={goBack}
               onClose={handleCloseClick}
-              selectedPlan={selectedPlan}
-            />
-          )}
-          {/* Step 6: Confirmation */}
-          {step === 6 && (
-            <MbbSignup6
-              onComplete={async () => {
-              try {
-                setLoading(true);
-                setError(null);
-                  // User already created in step 3, just show success
-                setShowSuccess(true);
-              } catch (e: any) {
-                setError(e?.message || "Signup failed");
-              } finally {
-                setLoading(false);
-              }
-              }}
-              onBack={goBack}
-              onClose={handleCloseClick}
-              loading={loading}
-              error={error || undefined}
               selectedPlan={selectedPlan}
             />
           )}

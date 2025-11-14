@@ -46,6 +46,7 @@ export default function MobileVoiceSignupController({
   const [mblCurrentMobileNumber, setMblCurrentMobileNumber] = useState("");
   const [mblCurrentProvider, setMblCurrentProvider] = useState("");
   const [identity, setIdentity] = useState<any>(null);
+  const [otpVerified, setOtpVerified] = useState(false);
   const canProceedIdentity = !!identity;
 
   const closeAll = useCallback(() => {
@@ -69,12 +70,45 @@ export default function MobileVoiceSignupController({
     setMblCurrentMobileNumber("");
     setMblCurrentProvider("");
     setIdentity(null);
+    setOtpVerified(false);
     onClose();
   }, [onClose]);
 
   const handleCloseClick = useCallback(() => {
     setShowExitConfirmation(true);
   }, []);
+
+  const handleComplete = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Create user account after payment success
+      await signup({
+        type: "MBL",
+        firstName,
+        lastName,
+        email,
+        password,
+        phone,
+        dateOfBirth,
+        mblSelectedNumber: mblKeepExistingNumber ? mblCurrentMobileNumber : mblSelectedNumber,
+        mblKeepExistingNumber,
+        mblCurrentMobileNumber,
+        mblCurrentProvider,
+        identity,
+        simType: simType === "ESIM" ? "eSim" : "physical",
+        billingAddress,
+        selectedPlan: selectedPlan || undefined,
+      });
+
+      setShowSuccess(true);
+    } catch (e: any) {
+      setError(e?.message || "Signup failed");
+    } finally {
+      setLoading(false);
+    }
+  }, [firstName, lastName, email, password, phone, dateOfBirth, mblSelectedNumber, mblKeepExistingNumber, mblCurrentMobileNumber, mblCurrentProvider, identity, simType, billingAddress, selectedPlan]);
 
   const goNext = useCallback(() => {
     const idx = order.indexOf(step);
@@ -84,7 +118,7 @@ export default function MobileVoiceSignupController({
       nextStep = 5;
     }
     setStep(nextStep);
-  }, [step, numberChoice]);
+  }, [step, numberChoice, order]);
 
   const goBack = useCallback(() => {
     const idx = order.indexOf(step);
@@ -94,7 +128,7 @@ export default function MobileVoiceSignupController({
       prevStep = 3;
     }
     setStep(prevStep);
-  }, [step, numberChoice]);
+  }, [step, numberChoice, order]);
 
   if (!open) return null;
 
@@ -167,6 +201,7 @@ export default function MobileVoiceSignupController({
             mblSelectedNumber={mblSelectedNumber}
             simType={simType}
             identity={identity}
+            otpVerified={otpVerified}
             onChangeFirstName={setFirstName}
             onChangeLastName={setLastName}
             onChangeEmail={setEmail}
@@ -177,6 +212,7 @@ export default function MobileVoiceSignupController({
             onChangeKeepExisting={setMblKeepExistingNumber}
             onChangeCurrentNumber={setMblCurrentMobileNumber}
             onChangeCurrentProvider={setMblCurrentProvider}
+            onOtpVerified={setOtpVerified}
           />
         )}
 
@@ -198,27 +234,18 @@ export default function MobileVoiceSignupController({
             onBack={goBack}
             onClose={handleCloseClick}
             selectedPlan={selectedPlan}
+            onPaymentSuccess={handleComplete}
+            loading={loading}
           />
         )}
 
         {/* Step 8: Confirmation */}
         {step === 8 && (
           <MVSignup7
-            onComplete={async () => {
-              try {
-                setLoading(true);
-                setError(null);
-                // User already created in step 5, just show success
-                setShowSuccess(true);
-              } catch (e: any) {
-                setError(e?.message || "Signup failed");
-              } finally {
-                setLoading(false);
-              }
-            }}
+            onComplete={() => { }} // Not used anymore, signup already completed
             onBack={goBack}
-            onClose={handleCloseClick}
-            loading={loading}
+            onClose={closeAll}
+            loading={false}
             error={error || undefined}
             selectedPlan={selectedPlan}
           />
