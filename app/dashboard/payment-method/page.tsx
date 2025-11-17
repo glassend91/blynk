@@ -279,16 +279,16 @@ function SettingRow({
         <div className="text-[14px] font-semibold text-[#0A0A0A]">{title}</div>
         <div className="text-[12px] text-[#6F6C90]">{desc}</div>
       </div>
-      <button
-        onClick={onToggle}
-        disabled={loading}
-        className={`rounded-[8px] border px-3 py-1 text-[12px] font-semibold disabled:opacity-50 ${enabled
-          ? 'border-[#3F205F] bg-[#3F205F] text-white'
-          : 'border-[#CDBEE3] text-[#3F205F] hover:bg-[#3F205F] hover:text-white'
-          }`}
-      >
-        {loading ? 'Updating...' : enabled ? 'Enabled' : 'Enable'}
-      </button>
+      <label className="relative inline-flex cursor-pointer items-center">
+        <input
+          type="checkbox"
+          className="peer sr-only"
+          checked={enabled}
+          onChange={onToggle}
+          disabled={loading}
+        />
+        <div className={`peer h-5 w-9 rounded-full ${enabled ? "bg-[#3F205F]" : "bg-[#D9D4E5]"} transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-4 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}></div>
+      </label>
     </div>
   );
 }

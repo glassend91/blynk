@@ -5,7 +5,7 @@ import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
 import MbbHeaderBanner from "../MbbHeaderBanner";
 import MbbStepper from "../MbbStepper";
-import { checkEmail, signup } from "@/lib/services/auth";
+import { checkEmail } from "@/lib/services/auth";
 
 export default function MobileBroadbandSignup3({
   onNext,
@@ -106,62 +106,14 @@ export default function MobileBroadbandSignup3({
     return () => clearTimeout(timeout);
   }, [email]);
 
-  // Handle account creation when all fields are filled
-  useEffect(() => {
-    const createAccountIfNeeded = async () => {
-      if (
-        firstName &&
-        lastName &&
-        email &&
-        isValidEmail(email) &&
-        !emailExists &&
-        phone &&
-        dateOfBirth &&
-        password &&
-        password.length >= 6 &&
-        billingAddress
-      ) {
-        try {
-          await signup({
-            type: "MBB",
-            firstName,
-            lastName,
-            email,
-            password,
-            phone,
-            dateOfBirth,
-            billingAddress,
-            serviceAddress,
-            identity,
-            simType,
-          });
-        } catch (signupErr: any) {
-          console.error("Signup error:", signupErr);
-          // Don't fail if user already exists, just continue
-        }
-      }
-    };
-
-    createAccountIfNeeded();
-  }, [
-    firstName,
-    lastName,
-    email,
-    emailExists,
-    phone,
-    dateOfBirth,
-    password,
-    billingAddress,
-    serviceAddress,
-    identity,
-    simType,
-  ]);
+  // User account will be created after payment success, not here
+  // Removed automatic signup call - signup happens only after payment
 
   // Validate only on Next click (no live validation)
   const validate = (): boolean => {
     const fnErr = !firstName ? "First name is required" : !isValidName(firstName) ? "Enter a valid first name" : null;
     const lnErr = !lastName ? "Last name is required" : !isValidName(lastName) ? "Enter a valid last name" : null;
-    const phErr = !phone ? "Phone number is required" : !isValidPhone(phone) ? "Enter a valid phone number" : null;
+    const phErr = phone && !isValidPhone(phone) ? "Enter a valid phone number" : null; // Phone is now optional
     const dbErr = !dateOfBirth ? "Date of birth is required" : !isAdult(dateOfBirth) ? "You must be at least 18 years old" : null;
     const pwErr = !password ? "Password is required" : password.length < 6 ? "Password must be at least 6 characters" : null;
     const baErr = !billingAddress ? "Billing address is required" : null;
@@ -242,12 +194,12 @@ export default function MobileBroadbandSignup3({
               )}
             </div>
             <div>
-              <label className="mb-1 block text-sm text-[#6B6478]">Contact Phone Number</label>
+              <label className="mb-1 block text-sm text-[#6B6478]">Contact Phone Number <span className="text-[#6F6C90] font-normal">(Optional)</span></label>
               <input
                 value={phone}
                 onChange={(e) => onChangePhone(e.target.value)}
                 className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${phoneError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
-                placeholder="Enter your phone number"
+                placeholder="Enter your phone number (optional)"
               />
               {phoneError && <p className="mt-1 text-xs text-red-600">{phoneError}</p>}
             </div>

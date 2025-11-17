@@ -1,6 +1,7 @@
 import Panel from "../dashboard/Panel";
 import Progress from "../dashboard/Progress";
 import { Pill } from "../dashboard/Pill";
+import { parseAndFormatDate, convertMonthNameToAU } from "@/lib/dateUtils";
 
 export default function DashboardHome() {
   return (
@@ -21,9 +22,9 @@ export default function DashboardHome() {
                   <div className="flex items-center gap-3">
                     <span className="grid h-8 w-8 place-items-center rounded-full bg-[#3F205F] text-white">
                       {s.icon === "wifi" ? (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M2 8.5C6.5 4.5 17.5 4.5 22 8.5M5 12c4-3 10-3 14 0M8.5 15.5c2-1.5 5-1.5 7 0" stroke="white" strokeWidth="1.6" strokeLinecap="round"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M2 8.5C6.5 4.5 17.5 4.5 22 8.5M5 12c4-3 10-3 14 0M8.5 15.5c2-1.5 5-1.5 7 0" stroke="white" strokeWidth="1.6" strokeLinecap="round" /></svg>
                       ) : (
-                        <svg width="16" height="20" viewBox="0 0 16 20" fill="none"><rect x="3" y="1.5" width="10" height="17" rx="3" stroke="white" strokeWidth="1.8"/><circle cx="8" cy="15" r="1.4" fill="white"/></svg>
+                        <svg width="16" height="20" viewBox="0 0 16 20" fill="none"><rect x="3" y="1.5" width="10" height="17" rx="3" stroke="white" strokeWidth="1.8" /><circle cx="8" cy="15" r="1.4" fill="white" /></svg>
                       )}
                     </span>
                     <div>
@@ -45,7 +46,7 @@ export default function DashboardHome() {
             <div className="mb-2 text-[14px] text-[#0A0A0A]">42.5GB used</div>
             <Progress value={42.5} max={60} />
             <div className="mt-3 text-right text-[12px] text-[#6F6C90]">60GB total</div>
-            <div className="mt-3 text-[13px] text-[#6F6C90]">Resets on 2025-02-10</div>
+            <div className="mt-3 text-[13px] text-[#6F6C90]">Resets on {parseAndFormatDate("2025-02-10")}</div>
           </div>
         </Panel>
 
@@ -63,11 +64,11 @@ export default function DashboardHome() {
               <div key={b.label} className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-3">
                   <span className="grid h-8 w-8 place-items-center rounded-full bg-[#3F205F] text-white">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M7 2h10a2 2 0 0 1 2 2v18l-7-3-7 3V4a2 2 0 0 1 2-2Z" stroke="white" strokeWidth="1.6"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M7 2h10a2 2 0 0 1 2 2v18l-7-3-7 3V4a2 2 0 0 1 2-2Z" stroke="white" strokeWidth="1.6" /></svg>
                   </span>
                   <div>
                     <div className="text-[14px] font-semibold text-[#0A0A0A]">{b.label}</div>
-                    <div className="text-[12px] text-[#6F6C90]">Due: {b.due}</div>
+                    <div className="text-[12px] text-[#6F6C90]">Due: {parseAndFormatDate(b.due)}</div>
                   </div>
                 </div>
                 <div className="text-[14px] font-semibold text-[#0A0A0A]">{b.amount}</div>
@@ -83,8 +84,8 @@ export default function DashboardHome() {
             <button className="rounded-[10px] border border-[#D9D4E5] px-3 py-1.5 text-[12px] font-semibold text-[#3F205F]">View All Tickets</button>
           </div>
           <div className="mt-4 space-y-3">
-            <TicketRow title="Internet connection issues" id="#T-2401 • 2025-01-28" state="Resolved" />
-            <TicketRow title="Billing inquiry" id="#T-2398 • 2025-01-25" state="Open" />
+            <TicketRow title="Internet connection issues" id={`#T-2401 • ${parseAndFormatDate("2025-01-28")}`} state="Resolved" />
+            <TicketRow title="Billing inquiry" id={`#T-2398 • ${parseAndFormatDate("2025-01-25")}`} state="Open" />
           </div>
         </Panel>
 
@@ -95,8 +96,8 @@ export default function DashboardHome() {
             <button className="rounded-[10px] border border-[#D9D4E5] px-3 py-1.5 text-[12px] font-semibold text-[#3F205F]">View All</button>
           </div>
           <div className="mt-4 space-y-3">
-            <InvoiceRow date="Jan 15, 2025" label="Monthly Services" amount="$134.95" />
-            <InvoiceRow date="Dec 15, 2024" label="Monthly Services" amount="$134.95" />
+            <InvoiceRow date={convertMonthNameToAU("Jan 15, 2025")} label="Monthly Services" amount="$134.95" />
+            <InvoiceRow date={convertMonthNameToAU("Dec 15, 2024")} label="Monthly Services" amount="$134.95" />
           </div>
         </Panel>
 

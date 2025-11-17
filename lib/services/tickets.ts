@@ -57,7 +57,7 @@ export type CreateTicketPayload = {
     subject: string;
     description: string;
     category: string;
-    priority: string;
+    priority?: string; // Optional - only for admin use, defaults to "Medium" for customers
 };
 
 export type CreateTicketResponse = {

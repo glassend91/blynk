@@ -5,8 +5,8 @@ const LABELS = [
   "SIM Type",
   "Customer Details",
   "ID Check",
-  "Payment",
-  "Agreement",
+  "Payment & Agreement",
+  "Confirmation",
 ];
 
 export default function MbbStepper({ active }: { active: number }) {

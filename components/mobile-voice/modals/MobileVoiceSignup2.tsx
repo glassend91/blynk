@@ -30,7 +30,6 @@ export default function MobileVoiceSignup2({
         setLoading(true);
         setError(null);
         // Call GET /api/v1/mobile/reserve/numbers
-        // Note: Adjust the endpoint based on your backend structure
         const response = await apiClient.get("/v1/mobile/reserve/numbers");
         // Assuming the API returns { numbers: string[] } or similar
         const availableNumbers = response.data?.numbers || response.data || [];

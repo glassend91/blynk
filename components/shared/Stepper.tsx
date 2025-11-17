@@ -4,8 +4,7 @@ const LABELS = [
   "Add-on Selection",
   "Customer Details",
   "ID Check",
-  "Payment",
-  "Agreement",
+  "Payment & Agreement",
 ];
 
 export default function Stepper({ active }: { active: number }) {
