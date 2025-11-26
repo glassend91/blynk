@@ -69,7 +69,14 @@ export default function LoginPage() {
       if (res?.success) {
         if (res.token) setAuthToken(res.token);
         if (res.user) setAuthUser(res.user);
-        router.push("/dashboard");
+
+        // Role-based redirect: admins go to /admin, customers to /dashboard
+        const role = (res.user as any)?.role || "customer";
+        if (role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/dashboard");
+        }
         return;
       }
       setError(res?.message || "Login failed");

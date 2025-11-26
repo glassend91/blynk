@@ -3,8 +3,10 @@ export type Status = "Active" | "Inactive" | "Pending";
 
 export type UserRow = {
   id: number;
+  userId?: string; // real DB id when loaded from API
   name: string;
   email: string;
+  type?: string;
   role: Role;
   status: Status;
   lastLogin: string;
@@ -16,6 +18,7 @@ export const initialUsers: UserRow[] = [
     id: 1,
     name: "Sarah Johnson",
     email: "sarah.johnson@telco.com",
+    type: "NBN",
     role: "Administrator",
     status: "Active",
     lastLogin: "2 Hours Ago",
@@ -25,6 +28,7 @@ export const initialUsers: UserRow[] = [
     id: 2,
     name: "Mike Chen",
     email: "mike.chen@telco.com",
+    type: "MBL",
     role: "Support Manager",
     status: "Active",
     lastLogin: "1 Day Ago",
@@ -34,6 +38,7 @@ export const initialUsers: UserRow[] = [
     id: 3,
     name: "Emma Davis",
     email: "emma.davis@telco.com",
+    type: "MBB",
     role: "Content Editor",
     status: "Inactive",
     lastLogin: "1 Week Ago",
@@ -43,6 +48,7 @@ export const initialUsers: UserRow[] = [
     id: 4,
     name: "Tom Wilson",
     email: "tom.wilson@telco.com",
+    type: "SME",
     role: "Technical Support",
     status: "Pending",
     lastLogin: "Never",
