@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import TableHeader from "./_local/components/TableHeader";
 import UsersTable from "./_local/components/UsersTable";
 import InviteUserModal from "./_local/components/InviteUserModal";
-import { allStatuses, initialUsers, Role, Status, UserRow } from "./_local/data";
+import { allStatuses, Role, Status, UserRow } from "./_local/data";
 import apiClient from "@/lib/apiClient";
 
 export default function UserManagementPage() {
@@ -101,7 +101,10 @@ export default function UserManagementPage() {
         open={openInvite}
         onClose={() => setOpenInvite(false)}
         onInvite={(newUser) => {
-          setRows((prev) => [{ id: prev.length + 1, ...newUser }, ...prev]);
+          setRows((prev) => {
+            const next = [newUser, ...prev];
+            return next.map((row, index) => ({ ...row, id: index + 1 }));
+          });
           setOpenInvite(false);
         }}
       />

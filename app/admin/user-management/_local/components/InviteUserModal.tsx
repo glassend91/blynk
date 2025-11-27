@@ -1,28 +1,68 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Role } from "../data";
+import { Role, UserRow } from "../data";
+import apiClient from "@/lib/apiClient";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onInvite: (u: { name: string; email: string; role: Role; status: "Pending"; lastLogin: string; created: string }) => void;
+  onInvite: (u: UserRow) => void;
 };
+
+const roleOptions: Role[] = ["Administrator", "Support Manager", "Content Editor", "Technical Support"];
 
 export default function InviteUserModal({ open, onClose, onInvite }: Props) {
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<Role>("Technical Support");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setEmail("");
-      setName("");
+      setFirstName("");
+      setLastName("");
       setRole("Technical Support");
+      setError(null);
+      setSubmitting(false);
     }
   }, [open]);
 
   if (!open) return null;
+
+  const handleSubmit = async () => {
+    if (!email.trim() || !firstName.trim() || !lastName.trim()) {
+      setError("First name, last name, and email are required.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+      const payload = {
+        email: email.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        role,
+      };
+      const { data } = await apiClient.post<{ success: boolean; user: UserRow }>("/auth/createUserByAdmin", payload);
+
+      if (data?.success && data.user) {
+        onInvite(data.user);
+        onClose();
+        return;
+      }
+
+      setError("Failed to invite user. Please try again.");
+    } catch (err: any) {
+      setError(err?.message || "Failed to invite user. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50">
@@ -54,15 +94,27 @@ export default function InviteUserModal({ open, onClose, onInvite }: Props) {
             />
           </div>
 
-          <div>
-            <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">Full Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter full name"
-              className="w-full rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none placeholder-[#6F6C90]"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">First Name</label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Enter first name"
+                className="w-full rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none placeholder-[#6F6C90]"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">Last Name</label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Enter last name"
+                className="w-full rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none placeholder-[#6F6C90]"
+              />
+            </div>
           </div>
 
           <div>
@@ -72,13 +124,20 @@ export default function InviteUserModal({ open, onClose, onInvite }: Props) {
               onChange={(e) => setRole(e.target.value as Role)}
               className="w-full appearance-none rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none"
             >
-              <option>Administrator</option>
-              <option>Support Manager</option>
-              <option>Content Editor</option>
-              <option>Technical Support</option>
+              {roleOptions.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
             </select>
           </div>
         </div>
+
+        {error && (
+          <div className="mt-4 rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
+            {error}
+          </div>
+        )}
 
         <div className="mt-6 flex items-center justify-between gap-3">
           <button
@@ -88,19 +147,11 @@ export default function InviteUserModal({ open, onClose, onInvite }: Props) {
             Cancel
           </button>
           <button
-            onClick={() =>
-              onInvite({
-                name: name || "Invited User",
-                email: email || "user@telco.com",
-                role,
-                status: "Pending",
-                lastLogin: "Never",
-                created: new Date().toISOString().slice(0, 10),
-              })
-            }
-            className="h-[44px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white hover:opacity-95"
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="h-[44px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Send Invitation
+            {submitting ? "Sending..." : "Send Invitation"}
           </button>
         </div>
       </div>

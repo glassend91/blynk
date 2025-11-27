@@ -103,7 +103,7 @@ export default function UsersTable({ rows, onView, onEdit, onDelete }: Props) {
               ))}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-[14px] text-[#6F6C90]">
+                  <td colSpan={9} className="px-4 py-10 text-center text-[14px] text-[#6F6C90]">
                     No users found.
                   </td>
                 </tr>

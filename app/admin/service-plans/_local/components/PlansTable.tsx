@@ -30,7 +30,10 @@ export default function PlansTable({ rows }: { rows: PlanRow[] }) {
             </thead>
             <tbody className="text-[14px] text-[#0A0A0A]">
               {rows.map((r) => (
-                <tr key={r.id} className="border-t border-[#F0EEF3] hover:bg-[#FBFAFD] [&>td]:px-4 [&>td]:py-3">
+                <tr
+                  key={r.serviceId ?? r.id}
+                  className="border-t border-[#F0EEF3] hover:bg-[#FBFAFD] [&>td]:px-4 [&>td]:py-3"
+                >
                   <td>{r.id}</td>
                   <td className="text-[#401B60] underline-offset-2 hover:underline">{r.name}</td>
                   <td className="text-[#6F6C90]">{r.details}</td>
@@ -40,7 +43,9 @@ export default function PlansTable({ rows }: { rows: PlanRow[] }) {
                   <td className="text-[#6F6C90]">{r.speedOrData}</td>
                   <td className="text-[#0A0A0A]">{r.price}</td>
                   <td><StatusBadge value={r.status} /></td>
-                  <td className="text-[#6F6C90]">{r.customers.toLocaleString()}</td>
+                  <td className="text-[#6F6C90]">
+                    {typeof r.customers === "number" ? r.customers.toLocaleString() : "-"}
+                  </td>
                 </tr>
               ))}
               {rows.length === 0 && (

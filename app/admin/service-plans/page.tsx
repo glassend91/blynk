@@ -1,18 +1,48 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import TableHeader from "./_local/components/TableHeader";
 import PlansTable from "./_local/components/PlansTable";
 import OverviewStats from "./_local/components/OverviewStats";
 import CreatePlanModal from "./_local/components/CreatePlanModal";
-import { plansSeed } from "./_local/data";
 import type { PlanRow, PlanType } from "./_local/types";
+import apiClient from "@/lib/apiClient";
 
 export default function ServicePlansPage() {
   const [query, setQuery] = useState("");
   const [type, setType] = useState<PlanType | "All Type">("All Type");
-  const [rows, setRows] = useState<PlanRow[]>(plansSeed);
+  const [rows, setRows] = useState<PlanRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+    async function load() {
+      try {
+        setError(null);
+        setLoading(true);
+        const { data } = await apiClient.get<{ success: boolean; services: PlanRow[] }>("/services/admin/list");
+        if (ignore) return;
+        if (data?.success && Array.isArray(data.services)) {
+          setRows(data.services);
+        } else {
+          setRows([]);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError("Failed to load service plans. Please try again.");
+          setRows([]);
+        }
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -65,7 +95,17 @@ export default function ServicePlansPage() {
           onType={setType}
         />
 
-        <PlansTable rows={filtered} />
+        {loading ? (
+          <div className="rounded-[12px] border border-dashed border-[#E7E4EC] bg-[#FBFBFD] p-6 text-[14px] text-[#6F6C90]">
+            Loading service plans...
+          </div>
+        ) : error ? (
+          <div className="rounded-[12px] border border-[#FCD1D2] bg-[#FFF5F5] p-6 text-[14px] text-[#C53030]">
+            {error}
+          </div>
+        ) : (
+          <PlansTable rows={filtered} />
+        )}
       </div>
 
       <OverviewStats {...stats} />
@@ -73,8 +113,11 @@ export default function ServicePlansPage() {
       <CreatePlanModal
         open={openCreate}
         onClose={() => setOpenCreate(false)}
-        onCreate={(plan) => {
-          setRows((prev) => [{ id: prev.length + 1, customers: 0, ...plan }, ...prev]);
+        onCreate={(createdPlan) => {
+          setRows((prev) => {
+            const next = [createdPlan, ...prev];
+            return next.map((row, index) => ({ ...row, id: index + 1 }));
+          });
           setOpenCreate(false);
         }}
       />
