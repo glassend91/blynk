@@ -1,21 +1,57 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { OTPForm } from './_local/OTPForm';
 import { ManualVerification } from './_local/ManualVerification';
 import { StatCard } from './_local/StatCard';
 import { AddNoteDialog } from './_local/AddNoteDialog';
+import apiClient from '@/lib/apiClient';
 
 export default function CustomerVerificationPage() {
   const [openNote, setOpenNote] = useState(false);
-  console.log('openNote', openNote);
+  const [stats, setStats] = useState({
+    pendingVerification: 0,
+    verifiedToday: 0,
+    failedVerifications: 0,
+    otpsSentToday: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
-  // mock stats (wire to API later)
-  const stats = [
-    { label: 'Pending Verification', value: 2, icon: 'clock' as const },
-    { label: 'Verified Today', value: 1, icon: 'check' as const },
-    { label: 'Failed Verifications', value: 1, icon: 'warning' as const },
-    { label: 'OTPs Sent Today', value: 3, icon: 'send' as const },
+  useEffect(() => {
+    fetchStatistics();
+  }, []);
+
+  const fetchStatistics = async () => {
+    try {
+      setLoading(true);
+      const { data } = await apiClient.get<{ success: boolean; data: any }>(
+        '/customer-verification/statistics'
+      );
+
+      if (data?.success && data.data) {
+        setStats({
+          pendingVerification: data.data.pendingVerification || 0,
+          verifiedToday: data.data.verifiedToday || 0,
+          failedVerifications: data.data.failedVerifications || 0,
+          otpsSentToday: data.data.otpsSentToday || 0,
+        });
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch statistics:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSuccess = () => {
+    fetchStatistics(); // Refresh stats after successful operations
+  };
+
+  const statCards = [
+    { label: 'Pending Verification', value: stats.pendingVerification, icon: 'clock' as const },
+    { label: 'Verified Today', value: stats.verifiedToday, icon: 'check' as const },
+    { label: 'Failed Verifications', value: stats.failedVerifications, icon: 'warning' as const },
+    { label: 'OTPs Sent Today', value: stats.otpsSentToday, icon: 'send' as const },
   ];
 
   return (
@@ -30,18 +66,18 @@ export default function CustomerVerificationPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {stats.map((s) => (
+        {statCards.map((s) => (
           <StatCard key={s.label} {...s} />
         ))}
       </div>
 
       {/* Two-column content */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <ManualVerification />
-        <OTPForm />
+        <ManualVerification onSuccess={handleSuccess} />
+        <OTPForm onSuccess={handleSuccess} />
       </div>
 
-      {/* Floating action: Add Note (match to your pattern of top-right CTA) */}
+      {/* Floating action: Add Note */}
       <div className="flex justify-end">
         <button
           onClick={() => setOpenNote(true)}
@@ -51,12 +87,7 @@ export default function CustomerVerificationPage() {
         </button>
       </div>
 
-{
-  openNote && (
-    <AddNoteDialog open={openNote} onOpenChange={setOpenNote} />
-  )
-}
-      {/* <AddNoteDialog open={openNote} onOpenChange={setOpenNote} /> */}
+      <AddNoteDialog open={openNote} onOpenChange={setOpenNote} onSuccess={handleSuccess} />
     </div>
   );
 }

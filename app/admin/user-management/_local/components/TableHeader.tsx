@@ -10,7 +10,7 @@ type Props = {
   onRole: (v: Role | "All Roles") => void;
   status: Status | "All Status";
   onStatus: (v: Status | "All Status") => void;
-  onInvite: () => void;
+  onInvite?: () => void;
 };
 
 function Select({
@@ -109,12 +109,14 @@ export default function TableHeader({
         />
       </div>
 
-      <button
-        onClick={onInvite}
-        className="h-[44px] rounded-[8px] bg-[#401B60] px-5 text-[14px] font-semibold text-white hover:opacity-95"
-      >
-        Add User
-      </button>
+      {onInvite && (
+        <button
+          onClick={onInvite}
+          className="h-[44px] rounded-[8px] bg-[#401B60] px-5 text-[14px] font-semibold text-white hover:opacity-95"
+        >
+          Add User
+        </button>
+      )}
     </div>
   );
 }

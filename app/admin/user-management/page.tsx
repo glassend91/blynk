@@ -7,12 +7,16 @@ import UsersTable from "./_local/components/UsersTable";
 import InviteUserModal from "./_local/components/InviteUserModal";
 import { allStatuses, Role, Status, UserRow } from "./_local/data";
 import apiClient from "@/lib/apiClient";
+import { usePermission } from "@/lib/permissions";
 
 export default function UserManagementPage() {
   const [query, setQuery] = useState("");
   const [role, setRole] = useState<Role | "All Roles">("All Roles");
   const [status, setStatus] = useState<Status | "All Status">("All Status");
   const [openInvite, setOpenInvite] = useState(false);
+  const canInvite = usePermission("user.invite");
+  const canEdit = usePermission("user.edit");
+  const canDelete = usePermission("user.delete");
   const [rows, setRows] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewUser, setViewUser] = useState<UserRow | null>(null);
@@ -73,7 +77,7 @@ export default function UserManagementPage() {
         onRole={setRole}
         status={status}
         onStatus={setStatus}
-        onInvite={() => setOpenInvite(true)}
+        onInvite={canInvite ? () => setOpenInvite(true) : undefined}
       />
 
       {/* Data table */}
@@ -85,29 +89,31 @@ export default function UserManagementPage() {
         <UsersTable
           rows={filtered}
           onView={(u) => setViewUser(u)}
-          onEdit={(u) => {
+          onEdit={canEdit ? (u) => {
             setEditUser(u);
             setEditName(u.name);
             setEditStatus(u.status);
-          }}
-          onDelete={(u) => {
+          } : undefined}
+          onDelete={canDelete ? (u) => {
             setDeleteUser(u);
-          }}
+          } : undefined}
         />
       )}
 
-      {/* Invite modal */}
-      <InviteUserModal
-        open={openInvite}
-        onClose={() => setOpenInvite(false)}
-        onInvite={(newUser) => {
-          setRows((prev) => {
-            const next = [newUser, ...prev];
-            return next.map((row, index) => ({ ...row, id: index + 1 }));
-          });
-          setOpenInvite(false);
-        }}
-      />
+      {/* Invite modal - only show if user has permission */}
+      {canInvite && (
+        <InviteUserModal
+          open={openInvite}
+          onClose={() => setOpenInvite(false)}
+          onInvite={(newUser) => {
+            setRows((prev) => {
+              const next = [newUser, ...prev];
+              return next.map((row, index) => ({ ...row, id: index + 1 }));
+            });
+            setOpenInvite(false);
+          }}
+        />
+      )}
 
       {/* View user details modal */}
       {viewUser && (
@@ -166,8 +172,8 @@ export default function UserManagementPage() {
         </div>
       )}
 
-      {/* Edit user modal */}
-      {editUser && (
+      {/* Edit user modal - only show if user has permission */}
+      {editUser && canEdit && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
@@ -278,8 +284,8 @@ export default function UserManagementPage() {
         </div>
       )}
 
-      {/* Delete confirmation modal */}
-      {deleteUser && (
+      {/* Delete confirmation modal - only show if user has permission */}
+      {deleteUser && canDelete && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">

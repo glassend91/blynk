@@ -46,4 +46,29 @@ export function clearAuthAll() {
     clearAuthUser();
 }
 
+/**
+ * Refresh user data from server (useful when permissions are updated)
+ */
+export async function refreshAuthUser(): Promise<void> {
+    if (typeof window === "undefined") return;
+
+    try {
+        const { getCurrentUser } = await import("./services/auth");
+        const response = await getCurrentUser();
+        if (response?.user) {
+            setAuthUser(response.user);
+            // Dispatch custom event to notify components of permission update
+            window.dispatchEvent(new CustomEvent('authUserRefreshed', { detail: response.user }));
+            // Also trigger storage event for cross-tab sync
+            window.dispatchEvent(new StorageEvent('storage', {
+                key: USER_KEY,
+                newValue: JSON.stringify(response.user),
+                storageArea: localStorage
+            }));
+        }
+    } catch (error) {
+        console.error("Failed to refresh user data:", error);
+    }
+}
+
 

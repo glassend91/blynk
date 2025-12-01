@@ -1,38 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AddStoreWizard from "./_local/components/AddStoreModal";
+import apiClient from "@/lib/apiClient";
+
+type Technician = {
+  id: string;
+  fullName: string;
+  roleTitle?: string;
+  years?: string;
+  specialties?: string;
+  videoUrl?: string;
+  bio?: string;
+  photoUrl?: string;
+};
 
 type StoreRow = {
-  id: number;
+  id: string;
   name: string;
   address: string;
   hours: string;
   phone: string;
-  technicians: string;
+  googleLink?: string;
+  bannerUrl?: string;
+  pitch?: string;
   status: "Active" | "Inactive";
+  technicians: Technician[];
+  createdAt?: string;
 };
-
-const rows: StoreRow[] = [
-  {
-    id: 1,
-    name: "TechConnect Brisbane",
-    address: "123 Queen St, Brisbane QLD 4000",
-    hours: "Mon–Fri 9am–5pm",
-    phone: "(07) 3123 4567",
-    technicians: "John Smith, Mark ductle… +2",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Network Solutions Sydney",
-    address: "Ideal for streaming and working from home",
-    hours: "Mon–Fri 9am–5pm",
-    phone: "100/20 Mbps",
-    technicians: "John Smith, Mark ductle… +2",
-    status: "Inactive",
-  },
-];
 
 function StatCard({
   label,
@@ -59,6 +54,146 @@ function StatCard({
 
 export default function TechnicianNetworkPage() {
   const [open, setOpen] = useState(false);
+  const [editingStore, setEditingStore] = useState<StoreRow | null>(null);
+  const [rows, setRows] = useState<StoreRow[]>([]);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("All Type");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState({
+    totalTechnicians: 0,
+    activeStores: 0,
+    inactiveStores: 0,
+  });
+
+  // Fetch stores and statistics on mount
+  useEffect(() => {
+    fetchStores();
+    fetchStatistics();
+  }, []);
+
+  const fetchStores = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await apiClient.get<{ success: boolean; data: StoreRow[] }>("/stores");
+
+      if (data?.success && data.data) {
+        setRows(data.data);
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch stores:", err);
+      setError(err?.message || "Failed to load stores");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStatistics = async () => {
+    try {
+      const { data } = await apiClient.get<{ success: boolean; data: any }>("/stores/statistics");
+
+      if (data?.success && data.data) {
+        setStats({
+          totalTechnicians: data.data.totalTechnicians || 0,
+          activeStores: data.data.activeStores || 0,
+          inactiveStores: data.data.inactiveStores || 0,
+        });
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch statistics:", err);
+    }
+  };
+
+  const filtered = useMemo(() => {
+    let filteredRows = rows;
+
+    // Search filter
+    const q = query.trim().toLowerCase();
+    if (q) {
+      filteredRows = filteredRows.filter(
+        (r) =>
+          r.name.toLowerCase().includes(q) ||
+          r.address.toLowerCase().includes(q) ||
+          r.phone.toLowerCase().includes(q)
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== "All Type") {
+      filteredRows = filteredRows.filter((r) => r.status === statusFilter);
+    }
+
+    return filteredRows;
+  }, [rows, query, statusFilter]);
+
+  const handleCreate = (store: StoreRow) => {
+    setRows((prev) => [store, ...prev]);
+    setOpen(false);
+    setEditingStore(null);
+    fetchStatistics();
+  };
+
+  const handleUpdate = (updatedStore: StoreRow) => {
+    setRows((prev) =>
+      prev.map((s) => (s.id === updatedStore.id ? updatedStore : s))
+    );
+    setEditingStore(null);
+    setOpen(false);
+    fetchStatistics();
+  };
+
+  const handleEdit = (store: StoreRow) => {
+    setEditingStore(store);
+    setOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this store?")) {
+      return;
+    }
+
+    try {
+      const { data } = await apiClient.delete<{ success: boolean }>(`/stores/${id}`);
+
+      if (data?.success) {
+        setRows((prev) => prev.filter((r) => r.id !== id));
+        fetchStatistics();
+      } else {
+        alert("Failed to delete store. Please try again.");
+      }
+    } catch (err: any) {
+      alert(err?.message || "Failed to delete store. Please try again.");
+    }
+  };
+
+  const handleCloseModal = () => {
+    setOpen(false);
+    setEditingStore(null);
+  };
+
+  const handleOpenModal = () => {
+    setEditingStore(null);
+    setOpen(true);
+  };
+
+  const formatTechnicians = (technicians: Technician[]) => {
+    if (!technicians || technicians.length === 0) return "No technicians";
+    const names = technicians.map((t) => t.fullName).filter(Boolean);
+    if (names.length === 0) return "No technicians";
+    if (names.length <= 2) return names.join(", ");
+    return `${names.slice(0, 2).join(", ")}… +${names.length - 2}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="mx-auto w-full max-w-[1686px] p-[30px]">
+        <div className="flex items-center justify-center py-12">
+          <p className="text-[16px] text-[#6F6C90]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-[1686px] p-[30px]">
@@ -71,18 +206,24 @@ export default function TechnicianNetworkPage() {
           </p>
         </div>
         <button
-          onClick={() => setOpen(true)}
-          className="rounded-[10px] bg-[#3F205F] px-5 py-2.5 text-[14px] font-semibold text-white"
+          onClick={handleOpenModal}
+          className="rounded-[10px] bg-[#3F205F] px-5 py-2.5 text-[14px] font-semibold text-white hover:opacity-95"
         >
           Add Store
         </button>
       </div>
 
+      {error && (
+        <div className="mb-6 rounded-[10px] border border-[#FCD1D2] bg-[#FFF5F5] px-4 py-3 text-[13px] text-[#C53030]">
+          {error}
+        </div>
+      )}
+
       {/* Stat cards */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         <StatCard
           label="All Technician"
-          value="20"
+          value={stats.totalTechnicians.toString()}
           sub="All Technician"
           rightIcon={
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
@@ -98,7 +239,7 @@ export default function TechnicianNetworkPage() {
         />
         <StatCard
           label="Active Local Store"
-          value="10"
+          value={stats.activeStores.toString()}
           sub="From last month"
           rightIcon={
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
@@ -109,7 +250,7 @@ export default function TechnicianNetworkPage() {
         />
         <StatCard
           label="Inactive Local Store"
-          value="05"
+          value={stats.inactiveStores.toString()}
           sub="From last month"
           rightIcon={
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
@@ -131,15 +272,21 @@ export default function TechnicianNetworkPage() {
               </svg>
             </span>
             <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               className="w-full rounded-[10px] border border-[#EEEAF4] bg-white px-10 py-2.5 text-[14px] text-[#0A0A0A] outline-none placeholder:text-[#8E8AA3]"
               placeholder="Search local store…"
             />
           </div>
           <div className="relative">
-            <select className="w-full appearance-none rounded-[10px] border border-[#EEEAF4] bg-white px-3 py-2.5 text-[14px] text-[#0A0A0A] outline-none">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full appearance-none rounded-[10px] border border-[#EEEAF4] bg-white px-3 py-2.5 text-[14px] text-[#0A0A0A] outline-none"
+            >
               <option>All Type</option>
-              <option>NBN</option>
-              <option>Mobile</option>
+              <option>Active</option>
+              <option>Inactive</option>
             </select>
             <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8AA3]">
               ▾
@@ -163,15 +310,15 @@ export default function TechnicianNetworkPage() {
               </tr>
             </thead>
             <tbody className="text-[#0A0A0A]">
-              {rows.map((r) => (
+              {filtered.map((r, index) => (
                 <tr key={r.id} className="hover:bg-[#FAF9FC]">
-                  <td className="border-b border-[#F0EDF5] px-4 py-3">{r.id}</td>
+                  <td className="border-b border-[#F0EDF5] px-4 py-3">{index + 1}</td>
                   <td className="border-b border-[#F0EDF5] px-4 py-3">{r.name}</td>
                   <td className="border-b border-[#F0EDF5] px-4 py-3">{r.address}</td>
                   <td className="border-b border-[#F0EDF5] px-4 py-3">{r.hours}</td>
                   <td className="border-b border-[#F0EDF5] px-4 py-3">{r.phone}</td>
                   <td className="border-b border-[#F0EDF5] px-4 py-3 text-[#401B60] underline-offset-2 hover:underline">
-                    {r.technicians}
+                    {formatTechnicians(r.technicians)}
                   </td>
                   <td className="border-b border-[#F0EDF5] px-4 py-3">
                     {r.status === "Active" ? (
@@ -182,12 +329,20 @@ export default function TechnicianNetworkPage() {
                   </td>
                   <td className="border-b border-[#F0EDF5] px-4 py-3">
                     <div className="flex items-center gap-4 text-[#6F6C90]">
-                      <button title="Edit">
+                      <button
+                        onClick={() => handleEdit(r)}
+                        title="Edit"
+                        className="hover:text-[#3F205F]"
+                      >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                           <path d="M4 15.5V20h4.5L20 8.5 15.5 4 4 15.5Z" stroke="currentColor" strokeWidth="1.5" />
                         </svg>
                       </button>
-                      <button title="Delete" className="text-[#E05252]">
+                      <button
+                        onClick={() => handleDelete(r.id)}
+                        title="Delete"
+                        className="text-[#E05252] hover:text-[#B82723]"
+                      >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                           <path d="M6 7h12M9 7V5h6v2M8 7v12h8V7" stroke="currentColor" strokeWidth="1.5" />
                         </svg>
@@ -196,13 +351,26 @@ export default function TechnicianNetworkPage() {
                   </td>
                 </tr>
               ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="border-b border-[#F0EDF5] px-4 py-8 text-center text-[#6F6C90]">
+                    {query || statusFilter !== "All Type" ? "No stores found matching your filters." : "No stores yet. Add your first store!"}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
       {/* Wizard */}
-      <AddStoreWizard open={open} onClose={() => setOpen(false)} />
+      <AddStoreWizard
+        open={open}
+        onClose={handleCloseModal}
+        onCreate={handleCreate}
+        onUpdate={handleUpdate}
+        editingStore={editingStore}
+      />
     </div>
   );
 }

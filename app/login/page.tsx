@@ -70,9 +70,9 @@ export default function LoginPage() {
         if (res.token) setAuthToken(res.token);
         if (res.user) setAuthUser(res.user);
 
-        // Role-based redirect: admins go to /admin, customers to /dashboard
+        // Role-based redirect: admins and superAdmins go to /admin, customers to /dashboard
         const role = (res.user as any)?.role || "customer";
-        if (role === "admin") {
+        if (role === "admin" || role === "superAdmin") {
           router.push("/admin/dashboard");
         } else {
           router.push("/dashboard");

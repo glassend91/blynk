@@ -1,0 +1,156 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import type { HeroBlock } from "../types";
+import apiClient from "@/lib/apiClient";
+
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  pageKey: string;
+  initialValue: HeroBlock;
+  onSave: (value: HeroBlock) => void;
+};
+
+const fieldClass =
+  "w-full rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none placeholder-[#6F6C90] focus:border-[#6A1D99]";
+
+export default function HeroSectionModal({ open, onClose, pageKey, initialValue, onSave }: Props) {
+  const [headline, setHeadline] = useState(initialValue.headline || "");
+  const [subtitle, setSubtitle] = useState(initialValue.subtitle || "");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setHeadline(initialValue.headline || "");
+      setSubtitle(initialValue.subtitle || "");
+      setError(null);
+      setSubmitting(false);
+    }
+  }, [open, initialValue]);
+
+  if (!open) return null;
+
+  const handleSubmit = async () => {
+    if (!headline.trim()) {
+      setError("Headline is required.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const blockData = {
+        headline: headline.trim(),
+        subtitle: subtitle.trim(),
+      };
+
+      const { data } = await apiClient.patch<{ success: boolean; data: any }>(
+        `/website-content/${pageKey}/hero`,
+        blockData
+      );
+
+      if (data?.success) {
+        onSave(blockData);
+        onClose();
+        return;
+      }
+      setError("Failed to save changes. Please try again.");
+    } catch (err: any) {
+      setError(err?.message || "Failed to save changes. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      <div className="absolute left-1/2 top-1/2 max-h-[95vh] w-[600px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white p-6 shadow-2xl">
+        <div className="mb-1 flex items-center justify-between">
+          <div>
+            <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">Edit Content</p>
+            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">Hero Section</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="grid h-8 w-8 place-items-center rounded-full bg-[#F3E8FF] text-[#5B2DEE] hover:bg-[#E7D4FF]"
+            aria-label="Close modal"
+          >
+            ×
+          </button>
+        </div>
+
+        <p className="text-[14px] text-[#6F6C90]">
+          Update the hero section content that appears at the top of the page.
+        </p>
+
+        <div className="mt-6 space-y-5">
+          <Field label="Main Headline" required>
+            <input
+              value={headline}
+              onChange={(e) => setHeadline(e.target.value)}
+              placeholder="Fast, Reliable Internet & Mobile Plans"
+              className={fieldClass}
+            />
+          </Field>
+
+          <Field label="Hero Subtitle">
+            <input
+              value={subtitle}
+              onChange={(e) => setSubtitle(e.target.value)}
+              placeholder="Supporting text for the hero section"
+              className={fieldClass}
+            />
+          </Field>
+        </div>
+
+        {error && (
+          <div className="mt-4 rounded-[10px] border border-[#FCD1D2] bg-[#FFF5F5] px-4 py-3 text-[13px] text-[#C53030]">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center">
+          <button
+            onClick={onClose}
+            className="h-[46px] flex-1 rounded-[10px] border border-[#DFDBE3] bg-[#F8F8F8] text-[14px] font-semibold text-[#6F6C90] hover:bg-[#F1EEF8]"
+            disabled={submitting}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="h-[46px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitting ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  children,
+  required,
+}: {
+  label: string;
+  children: React.ReactNode;
+  required?: boolean;
+}) {
+  return (
+    <div className="space-y-2">
+      <label className="flex items-center gap-2 text-[13px] font-semibold text-[#0A0A0A]">
+        {label}
+        {required && <span className="text-[#E0342F]">*</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+

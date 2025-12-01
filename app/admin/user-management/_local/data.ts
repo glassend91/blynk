@@ -1,4 +1,5 @@
-export type Role = "Administrator" | "Support Manager" | "Content Editor" | "Technical Support";
+// Admin role label displayed in the UI – now dynamic from backend Roles
+export type Role = string;
 export type Status = "Active" | "Inactive" | "Pending";
 
 export type UserRow = {
@@ -56,12 +57,6 @@ export const initialUsers: UserRow[] = [
   },
 ];
 
-export const allRoles: Array<Role | "All Roles"> = [
-  "All Roles",
-  "Administrator",
-  "Support Manager",
-  "Content Editor",
-  "Technical Support",
-];
+export const allRoles: Array<Role | "All Roles"> = ["All Roles"];
 
 export const allStatuses: Array<Status | "All Status"> = ["All Status", "Active", "Inactive", "Pending"];

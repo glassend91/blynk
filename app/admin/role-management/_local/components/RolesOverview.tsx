@@ -9,8 +9,8 @@ export default function RolesOverview({
   onRemove,
 }: {
   roles: Role[];
-  onEdit: (id: number) => void;
-  onRemove: (id: number) => void;
+  onEdit: (id: string) => void;
+  onRemove: (id: string) => void;
 }) {
   return (
     <div className="grid gap-6 md:grid-cols-2">

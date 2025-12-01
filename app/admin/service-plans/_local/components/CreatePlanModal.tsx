@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { PlanRow, PlanType, PlanStatus } from "../types";
 import apiClient from "@/lib/apiClient";
+import { hasPermission } from "@/lib/permissions";
 
 type Props = {
   open: boolean;
@@ -61,6 +62,12 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
   if (!open) return null;
 
   const handleSubmit = async () => {
+    // Check permission before submitting
+    if (!hasPermission("plans.create")) {
+      setError("You do not have permission to create plans.");
+      return;
+    }
+
     if (!name.trim()) {
       setError("Plan name is required.");
       return;

@@ -1,10 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import StatusBadge from './StatusBadge';
 import ActionButtons from './ActionButtons';
+import apiClient from '@/lib/apiClient';
 
 type Row = {
-  id: number;
+  id: string;
   orderNumber: string;
   customer: string;
   email: string;
@@ -13,28 +15,54 @@ type Row = {
   orderDate: string; // yyyy-mm-dd
 };
 
-const rows: Row[] = [
-  {
-    id: 1,
-    orderNumber: 'SO-2024-0089',
-    customer: 'John Smith',
-    email: 'john.smith@email.com',
-    plan: 'Mobile 20GB',
-    status: 'Pending ICCID',
-    orderDate: '2024-02-15',
-  },
-  {
-    id: 2,
-    orderNumber: 'SO-2024-0090',
-    customer: 'Lisa Park',
-    email: 'lisa.park@email.com',
-    plan: 'Mobile Unlimited',
-    status: 'Awaiting Provisioning',
-    orderDate: '2024-02-16',
-  },
-];
-
 export default function OrdersTable() {
+  const [rows, setRows] = useState<Row[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await apiClient.get<{ success: boolean; data: Row[] }>('/sim-orders');
+      
+      if (data?.success && data.data) {
+        setRows(data.data);
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch orders:', err);
+      setError(err?.message || 'Failed to load SIM orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOrderUpdate = (updatedOrder: Row) => {
+    setRows((prev) =>
+      prev.map((r) => (r.id === updatedOrder.id ? updatedOrder : r))
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <p className="text-[16px] text-[#6F6C90]">Loading...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-[10px] border border-[#FCD1D2] bg-[#FFF5F5] px-4 py-3 text-[13px] text-[#C53030]">
+        {error}
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left">
@@ -61,9 +89,9 @@ export default function OrdersTable() {
         </thead>
 
         <tbody className="text-[14px] text-[#6F6C90]">
-          {rows.map((r) => (
+          {rows.map((r, index) => (
             <tr key={r.id} className="hover:bg-[#FBFAFD]">
-              <td className="border border-[#DFDBE3] px-4 py-4">{r.id}</td>
+              <td className="border border-[#DFDBE3] px-4 py-4">{index + 1}</td>
               <td className="border border-[#DFDBE3] px-4 py-4">
                 <span className="text-[#401B60]">{r.orderNumber}</span>
               </td>
@@ -74,13 +102,20 @@ export default function OrdersTable() {
                 <StatusBadge status={r.status} />
               </td>
               <td className="border border-[#DFDBE3] px-4 py-4">
-                {new Date(r.orderDate).toISOString().slice(0, 10)}
+                {r.orderDate}
               </td>
               <td className="border border-[#DFDBE3] px-4 py-4">
-                <ActionButtons row={r} />
+                <ActionButtons row={r} onUpdate={handleOrderUpdate} />
               </td>
             </tr>
           ))}
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={8} className="border border-[#DFDBE3] px-4 py-8 text-center text-[#6F6C90]">
+                No SIM orders found.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

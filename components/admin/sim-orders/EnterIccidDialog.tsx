@@ -1,12 +1,62 @@
 'use client';
 
+import { useState } from 'react';
+import apiClient from '@/lib/apiClient';
+
 type Props = {
   open: boolean;
   onClose: () => void;
-  order: { orderNumber: string };
+  order: { id: string; orderNumber: string };
+  onSuccess?: (order: any) => void;
 };
 
-export default function EnterIccidDialog({ open, onClose, order }: Props) {
+export default function EnterIccidDialog({ open, onClose, order, onSuccess }: Props) {
+  const [iccid, setIccid] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleClose = () => {
+    setIccid('');
+    setError(null);
+    setSubmitting(false);
+    onClose();
+  };
+
+  const handleSubmit = async () => {
+    if (!iccid.trim()) {
+      setError('ICCID is required');
+      return;
+    }
+
+    // Basic ICCID validation (should be numeric, typically 19-20 digits)
+    const cleanedIccid = iccid.replace(/\s/g, '');
+    if (!/^\d{19,20}$/.test(cleanedIccid)) {
+      setError('ICCID must be 19-20 digits');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const { data } = await apiClient.post<{ success: boolean; data: any }>(
+        `/sim-orders/${order.id}/enter-iccid`,
+        { iccid: cleanedIccid }
+      );
+
+      if (data?.success && data.data) {
+        onSuccess?.(data.data);
+        handleClose();
+      } else {
+        setError('Failed to enter ICCID. Please try again.');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to enter ICCID. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -17,9 +67,10 @@ export default function EnterIccidDialog({ open, onClose, order }: Props) {
             Enter ICCID
           </h3>
           <button
-            onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-full bg-[#F8F8F8]"
+            onClick={handleClose}
+            className="grid h-8 w-8 place-items-center rounded-full bg-[#F8F8F8] hover:bg-[#F0F0F0]"
             aria-label="close"
+            disabled={submitting}
           >
             ✕
           </button>
@@ -36,31 +87,46 @@ export default function EnterIccidDialog({ open, onClose, order }: Props) {
         <div className="space-y-4">
           <div>
             <label className="mb-2 block text-[14px] font-semibold text-[#0A0A0A]">
-              ICCID
+              ICCID <span className="text-[#E0342F]">*</span>
             </label>
             <input
               type="text"
+              value={iccid}
+              onChange={(e) => setIccid(e.target.value)}
               placeholder="e.g., 8961 2345 6789 0123 45"
-              className="w-full rounded-xl border border-[#DFDBE3] bg-white px-4 py-3 outline-none placeholder:text-[#B1AFBE] focus:ring-2 focus:ring-[#401B60]"
+              className="w-full rounded-xl border border-[#DFDBE3] bg-white px-4 py-3 outline-none placeholder:text-[#B1AFBE] focus:ring-2 focus:ring-[#401B60] disabled:opacity-50"
+              disabled={submitting}
             />
+            <p className="mt-1 text-[12px] text-[#6F6C90]">
+              Enter 19-20 digit ICCID (spaces will be removed automatically)
+            </p>
           </div>
         </div>
 
+        {error && (
+          <div className="mt-4 rounded-[10px] border border-[#FCD1D2] bg-[#FFF5F5] px-4 py-3 text-[13px] text-[#C53030]">
+            {error}
+          </div>
+        )}
+
         <div className="mt-6 flex items-center justify-end gap-3">
           <button
-            onClick={onClose}
-            className="rounded-md border border-[#DFDBE3] bg-white px-4 py-2 text-[14px] font-medium text-[#6F6C90]"
+            onClick={handleClose}
+            className="rounded-md border border-[#DFDBE3] bg-white px-4 py-2 text-[14px] font-medium text-[#6F6C90] hover:bg-[#F8F8F8] disabled:opacity-50"
+            disabled={submitting}
           >
             Cancel
           </button>
           <button
-            onClick={onClose}
-            className="rounded-md bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white"
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="rounded-md bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save
+            {submitting ? 'Saving...' : 'Save'}
           </button>
         </div>
       </div>
     </div>
   );
 }
+

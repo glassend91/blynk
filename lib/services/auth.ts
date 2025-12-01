@@ -92,3 +92,16 @@ export async function verifyOtp(email: string, code: string): Promise<VerifyOTPR
     return data;
 }
 
+export type CurrentUserResponse = {
+    user: any;
+    selectedPackages?: any[];
+};
+
+/**
+ * Get current user with fresh permissions from server
+ */
+export async function getCurrentUser(): Promise<CurrentUserResponse> {
+    const { data } = await apiClient.get<CurrentUserResponse>("/auth/me");
+    return data;
+}
+

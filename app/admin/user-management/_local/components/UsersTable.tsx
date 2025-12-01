@@ -1,6 +1,7 @@
 "use client";
 
 import { UserRow } from "../data";
+import { usePermission } from "@/lib/permissions";
 
 function StatusPill({ value }: { value: UserRow["status"] }) {
   const map = {
@@ -39,6 +40,9 @@ type Props = {
 };
 
 export default function UsersTable({ rows, onView, onEdit, onDelete }: Props) {
+  const canEdit = usePermission("user.edit");
+  const canDelete = usePermission("user.delete");
+
   return (
     <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-4">
       <div className="rounded-[12px] border border-[#E7E4EC]">
@@ -83,20 +87,26 @@ export default function UsersTable({ rows, onView, onEdit, onDelete }: Props) {
                       >
                         <IconView />
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => onEdit?.(r)}
-                        className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white"
-                      >
-                        <IconEdit />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onDelete?.(r)}
-                        className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white"
-                      >
-                        <IconTrash />
-                      </button>
+                      {canEdit && (
+                        <button
+                          type="button"
+                          onClick={() => onEdit?.(r)}
+                          className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white hover:bg-[#F8F8F8]"
+                          title="Edit user"
+                        >
+                          <IconEdit />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          type="button"
+                          onClick={() => onDelete?.(r)}
+                          className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white hover:bg-[#F8F8F8]"
+                          title="Delete user"
+                        >
+                          <IconTrash />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

@@ -7,6 +7,7 @@ import OverviewStats from "./_local/components/OverviewStats";
 import CreatePlanModal from "./_local/components/CreatePlanModal";
 import type { PlanRow, PlanType } from "./_local/types";
 import apiClient from "@/lib/apiClient";
+import { usePermission } from "@/lib/permissions";
 
 export default function ServicePlansPage() {
   const [query, setQuery] = useState("");
@@ -15,6 +16,7 @@ export default function ServicePlansPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
+  const canCreate = usePermission("plans.create");
 
   useEffect(() => {
     let ignore = false;
@@ -80,12 +82,14 @@ export default function ServicePlansPage() {
           <div className="text-[16px] font-semibold text-[#0A0A0A]">
             Service Plans
           </div>
-          <button
-            onClick={() => setOpenCreate(true)}
-            className="h-[40px] rounded-[8px] bg-[#401B60] px-4 text-[14px] font-semibold text-white"
-          >
-            Create Plan
-          </button>
+          {canCreate && (
+            <button
+              onClick={() => setOpenCreate(true)}
+              className="h-[40px] rounded-[8px] bg-[#401B60] px-4 text-[14px] font-semibold text-white hover:opacity-95"
+            >
+              Create Plan
+            </button>
+          )}
         </div>
 
         <TableHeader
@@ -110,17 +114,19 @@ export default function ServicePlansPage() {
 
       <OverviewStats {...stats} />
 
-      <CreatePlanModal
-        open={openCreate}
-        onClose={() => setOpenCreate(false)}
-        onCreate={(createdPlan) => {
-          setRows((prev) => {
-            const next = [createdPlan, ...prev];
-            return next.map((row, index) => ({ ...row, id: index + 1 }));
-          });
-          setOpenCreate(false);
-        }}
-      />
+      {canCreate && (
+        <CreatePlanModal
+          open={openCreate}
+          onClose={() => setOpenCreate(false)}
+          onCreate={(createdPlan) => {
+            setRows((prev) => {
+              const next = [createdPlan, ...prev];
+              return next.map((row, index) => ({ ...row, id: index + 1 }));
+            });
+            setOpenCreate(false);
+          }}
+        />
+      )}
     </section>
   );
 }

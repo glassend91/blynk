@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Role, UserRow } from "../data";
 import apiClient from "@/lib/apiClient";
+import { getRoles as getBackendRoles } from "@/lib/services/roles";
+import { hasPermission } from "@/lib/permissions";
 
 type Props = {
   open: boolean;
@@ -10,32 +12,64 @@ type Props = {
   onInvite: (u: UserRow) => void;
 };
 
-const roleOptions: Role[] = ["Administrator", "Support Manager", "Content Editor", "Technical Support"];
-
 export default function InviteUserModal({ open, onClose, onInvite }: Props) {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [role, setRole] = useState<Role>("Technical Support");
+  const [role, setRole] = useState<Role>("");
+  const [roleOptions, setRoleOptions] = useState<Role[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Reset form when modal closes
   useEffect(() => {
     if (!open) {
       setEmail("");
       setFirstName("");
       setLastName("");
-      setRole("Technical Support");
+      setRole("");
       setError(null);
       setSubmitting(false);
     }
   }, [open]);
 
+  // Load available roles from backend
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const roles = await getBackendRoles();
+        if (Array.isArray(roles) && roles.length > 0) {
+          const names = roles.map((r) => r.name as Role);
+          setRoleOptions(names);
+          setRole((current) => current || (names[0] ?? ""));
+        }
+      } catch (e) {
+        console.error("Failed to load roles for invite modal", e);
+      }
+    };
+
+    fetchRoles();
+  }, []);
+
   if (!open) return null;
 
+  // Check permission before allowing submission
+  const canInvite = hasPermission("user.invite");
+
   const handleSubmit = async () => {
+    // Permission check
+    if (!canInvite) {
+      setError("You don't have permission to invite users.");
+      return;
+    }
+
     if (!email.trim() || !firstName.trim() || !lastName.trim()) {
       setError("First name, last name, and email are required.");
+      return;
+    }
+
+    if (!role) {
+      setError("Please select a role.");
       return;
     }
 
@@ -46,7 +80,7 @@ export default function InviteUserModal({ open, onClose, onInvite }: Props) {
         email: email.trim(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        role,
+        subrole: role, // Send as 'subrole' to backend
       };
       const { data } = await apiClient.post<{ success: boolean; user: UserRow }>("/auth/createUserByAdmin", payload);
 
@@ -124,6 +158,9 @@ export default function InviteUserModal({ open, onClose, onInvite }: Props) {
               onChange={(e) => setRole(e.target.value as Role)}
               className="w-full appearance-none rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none"
             >
+              <option value="" disabled>
+                {roleOptions.length === 0 ? "Loading roles..." : "Select a role"}
+              </option>
               {roleOptions.map((r) => (
                 <option key={r} value={r}>
                   {r}

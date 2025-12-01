@@ -8,8 +8,8 @@ export default function RoleCard({
   onRemove,
 }: {
   role: Role;
-  onEdit: (id: number) => void;
-  onRemove: (id: number) => void;
+  onEdit: (id: string) => void;
+  onRemove: (id: string) => void;
 }) {
   return (
     <div className="rounded-[12.75px] border border-[#DFDBE3] bg-white p-5 shadow-[0_10px_24px_rgba(17,24,39,0.06)]">
@@ -32,7 +32,7 @@ export default function RoleCard({
         <div className="text-[12px] text-[#6F6C90]">{role.usersCount} users</div>
         <div className="flex gap-3">
           <button
-            onClick={() => onRemove(role.id)}
+            // onClick={() => onRemove(role.id)}
             className="grid h-[36px] w-[36px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white"
             title="Delete"
           >
