@@ -21,6 +21,7 @@ export type SignupPayload = {
         price: number;
     };
     billingAddress?: string;
+    customerType?: "residential" | "business";
 };
 
 export type SignupResponse = {

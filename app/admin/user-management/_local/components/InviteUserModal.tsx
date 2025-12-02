@@ -3,21 +3,21 @@
 import { useEffect, useState } from "react";
 import { Role, UserRow } from "../data";
 import apiClient from "@/lib/apiClient";
-import { getRoles as getBackendRoles } from "@/lib/services/roles";
 import { hasPermission } from "@/lib/permissions";
+import { Select } from "./TableHeader";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   onInvite: (u: UserRow) => void;
+  availableRoles: Role[];
 };
 
-export default function InviteUserModal({ open, onClose, onInvite }: Props) {
+export default function InviteUserModal({ open, onClose, onInvite, availableRoles }: Props) {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<Role>("");
-  const [roleOptions, setRoleOptions] = useState<Role[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -33,23 +33,12 @@ export default function InviteUserModal({ open, onClose, onInvite }: Props) {
     }
   }, [open]);
 
-  // Load available roles from backend
+  // Set initial role when roles are available
   useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const roles = await getBackendRoles();
-        if (Array.isArray(roles) && roles.length > 0) {
-          const names = roles.map((r) => r.name as Role);
-          setRoleOptions(names);
-          setRole((current) => current || (names[0] ?? ""));
-        }
-      } catch (e) {
-        console.error("Failed to load roles for invite modal", e);
-      }
-    };
-
-    fetchRoles();
-  }, []);
+    if (availableRoles.length > 0 && !role) {
+      setRole(availableRoles[0]);
+    }
+  }, [availableRoles, role]);
 
   if (!open) return null;
 
@@ -153,20 +142,20 @@ export default function InviteUserModal({ open, onClose, onInvite }: Props) {
 
           <div>
             <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">Initial Role</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
-              className="w-full appearance-none rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none"
-            >
-              <option value="" disabled>
-                {roleOptions.length === 0 ? "Loading roles..." : "Select a role"}
-              </option>
-              {roleOptions.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
+            {availableRoles.length === 0 ? (
+              <div className="flex h-[48px] items-center justify-between rounded-[10px] border border-[#DFDBE3] bg-white px-4 text-left text-[14px] font-medium text-[#6F6C90]">
+                Loading roles...
+              </div>
+            ) : (
+              <Select
+                label={role || "Select a role"}
+                value={role}
+                onChange={(v) => setRole(v as Role)}
+                options={availableRoles}
+                className="w-full"
+                openUp={true}
+              />
+            )}
           </div>
         </div>
 

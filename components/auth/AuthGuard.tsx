@@ -92,7 +92,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     if (checking || !ready) {
         return (
-            <div className="flex h-screen w-screen items-center justify-center">
+            <div className="fixed inset-0 flex items-center justify-center bg-[#F8F8F8] overflow-hidden">
                 <div className="text-center">
                     <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#401B60] border-r-transparent"></div>
                     <p className="text-[14px] text-[#6F6C90]">Checking permissions...</p>

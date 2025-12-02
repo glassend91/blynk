@@ -8,6 +8,7 @@ import InviteUserModal from "./_local/components/InviteUserModal";
 import { allStatuses, Role, Status, UserRow } from "./_local/data";
 import apiClient from "@/lib/apiClient";
 import { usePermission } from "@/lib/permissions";
+import { getRoles } from "@/lib/services/roles";
 
 export default function UserManagementPage() {
   const [query, setQuery] = useState("");
@@ -19,6 +20,7 @@ export default function UserManagementPage() {
   const canDelete = usePermission("user.delete");
   const [rows, setRows] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [viewUser, setViewUser] = useState<UserRow | null>(null);
   const [editUser, setEditUser] = useState<UserRow | null>(null);
   const [editName, setEditName] = useState("");
@@ -30,12 +32,21 @@ export default function UserManagementPage() {
   useEffect(() => {
     async function load() {
       try {
-        const { data } = await apiClient.get<{ success: boolean; users: UserRow[] }>("/auth/users");
-        if (data?.success && Array.isArray(data.users)) {
-          setRows(data.users);
+        const [usersResponse, rolesResponse] = await Promise.all([
+          apiClient.get<{ success: boolean; users: UserRow[] }>("/auth/users"),
+          getRoles().catch(() => []),
+        ]);
+
+        if (usersResponse.data?.success && Array.isArray(usersResponse.data.users)) {
+          setRows(usersResponse.data.users);
+        }
+
+        if (Array.isArray(rolesResponse) && rolesResponse.length > 0) {
+          const roleNames = rolesResponse.map((r) => r.name as Role);
+          setAvailableRoles(roleNames);
         }
       } catch (err) {
-        console.error("Failed to load users", err);
+        console.error("Failed to load users or roles", err);
         // Optional: if you still want a fallback, uncomment the next line
         // setRows(initialUsers);
       }
@@ -78,6 +89,7 @@ export default function UserManagementPage() {
         status={status}
         onStatus={setStatus}
         onInvite={canInvite ? () => setOpenInvite(true) : undefined}
+        availableRoles={availableRoles}
       />
 
       {/* Data table */}
@@ -112,6 +124,7 @@ export default function UserManagementPage() {
             });
             setOpenInvite(false);
           }}
+          availableRoles={availableRoles}
         />
       )}
 

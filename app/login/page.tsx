@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import AuthShell from "@/components/auth/AuthShell";
 import { useState, useRef, useEffect } from "react";
 import { login } from "@/lib/services/auth";
-import { setAuthToken, setAuthUser } from "@/lib/auth";
+import { setAuthToken, setAuthUser, getAuthToken, getAuthUser } from "@/lib/auth";
 import MbbSignupController from "@/components/mobile-broadband/MbbSignupController";
 import NbnSignupController from "@/components/nbn/NbnSignupController";
 import MobileVoiceSignupController from "@/components/mobile-voice/MobileVoiceSignupController";
@@ -18,6 +18,22 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [signupDropdownOpen, setSignupDropdownOpen] = useState(false);
   const signupDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = getAuthToken();
+    if (token) {
+      const user = getAuthUser<{ role?: string }>();
+      const role = user?.role || "customer";
+      
+      // Redirect based on role: admins and superAdmins go to /admin/dashboard, customers to /dashboard
+      if (role === "admin" || role === "superAdmin") {
+        router.replace("/admin/dashboard");
+      } else {
+        router.replace("/dashboard");
+      }
+    }
+  }, [router]);
 
   // Signup modal states
   const [openMbbFlow, setOpenMbbFlow] = useState(false);

@@ -72,6 +72,11 @@ export default function Sidebar({ width = 234 }: { width?: number }) {
         routes.forEach(route => {
           access[route] = canAccessRoute(route);
         });
+        // Customer Dashboard has access if user can access any of the customer-related routes
+        access["/admin/customer-dashboard"] =
+          canAccessRoute("/admin/customer-verification") ||
+          canAccessRoute("/admin/customer-notes") ||
+          canAccessRoute("/admin/customer-plans");
         setRouteAccess(access);
       }
     };
@@ -149,9 +154,7 @@ export default function Sidebar({ width = 234 }: { width?: number }) {
           <Item label="Technician Network" href="/admin/technician-network" show={mounted ? (routeAccess["/admin/technician-network"] ?? true) : true} />
           <Item label="SIM Orders" href="/admin/sim-orders" show={mounted ? (routeAccess["/admin/sim-orders"] ?? true) : true} />
           <Item label="Support Tickets" href="/admin/support-tickets" show={mounted ? (routeAccess["/admin/support-tickets"] ?? true) : true} />
-          <Item label="Customer Verification" href="/admin/customer-verification" show={mounted ? (routeAccess["/admin/customer-verification"] ?? true) : true} />
-          <Item label="Customer Notes" href="/admin/customer-notes" show={mounted ? (routeAccess["/admin/customer-notes"] ?? true) : true} />
-          <Item label="Customer Plans" href="/admin/customer-plans" show={mounted ? (routeAccess["/admin/customer-plans"] ?? true) : true} />
+          <Item label="Customer Dashboard" href="/admin/customer-dashboard" show={mounted ? (routeAccess["/admin/customer-dashboard"] ?? true) : true} />
         </Section>
 
         <Section title="System">
