@@ -16,7 +16,6 @@ export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is logged in
     const token = getAuthToken();
     if (token) {
       // Get user role to determine redirect destination
