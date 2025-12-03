@@ -47,10 +47,19 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
       });
 
       if (data?.success) {
-        setFinancialData(data.data || data.financial || {
-          accountBalance: 0,
-          autoPayStatus: "Inactive",
-        });
+        let financial: FinancialData;
+
+        if ('data' in data) {
+          financial = data.data;
+        } else if ('financial' in data) {
+          financial = data.financial;
+        } else {
+          financial = {
+            accountBalance: 0,
+            autoPayStatus: "Inactive",
+          };
+        }
+        setFinancialData(financial);
       } else {
         // Default values if API doesn't return data
         setFinancialData({
