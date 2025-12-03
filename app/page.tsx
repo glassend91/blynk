@@ -22,7 +22,6 @@ export default function Page() {
       const user = getAuthUser<{ role?: string }>();
       const role = user?.role || "customer";
       
-      // Redirect based on role: admins and superAdmins go to /admin/dashboard, customers to /dashboard
       if (role === "admin" || role === "superAdmin") {
         router.replace("/admin/dashboard");
       } else {
