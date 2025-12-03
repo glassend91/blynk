@@ -1,5 +1,5 @@
-export type Priority = "High" | "Medium" | "Low";
-export type Status = "Open" | "In Progress" | "Resolved" | "Closed";
+export type Priority = "Critical" | "High" | "Medium" | "Low";
+export type Status = "Open" | "In Progress" | "Pending Customer" | "Resolved" | "Closed" | "Cancelled";
 
 export interface Ticket {
   id: string;           // e.g. ST-2024-0156

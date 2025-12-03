@@ -1,8 +1,9 @@
-export type PlanType = "NBN" | "Mobile";
+export type PlanType = "NBN" | "Mobile" | "Data Only" | "Voice Only";
 export type PlanStatus = "Published" | "Draft";
 
 export type PlanRow = {
   id: number;
+  serviceId?: string;
   name: string;
   details: string;
   type: PlanType;

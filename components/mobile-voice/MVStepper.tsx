@@ -2,12 +2,13 @@
 
 const STEPS = [
   "Plan Selection",
-  "Number Selection",
-  "SIM Type",
-  "ID Check",
-  "Customer Details",
-  "Payment",
-  "Agreement",
+  "SIM Selection",
+  "Choose Your Number",
+  "Select a New Number",
+  "Customer & Porting Details",
+  "ID Verification",
+  "Payment & Agreement",
+  "Confirmation",
 ];
 
 export default function MVStepper({ active }: { active: number }) {

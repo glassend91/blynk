@@ -1,15 +1,41 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { seedTestimonials, servicePlans } from "./_local/data";
+import { useEffect, useMemo, useState } from "react";
+import { servicePlans } from "./_local/data";
 import type { Testimonial } from "./_local/types";
 import TestimonialCard from "./_local/components/TestimonialCard";
 import AddTestimonialModal from "./_local/components/AddTestimonialModal";
+import apiClient from "@/lib/apiClient";
 
 export default function TestimonialsPage() {
-  const [rows, setRows] = useState<Testimonial[]>(seedTestimonials);
+  const [rows, setRows] = useState<Testimonial[]>([]);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch testimonials on mount
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
+  const fetchTestimonials = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await apiClient.get<{ success: boolean; data: Testimonial[] }>("/testimonials");
+
+      if (data?.success && data.data) {
+        setRows(data.data);
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch testimonials:", err);
+      setError(err?.message || "Failed to load testimonials");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -23,6 +49,72 @@ export default function TestimonialsPage() {
     );
   }, [rows, query]);
 
+  const handleCreate = (testimonial: Testimonial) => {
+    setRows((prev) => [testimonial, ...prev]);
+    setOpen(false);
+  };
+
+  const handleUpdate = (updatedTestimonial: Testimonial) => {
+    setRows((prev) =>
+      prev.map((t) => (t.id === updatedTestimonial.id ? updatedTestimonial : t))
+    );
+    setEditingTestimonial(null);
+    setOpen(false);
+  };
+
+  const handleEdit = (testimonial: Testimonial) => {
+    setEditingTestimonial(testimonial);
+    setOpen(true);
+  };
+
+  const handleDelete = async (id: string | number) => {
+    if (!confirm("Are you sure you want to delete this testimonial?")) {
+      return;
+    }
+
+    try {
+      const { data } = await apiClient.delete<{ success: boolean }>(`/testimonials/${id}`);
+
+      if (data?.success) {
+        setRows((prev) => prev.filter((r) => r.id !== id));
+      } else {
+        alert("Failed to delete testimonial. Please try again.");
+      }
+    } catch (err: any) {
+      alert(err?.message || "Failed to delete testimonial. Please try again.");
+    }
+  };
+
+  const handleCloseModal = () => {
+    setOpen(false);
+    setEditingTestimonial(null);
+  };
+
+  const handleOpenModal = () => {
+    setEditingTestimonial(null);
+    setOpen(true);
+  };
+
+  if (loading) {
+    return (
+      <section className="space-y-6">
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="text-[26px] font-bold leading-[28px] text-[#0A0A0A]">
+              Customer Testimonials
+            </h1>
+            <p className="text-[16px] leading-[21px] text-[#6F6C90]">
+              Manage customer reviews and testimonials for your website
+            </p>
+          </div>
+        </header>
+        <div className="flex items-center justify-center py-12">
+          <p className="text-[16px] text-[#6F6C90]">Loading...</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="space-y-6">
       <header className="flex items-center justify-between">
@@ -35,12 +127,18 @@ export default function TestimonialsPage() {
           </p>
         </div>
         <button
-          onClick={() => setOpen(true)}
-          className="h-[40px] rounded-[8px] bg-[#401B60] px-4 text-[14px] font-semibold text-white"
+          onClick={handleOpenModal}
+          className="h-[40px] rounded-[8px] bg-[#401B60] px-4 text-[14px] font-semibold text-white hover:opacity-95"
         >
           Add Testimonial
         </button>
       </header>
+
+      {error && (
+        <div className="rounded-[10px] border border-[#FCD1D2] bg-[#FFF5F5] px-4 py-3 text-[13px] text-[#C53030]">
+          {error}
+        </div>
+      )}
 
       <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-5">
         <div className="mb-4 flex w-full max-w-[380px] items-center gap-3 rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3">
@@ -61,13 +159,13 @@ export default function TestimonialsPage() {
             <TestimonialCard
               key={t.id}
               t={t}
-              onEdit={() => setOpen(true)} // placeholder; wire to edit modal if needed
-              onDelete={() => setRows((prev) => prev.filter((r) => r.id !== t.id))}
+              onEdit={() => handleEdit(t)}
+              onDelete={() => handleDelete(t.id)}
             />
           ))}
           {filtered.length === 0 && (
             <div className="rounded-[12px] border border-[#E7E4EC] p-8 text-center text-[14px] text-[#6F6C90]">
-              No testimonials found.
+              {query ? "No testimonials found matching your search." : "No testimonials yet. Add your first testimonial!"}
             </div>
           )}
         </div>
@@ -76,18 +174,10 @@ export default function TestimonialsPage() {
       <AddTestimonialModal
         open={open}
         plans={servicePlans}
-        onClose={() => setOpen(false)}
-        onCreate={(data) => {
-          setRows((prev) => [
-            {
-              id: prev.length ? Math.max(...prev.map((x) => x.id)) + 1 : 1,
-              createdAt: new Date().toISOString(),
-              ...data,
-            },
-            ...prev,
-          ]);
-          setOpen(false);
-        }}
+        onClose={handleCloseModal}
+        onCreate={handleCreate}
+        onUpdate={handleUpdate}
+        editingTestimonial={editingTestimonial}
       />
     </section>
   );

@@ -1,12 +1,50 @@
 'use client';
 
+import { useState } from 'react';
+import apiClient from '@/lib/apiClient';
+
 type Props = {
   open: boolean;
   onClose: () => void;
-  order: { orderNumber: string; customer?: string };
+  order: { id: string; orderNumber: string; customer?: string };
+  onSuccess?: (order: any) => void;
 };
 
-export default function ProvisionDialog({ open, onClose, order }: Props) {
+export default function ProvisionDialog({ open, onClose, order, onSuccess }: Props) {
+  const [provisioningNotes, setProvisioningNotes] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleClose = () => {
+    setProvisioningNotes('');
+    setError(null);
+    setSubmitting(false);
+    onClose();
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const { data } = await apiClient.post<{ success: boolean; data: any }>(
+        `/sim-orders/${order.id}/provision`,
+        { provisioningNotes: provisioningNotes.trim() || undefined }
+      );
+
+      if (data?.success && data.data) {
+        onSuccess?.(data.data);
+        handleClose();
+      } else {
+        setError('Failed to provision order. Please try again.');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to provision order. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -17,9 +55,10 @@ export default function ProvisionDialog({ open, onClose, order }: Props) {
             Provision SIM
           </h3>
           <button
-            onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-full bg-[#F8F8F8]"
+            onClick={handleClose}
+            className="grid h-8 w-8 place-items-center rounded-full bg-[#F8F8F8] hover:bg-[#F0F0F0]"
             aria-label="close"
+            disabled={submitting}
           >
             ✕
           </button>
@@ -39,24 +78,35 @@ export default function ProvisionDialog({ open, onClose, order }: Props) {
               Provisioning Notes (optional)
             </label>
             <textarea
-              className="h-28 w-full resize-none rounded-xl border border-[#DFDBE3] bg-white px-4 py-3 outline-none placeholder:text-[#B1AFBE] focus:ring-2 focus:ring-[#401B60]"
+              value={provisioningNotes}
+              onChange={(e) => setProvisioningNotes(e.target.value)}
+              className="h-28 w-full resize-none rounded-xl border border-[#DFDBE3] bg-white px-4 py-3 outline-none placeholder:text-[#B1AFBE] focus:ring-2 focus:ring-[#401B60] disabled:opacity-50"
               placeholder="Any details to record with this provisioning…"
+              disabled={submitting}
             />
           </div>
         </div>
 
+        {error && (
+          <div className="mt-4 rounded-[10px] border border-[#FCD1D2] bg-[#FFF5F5] px-4 py-3 text-[13px] text-[#C53030]">
+            {error}
+          </div>
+        )}
+
         <div className="mt-6 flex items-center justify-end gap-3">
           <button
-            onClick={onClose}
-            className="rounded-md border border-[#DFDBE3] bg-white px-4 py-2 text-[14px] font-medium text-[#6F6C90]"
+            onClick={handleClose}
+            className="rounded-md border border-[#DFDBE3] bg-white px-4 py-2 text-[14px] font-medium text-[#6F6C90] hover:bg-[#F8F8F8] disabled:opacity-50"
+            disabled={submitting}
           >
             Cancel
           </button>
           <button
-            onClick={onClose}
-            className="rounded-md bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white"
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="rounded-md bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Provision
+            {submitting ? 'Provisioning...' : 'Provision'}
           </button>
         </div>
       </div>

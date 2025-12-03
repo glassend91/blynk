@@ -30,7 +30,6 @@ export default function MobileVoiceSignup2({
         setLoading(true);
         setError(null);
         // Call GET /api/v1/mobile/reserve/numbers
-        // Note: Adjust the endpoint based on your backend structure
         const response = await apiClient.get("/v1/mobile/reserve/numbers");
         // Assuming the API returns { numbers: string[] } or similar
         const availableNumbers = response.data?.numbers || response.data || [];
@@ -77,16 +76,16 @@ export default function MobileVoiceSignup2({
             <p className="text-sm text-red-600">{error}</p>
           </div>
         ) : (
-          <div className="mx-auto mt-8 max-w-[720px] space-y-4">
-            {numbers.map((n, i) => (
-              <label
-                key={n}
-                className={[
+        <div className="mx-auto mt-8 max-w-[720px] space-y-4">
+          {numbers.map((n, i) => (
+            <label
+              key={n}
+              className={[
                   "flex cursor-pointer items-center justify-between rounded-[12px] border px-5 py-4 transition-all",
                   selectedNumber === n ? "border-2 border-[#5C3B86] bg-[#FBF8FF]" : "border border-[#DFDBE3] hover:border-[#5C3B86]/50",
-                  "bg-white shadow-[0_40px_60px_rgba(0,0,0,0.06)]",
-                ].join(" ")}
-              >
+                "bg-white shadow-[0_40px_60px_rgba(0,0,0,0.06)]",
+              ].join(" ")}
+            >
                 <span className="text-[15px] font-medium text-[#2E2745]">{n}</span>
                 <input
                   type="radio"
@@ -95,21 +94,21 @@ export default function MobileVoiceSignup2({
                   onChange={() => onChangeSelectedNumber(n)}
                   className="sr-only"
                 />
-                <span
-                  className={[
+              <span
+                className={[
                     "grid h-5 w-5 place-items-center rounded-full border-2",
                     selectedNumber === n ? "border-[#5C3B86] bg-[#5C3B86]" : "border-[#CFC8DA]",
-                  ].join(" ")}
-                >
+                ].join(" ")}
+              >
                   {selectedNumber === n && (
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                       <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   )}
-                </span>
-              </label>
-            ))}
-          </div>
+              </span>
+            </label>
+          ))}
+        </div>
         )}
       </SectionPanel>
 

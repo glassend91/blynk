@@ -1,6 +1,7 @@
 "use client";
 
 import { UserRow } from "../data";
+import { usePermission } from "@/lib/permissions";
 
 function StatusPill({ value }: { value: UserRow["status"] }) {
   const map = {
@@ -31,7 +32,17 @@ const IconView = () => (
   </svg>
 );
 
-export default function UsersTable({ rows }: { rows: UserRow[] }) {
+type Props = {
+  rows: UserRow[];
+  onView?: (user: UserRow) => void;
+  onEdit?: (user: UserRow) => void;
+  onDelete?: (user: UserRow) => void;
+};
+
+export default function UsersTable({ rows, onView, onEdit, onDelete }: Props) {
+  const canEdit = usePermission("user.edit");
+  const canDelete = usePermission("user.delete");
+
   return (
     <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-4">
       <div className="rounded-[12px] border border-[#E7E4EC]">
@@ -42,6 +53,7 @@ export default function UsersTable({ rows }: { rows: UserRow[] }) {
                 <th className="w-[56px]">#</th>
                 <th>User</th>
                 <th>Email</th>
+                <th>Type</th>
                 <th>Role</th>
                 <th>Status</th>
                 <th>Last Login</th>
@@ -59,6 +71,7 @@ export default function UsersTable({ rows }: { rows: UserRow[] }) {
                     </a>
                   </td>
                   <td className="text-[#6F6C90]">{r.email}</td>
+                  <td className="text-[#6F6C90]">{r.type || "-"}</td>
                   <td className="text-[#6F6C90]">{r.role}</td>
                   <td>
                     <StatusPill value={r.status} />
@@ -67,22 +80,40 @@ export default function UsersTable({ rows }: { rows: UserRow[] }) {
                   <td className="text-[#6F6C90]">{r.created}</td>
                   <td>
                     <div className="flex items-center justify-center gap-3">
-                      <button className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white">
+                      <button
+                        type="button"
+                        onClick={() => onView?.(r)}
+                        className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white"
+                      >
                         <IconView />
                       </button>
-                      <button className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white">
-                        <IconEdit />
-                      </button>
-                      <button className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white">
-                        <IconTrash />
-                      </button>
+                      {canEdit && (
+                        <button
+                          type="button"
+                          onClick={() => onEdit?.(r)}
+                          className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white hover:bg-[#F8F8F8]"
+                          title="Edit user"
+                        >
+                          <IconEdit />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          type="button"
+                          onClick={() => onDelete?.(r)}
+                          className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white hover:bg-[#F8F8F8]"
+                          title="Delete user"
+                        >
+                          <IconTrash />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
               ))}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-[14px] text-[#6F6C90]">
+                  <td colSpan={9} className="px-4 py-10 text-center text-[14px] text-[#6F6C90]">
                     No users found.
                   </td>
                 </tr>

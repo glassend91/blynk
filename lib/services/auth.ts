@@ -21,6 +21,7 @@ export type SignupPayload = {
         price: number;
     };
     billingAddress?: string;
+    customerType?: "residential" | "business";
 };
 
 export type SignupResponse = {
@@ -89,6 +90,19 @@ export type VerifyOTPResponse = {
 
 export async function verifyOtp(email: string, code: string): Promise<VerifyOTPResponse> {
     const { data } = await apiClient.post<VerifyOTPResponse>("/auth/otp/verify", { email, code });
+    return data;
+}
+
+export type CurrentUserResponse = {
+    user: any;
+    selectedPackages?: any[];
+};
+
+/**
+ * Get current user with fresh permissions from server
+ */
+export async function getCurrentUser(): Promise<CurrentUserResponse> {
+    const { data } = await apiClient.get<CurrentUserResponse>("/auth/me");
     return data;
 }
 

@@ -1,19 +1,113 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Tabs from "./_local/components/Tabs";
 import RolesOverview from "./_local/components/RolesOverview";
 import PermissionMatrix from "./_local/components/PermissionMatrix";
 import CreateRoleModal from "./_local/components/CreateRoleModal";
 import { rolesSeed, permissionGroups } from "./_local/data";
 import type { Role } from "./_local/types";
+import { createRole, deleteRole, getRoles, updateRole } from "@/lib/services/roles";
+import { refreshAuthUser } from "@/lib/auth";
 
 export default function RoleManagementPage() {
   const [tab, setTab] = useState<"overview" | "matrix">("overview");
   const [roles, setRoles] = useState<Role[]>(rolesSeed);
   const [openCreate, setOpenCreate] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const matrix = useMemo(() => permissionGroups, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchRoles = async () => {
+      try {
+        setLoading(true);
+        const data = await getRoles();
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setRoles(data);
+        }
+      } catch (e) {
+        console.error("Failed to load roles", e);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchRoles();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteRole(id);
+      setRoles((prev) => prev.filter((r) => r.id !== id));
+    } catch (e) {
+      console.error("Failed to delete role", e);
+    }
+  };
+
+  const handleCreate = async (role: Omit<Role, "id">) => {
+    try {
+      const created = await createRole(role);
+      setRoles((prev) => [created, ...prev]);
+      setOpenCreate(false);
+    } catch (e) {
+      console.error("Failed to create role", e);
+    }
+  };
+
+  const handlePermissionToggle = async (roleId: string, permissionKey: string, value: boolean) => {
+    try {
+      // Find the role to update
+      const role = roles.find((r) => r.id === roleId);
+      if (!role) return;
+
+      // Update permissions object
+      const updatedPermissions = {
+        ...role.permissions,
+        [permissionKey]: value,
+      };
+
+      // Optimistically update UI
+      setRoles((prev) =>
+        prev.map((r) =>
+          r.id === roleId
+            ? { ...r, permissions: updatedPermissions }
+            : r
+        )
+      );
+
+      // Update on backend
+      await updateRole(roleId, { permissions: updatedPermissions });
+
+      // Refresh current user's permissions immediately after role update
+      // This ensures permissions are updated in real-time without logout/login
+      try {
+        await refreshAuthUser();
+        // Force a small delay to ensure localStorage is updated
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } catch (refreshError) {
+        console.error("Failed to refresh user permissions after role update:", refreshError);
+      }
+    } catch (e) {
+      console.error("Failed to update permission", e);
+      // Revert on error - reload roles from server
+      try {
+        const data = await getRoles();
+        if (Array.isArray(data) && data.length > 0) {
+          setRoles(data);
+        }
+      } catch (reloadError) {
+        console.error("Failed to reload roles after error", reloadError);
+      }
+    }
+  };
 
   return (
     <section className="space-y-6">
@@ -45,21 +139,22 @@ export default function RoleManagementPage() {
         {tab === "overview" ? (
           <RolesOverview
             roles={roles}
-            onEdit={(id) => setTab("matrix")}
-            onRemove={(id) => setRoles((prev) => prev.filter((r) => r.id !== id))}
+            onEdit={() => setTab("matrix")}
+            onRemove={handleDelete}
           />
         ) : (
-          <PermissionMatrix roles={roles} groups={matrix} />
+          <PermissionMatrix
+            roles={roles}
+            groups={matrix}
+            onPermissionToggle={handlePermissionToggle}
+          />
         )}
       </div>
 
       <CreateRoleModal
         open={openCreate}
         onClose={() => setOpenCreate(false)}
-        onCreate={(role) => {
-          setRoles((prev) => [{ ...role, id: prev.length + 1 }, ...prev]);
-          setOpenCreate(false);
-        }}
+        onCreate={handleCreate}
         groups={matrix}
       />
     </section>

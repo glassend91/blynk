@@ -6,8 +6,7 @@ const LABELS = [
   "Add-on Selection",
   "Business Details",
   "ID Check",
-  "Payment",
-  "Agreement",
+  "Payment & Agreement",
 ];
 
 export default function BsmStepper({ active }: { active: number }) {

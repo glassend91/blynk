@@ -2,16 +2,26 @@
 
 import type { PermissionGroup, Role } from "../types";
 
-function Tick({ on, faint = false }: { on: boolean; faint?: boolean }) {
+function Tick({
+  on,
+  faint = false,
+  onClick
+}: {
+  on: boolean;
+  faint?: boolean;
+  onClick?: () => void;
+}) {
   return (
     <div
+      onClick={onClick}
       className={[
-        "mx-auto h-[22px] w-[22px] rounded-[6px] border",
+        "mx-auto h-[22px] w-[22px] rounded-[6px] border transition-colors",
+        onClick ? "cursor-pointer hover:opacity-80" : "",
         on
           ? "border-[#19BF66] bg-[#E9FBF2]"
           : faint
-          ? "border-[#E7E4EC] bg-[#F8F8F8]"
-          : "border-[#E7E4EC] bg-white",
+            ? "border-[#E7E4EC] bg-[#F8F8F8]"
+            : "border-[#E7E4EC] bg-white",
       ].join(" ")}
     >
       {on && (
@@ -26,9 +36,11 @@ function Tick({ on, faint = false }: { on: boolean; faint?: boolean }) {
 export default function PermissionMatrix({
   groups,
   roles,
+  onPermissionToggle,
 }: {
   groups: PermissionGroup[];
   roles: Role[];
+  onPermissionToggle?: (roleId: string, permissionKey: string, value: boolean) => void;
 }) {
   return (
     <div className="space-y-6">
@@ -63,7 +75,11 @@ export default function PermissionMatrix({
                     </td>
                     {roles.map((r) => (
                       <td key={r.id} className="text-center">
-                        <Tick on={!!r.permissions[it.key]} faint />
+                        <Tick
+                          on={!!r.permissions[it.key]}
+                          faint
+                          onClick={() => onPermissionToggle?.(r.id, it.key, !r.permissions[it.key])}
+                        />
                       </td>
                     ))}
                   </tr>

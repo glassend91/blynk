@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { clearAuthToken } from "@/lib/auth";
+import { useEffect, useState } from "react";
+import { clearAuthToken, getAuthUser } from "@/lib/auth";
+import { canAccessRoute } from "@/lib/permissions";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -15,11 +17,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Item({ label, href }: { label: string; href: string }) {
+function Item({ label, href, show = true }: { label: string; href: string; show?: boolean }) {
   const pathname = usePathname();
 
   // Active if exact match OR user is in a nested route under this href
   const isActive = pathname === href || pathname.startsWith(href + "/");
+
+  if (!show) return null;
 
   return (
     <Link
@@ -37,6 +41,72 @@ function Item({ label, href }: { label: string; href: string }) {
 
 export default function Sidebar({ width = 234 }: { width?: number }) {
   const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
+  const [routeAccess, setRouteAccess] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setMounted(true);
+    const loadUser = () => {
+      const u = getAuthUser();
+      setUser(u);
+
+      // Calculate route access after user is loaded
+      if (u) {
+        const access: Record<string, boolean> = {};
+        const routes = [
+          "/admin/dashboard",
+          "/admin/user-management",
+          "/admin/role-management",
+          "/admin/service-plans",
+          "/admin/website-content",
+          "/admin/testimonials",
+          "/admin/technician-network",
+          "/admin/sim-orders",
+          "/admin/support-tickets",
+          "/admin/customer-verification",
+          "/admin/customer-notes",
+          "/admin/customer-plans",
+          "/admin/system-settings",
+        ];
+        routes.forEach(route => {
+          access[route] = canAccessRoute(route);
+        });
+        // Customer Dashboard has access if user can access any of the customer-related routes
+        access["/admin/customer-dashboard"] =
+          canAccessRoute("/admin/customer-verification") ||
+          canAccessRoute("/admin/customer-notes") ||
+          canAccessRoute("/admin/customer-plans");
+        setRouteAccess(access);
+      }
+    };
+    loadUser();
+
+    // Listen for storage changes and custom refresh events
+    const handleStorageChange = (e: StorageEvent | CustomEvent) => {
+      if (e instanceof StorageEvent && e.key === 'auth_user') {
+        loadUser();
+      } else if (e instanceof CustomEvent && e.type === 'authUserRefreshed') {
+        loadUser();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange as EventListener);
+    window.addEventListener('authUserRefreshed', handleStorageChange as EventListener);
+
+    // Refresh permissions periodically (every 30 seconds)
+    const interval = setInterval(() => {
+      const { refreshAuthUser } = require("@/lib/auth");
+      refreshAuthUser().catch(() => { });
+    }, 30000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange as EventListener);
+      window.removeEventListener('authUserRefreshed', handleStorageChange as EventListener);
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <aside
       className="fixed left-0 top-0 z-40 h-screen border-r border-[#DFDBE3] bg-white"
@@ -54,31 +124,41 @@ export default function Sidebar({ width = 234 }: { width?: number }) {
       {/* Sections */}
       <div className="flex h-[calc(100%-153px)] flex-col gap-6 overflow-auto px-[1px] py-[18px]">
         <Section title="Overview">
-          <Item label="Dashboard" href="/admin/dashboard" />
+          <Item
+            label="Dashboard"
+            href="/admin/dashboard"
+            show={mounted ? (routeAccess["/admin/dashboard"] ?? true) : true}
+          />
         </Section>
 
         <Section title="Management">
-          <Item label="User Management" href="/admin/user-management" />
-          <Item label="Role Management" href="/admin/role-management" />
+          <Item
+            label="User Management"
+            href="/admin/user-management"
+            show={mounted ? (routeAccess["/admin/user-management"] ?? true) : true}
+          />
+          <Item
+            label="Role Management"
+            href="/admin/role-management"
+            show={mounted ? (routeAccess["/admin/role-management"] ?? true) : true}
+          />
         </Section>
 
         <Section title="Content">
-          <Item label="Service Plan" href="/admin/service-plans" />
-          <Item label="Website Content" href="/admin/website-content" />
-          <Item label="Testimonial" href="/admin/testimonials" />
+          <Item label="Service Plan" href="/admin/service-plans" show={mounted ? (routeAccess["/admin/service-plans"] ?? true) : true} />
+          <Item label="Website Content" href="/admin/website-content" show={mounted ? (routeAccess["/admin/website-content"] ?? true) : true} />
+          <Item label="Testimonial" href="/admin/testimonials" show={mounted ? (routeAccess["/admin/testimonials"] ?? true) : true} />
         </Section>
 
         <Section title="Operations">
-          <Item label="Technician Network" href="/admin/technician-network" />
-          <Item label="SIM Orders" href="/admin/sim-orders" />
-          <Item label="Support Tickets" href="/admin/support-tickets" />
-          <Item label="Customer Verification" href="/admin/customer-verification" />
-          <Item label="Customer Notes" href="/admin/customer-notes" />
-          <Item label="Customer Plans" href="/admin/customer-plans" />
+          <Item label="Technician Network" href="/admin/technician-network" show={mounted ? (routeAccess["/admin/technician-network"] ?? true) : true} />
+          <Item label="SIM Orders" href="/admin/sim-orders" show={mounted ? (routeAccess["/admin/sim-orders"] ?? true) : true} />
+          <Item label="Support Tickets" href="/admin/support-tickets" show={mounted ? (routeAccess["/admin/support-tickets"] ?? true) : true} />
+          <Item label="Customer Dashboard" href="/admin/customer-dashboard" show={mounted ? (routeAccess["/admin/customer-dashboard"] ?? true) : true} />
         </Section>
 
         <Section title="System">
-          <Item label="System Settings" href="/admin/system-settings" />
+          <Item label="System Settings" href="/admin/system-settings" show={mounted ? (routeAccess["/admin/system-settings"] ?? true) : true} />
         </Section>
       </div>
 

@@ -93,7 +93,7 @@ export default function MobileBroadbandSignup1({
                   {!isSelected && (
                     <span className="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#CFC6DC]">
                       <span className="h-2.5 w-2.5 rounded-full bg-transparent" />
-                    </span>
+                  </span>
                   )}
                 </div>
 

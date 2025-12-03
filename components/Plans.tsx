@@ -17,19 +17,19 @@ export default function Plans() {
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#401B60b3] to-[#190A2FF2]" />
 
-      <div className="relative z-10 mx-auto max-w-[1434px] px-6 py-[150px] flex flex-col items-center gap-[70px]">
+      <div className="relative z-10 mx-auto max-w-[1434px] px-4 md:px-6 py-16 md:py-[150px] flex flex-col items-center gap-10 md:gap-[70px]">
         {/* Title */}
         <div className="flex flex-col items-center gap-4 text-center max-w-[702px]">
-          <h2 className="text-white text-[48px] leading-[72px] font-bold">
+          <h2 className="text-white text-[28px] leading-[40px] md:text-[48px] md:leading-[72px] font-bold">
             Simple Plans, Powerful Support
           </h2>
-          <p className="text-white text-[18px] leading-[27px] font-normal">
+          <p className="text-white text-[16px] leading-[24px] md:text-[18px] md:leading-[27px] font-normal">
             We’ve stripped away the confusing bundles and hidden fees. Just simple NBN and Mobile plans with the freedom of no lock-in contracts. It’s connectivity that’s easy to choose and even easier to use.
           </p>
         </div>
 
         {/* Plans cards */}
-        <div className="flex flex-col md:flex-row items-center gap-[51px]">
+        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-[51px]">
           <PlanCard
             icon={NBN}
             title="NBN Internet"
@@ -99,7 +99,7 @@ function PlanCard({
   buttonText,
 }: PlanCardProps) {
   return (
-    <div className="w-[560px] flex flex-col  gap-6 rounded-[30px] border border-white/20 bg-[rgba(19,2,33,0.7)] px-[50px] py-[50px] backdrop-blur-[0.5px]">
+    <div className="w-full max-w-[560px] flex flex-col gap-6 rounded-[30px] border border-white/20 bg-[rgba(19,2,33,0.7)] px-4 py-6 md:px-[50px] md:py-[50px] backdrop-blur-[0.5px]">
       {/* Icon */}
       <div className="flex items-center m-auto justify-center p-4 rounded-[16px] bg-white">
         <Image src={icon} alt={title} width={60} height={60} />
@@ -107,22 +107,22 @@ function PlanCard({
 
       {/* Title + Desc */}
       <div className="flex flex-col items-center gap-[6px] text-center">
-        <h3 className="text-white text-[32px] leading-[48px] font-bold">{title}</h3>
-        <p className="text-white text-[16px] leading-[24px]">{desc}</p>
+        <h3 className="text-white text-[22px] leading-[32px] md:text-[32px] md:leading-[48px] font-bold">{title}</h3>
+        <p className="text-white text-[14px] leading-[22px] md:text-[16px] md:leading-[24px]">{desc}</p>
       </div>
 
       {/* Price */}
-      <div className="flex justify-start" > 
-      <p className="text-[32px] leading-[48px] font-bold text-white">
-        {price.split(" ")[0]}{" "}
-        <span style={{ color: highlightColor }}>{price.split(" ").slice(1).join(" ")}</span>
-      </p>
+      <div className="flex justify-start" >
+        <p className="text-[32px] leading-[48px] font-bold text-white">
+          {price.split(" ")[0]}{" "}
+          <span style={{ color: highlightColor }}>{price.split(" ").slice(1).join(" ")}</span>
+        </p>
       </div>
 
       {/* Features */}
-      <ul className="flex flex-col items-start gap-4 w-full">
+      <ul className="flex flex-col items-start gap-3 md:gap-4 w-full">
         {features.map((feature, idx) => (
-          <li key={idx} className="flex items-center gap-2 text-white text-[16px] leading-[24px]">
+          <li key={idx} className="flex items-center gap-2 text-white text-[14px] leading-[22px] md:text-[16px] md:leading-[24px]">
             <span className="h-[20px] w-[20px] flex-shrink-0 rounded-full bg-[#8B8B8B]" />
             {feature}
           </li>
@@ -135,29 +135,29 @@ function PlanCard({
       </div>
 
       {/* Tags */}
-      <div className="flex items-center gap-5">
+      <div className="flex items-center flex-wrap gap-3 md:gap-5">
         {tags.map((tag, idx) => (
           <div key={idx} className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-white" />
-            <span className="text-white text-[14px] leading-[21px]">{tag}</span>
+            <span className="text-white text-[12px] leading-[18px] md:text-[14px] md:leading-[21px]">{tag}</span>
           </div>
         ))}
       </div>
 
       {/* Input or button */}
       {inputPlaceholder ? (
-        <div className="flex items-center gap-2 w-full">
+        <div className="flex items-center gap-2 w-full min-w-0">
           <input
             type="text"
             placeholder={inputPlaceholder}
-            className="flex-1 px-4 py-3 rounded-[16px] bg-[#2C1B3F] border border-[#401B600D] text-[#6F6C90] text-[14px]"
+            className="w-full min-w-0 flex-1 px-4 py-3 rounded-[16px] bg-[#2C1B3F] border border-[#401B600D] text-[#6F6C90] text-[14px]"
           />
-          <button className="flex items-center justify-center rounded-[16px] bg-white">
+          <button className="flex flex-shrink-0 items-center justify-center rounded-[16px] bg-white">
             <Image src={Search} alt="search" width={48} height={48} />
           </button>
         </div>
       ) : (
-        <button className="flex items-center justify-center gap-3 rounded-[8px] bg-white text-[#401B60] font-bold text-[16px] leading-[24px]">
+        <button className="w-full md:w-auto px-4 py-3 flex items-center justify-center gap-3 rounded-[8px] bg-white text-[#401B60] font-bold text-[16px] leading-[24px]">
           <Image src={simpleMobile} alt="mobile" width={48} height={48} />
           {buttonText}
           <Image src={ArrowRight} alt="arrow" width={36} height={36} />
