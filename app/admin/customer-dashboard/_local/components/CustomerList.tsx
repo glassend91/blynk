@@ -64,7 +64,13 @@ export default function CustomerList({ onCustomerSelect }: Props) {
                 });
 
                 if (data?.success) {
-                    const customersList = data.users || data.data || [];
+                    let customersList: Customer[] = [];
+
+                    if ('users' in data) {
+                    customersList = data.users;
+                    } else if ('data' in data) {
+                    customersList = data.data;
+                    }
                     setCustomers(customersList);
                     const total = data.total || customersList.length;
                     setTotalPages(Math.ceil(total / itemsPerPage));

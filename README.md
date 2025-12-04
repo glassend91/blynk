@@ -21,3 +21,4 @@ Open http://localhost:3000
   - Neutral 800 `#170F49`
 - Sections are split as components in `/components`.
 - The "Plans" section uses a glass card style similar to the design.
+.

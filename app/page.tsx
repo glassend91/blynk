@@ -16,14 +16,12 @@ export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is logged in
     const token = getAuthToken();
     if (token) {
       // Get user role to determine redirect destination
       const user = getAuthUser<{ role?: string }>();
       const role = user?.role || "customer";
       
-      // Redirect based on role: admins and superAdmins go to /admin/dashboard, customers to /dashboard
       if (role === "admin" || role === "superAdmin") {
         router.replace("/admin/dashboard");
       } else {
