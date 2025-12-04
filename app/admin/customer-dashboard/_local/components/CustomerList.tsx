@@ -54,11 +54,11 @@ export default function CustomerList({ onCustomerSelect }: Props) {
                 }
             } else {
                 // Fetch all customers with pagination
-                const { data } = await apiClient.get<{ success: boolean; users: Customer[]; total?: number }>(
+                const { data } = await apiClient.get<{ success: boolean; users?: Customer[]; data?: Customer[]; total?: number }>(
                     `/auth/users?role=customer&page=${currentPage}&limit=${itemsPerPage}`
                 ).catch(async () => {
                     // Fallback: try alternative endpoint
-                    return await apiClient.get<{ success: boolean; data: Customer[]; total?: number }>(
+                    return await apiClient.get<{ success: boolean; users?: Customer[]; data?: Customer[]; total?: number }>(
                         `/customer-verification/customers?page=${currentPage}&limit=${itemsPerPage}`
                     );
                 });

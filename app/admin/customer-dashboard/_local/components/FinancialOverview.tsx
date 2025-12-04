@@ -37,11 +37,11 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
       setError(null);
 
       // Fetch financial data from API
-      const { data } = await apiClient.get<{ success: boolean; data: FinancialData }>(
+      const { data } = await apiClient.get<{ success: boolean; data?: FinancialData; financial?: FinancialData }>(
         `/customer-verification/financial/${customerId}`
       ).catch(async () => {
         // Fallback: try alternative endpoint
-        return await apiClient.get<{ success: boolean; financial: FinancialData }>(
+        return await apiClient.get<{ success: boolean; data?: FinancialData; financial?: FinancialData }>(
           `/customer-plans/financial/${customerId}`
         );
       });
