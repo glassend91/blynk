@@ -17,6 +17,7 @@ export function getAuthToken(): string | null {
 }
 
 export function setAuthUser(user: unknown) {
+    console.log("setAuthUser", user);
     if (typeof window !== "undefined") {
         try { localStorage.setItem(USER_KEY, JSON.stringify(user)); } catch { }
     }
