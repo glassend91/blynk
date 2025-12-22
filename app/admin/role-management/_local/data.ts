@@ -43,6 +43,7 @@ export const permissionGroups: PermissionGroup[] = [
       { key: "tickets.manage", title: "Manage Support Tickets (Zendesk)" },
       { key: "services.manage", title: "Manage Customer Services (Add/Remove Plans)" },
       { key: "sim.manage", title: "Manage Physical SIM Orders" },
+      { key: "billing.credits_refunds", title: "Can Issue Credits and Refunds" },
     ],
   },
   {
@@ -72,7 +73,7 @@ export const rolesSeed: Role[] = [
     description: "Full access to all system features and settings",
     usersCount: 2,
     badge: "Default",
-    permissions: allowAll,
+    permissions: allowAll, // Admin gets all permissions including billing.credits_refunds
   },
   {
     id: "2",
@@ -83,7 +84,7 @@ export const rolesSeed: Role[] = [
     permissions: allowSubset([
       "plans.view", "plans.create", "plans.publish",
       "web.edit", "seo.manage", "analytics.view", "testimonials.manage"
-    ]),
+    ]), // billing.credits_refunds disabled by default
   },
   {
     id: "3",
@@ -93,7 +94,7 @@ export const rolesSeed: Role[] = [
     badge: "Default",
     permissions: allowSubset([
       "profiles.view", "notes.manage", "tickets.manage", "services.manage"
-    ]),
+    ]), // billing.credits_refunds disabled by default
   },
   {
     id: "4",
@@ -101,6 +102,6 @@ export const rolesSeed: Role[] = [
     description: "Manage technician network and store locations",
     usersCount: 5,
     badge: "Medium",
-    permissions: allowSubset(["tech.manage", "plans.view", "sys.logs"]),
+    permissions: allowSubset(["tech.manage", "plans.view", "sys.logs"]), // billing.credits_refunds disabled by default
   },
 ];

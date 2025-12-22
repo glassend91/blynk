@@ -1,4 +1,4 @@
-export type PlanType = "NBN" | "Mobile" | "Data Only" | "Voice Only";
+export type PlanType = "NBN" | "Business NBN" | "Mobile" | "Data Only" | "Voice Only";
 export type PlanStatus = "Published" | "Draft";
 
 export type PlanRow = {

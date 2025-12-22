@@ -5,6 +5,7 @@ import Tabs from "./_local/components/Tabs";
 import HeroSectionModal from "./_local/components/HeroSectionModal";
 import FeaturesSectionModal from "./_local/components/FeaturesSectionModal";
 import SeoModal from "./_local/components/SeoModal";
+import StaticPageEditor from "./_local/components/StaticPageEditor";
 import { pages, seed } from "./_local/data";
 import type { CmsPageKey, HeroBlock, SeoBlock, FeaturesBlock, CmsPageData } from "./_local/types";
 import apiClient from "@/lib/apiClient";
@@ -44,6 +45,8 @@ export default function WebsiteContentPage() {
             contentMap[page.pageKey as CmsPageKey] = {
               hero: page.hero || seed[page.pageKey as CmsPageKey].hero,
               features: page.features || seed[page.pageKey as CmsPageKey].features,
+              bodyContent: page.bodyContent || seed[page.pageKey as CmsPageKey].bodyContent || '',
+              pageTitle: page.pageTitle || seed[page.pageKey as CmsPageKey].pageTitle || '',
               seo: page.seo || seed[page.pageKey as CmsPageKey].seo,
             };
           }
@@ -134,10 +137,24 @@ export default function WebsiteContentPage() {
           ]}
         />
 
-        {/* Content Cards */}
-        <div className="mt-5 grid gap-6 xl:grid-cols-2">
-          {/* Left column - Hero Section */}
-          {!isSeoOnly && (
+        {/* Static Page Editor */}
+        <div className="mt-5">
+          <StaticPageEditor
+            pageKey={tab}
+            initialData={{
+              bodyContent: content[tab].bodyContent,
+              pageTitle: content[tab].pageTitle,
+              seo: content[tab].seo,
+            }}
+            onSave={() => {
+              fetchContent();
+            }}
+          />
+        </div>
+
+        {/* Additional Content Cards for Home Page */}
+        {tab === "home" && (
+          <div className="mt-6 grid gap-6 xl:grid-cols-2">
             <ContentCard
               title="Hero Section"
               onEdit={() => setHeroModalOpen(true)}
@@ -146,10 +163,10 @@ export default function WebsiteContentPage() {
                 <div>
                   <p className="text-[12px] font-medium text-[#6F6C90]">Headline</p>
                   <p className="text-[14px] font-semibold text-[#0A0A0A]">
-                    {content[tab].hero.headline || "Not set"}
+                    {content[tab].hero?.headline || "Not set"}
                   </p>
                 </div>
-                {content[tab].hero.subtitle && (
+                {content[tab].hero?.subtitle && (
                   <div>
                     <p className="text-[12px] font-medium text-[#6F6C90]">Subtitle</p>
                     <p className="text-[14px] text-[#0A0A0A]">
@@ -159,40 +176,7 @@ export default function WebsiteContentPage() {
                 )}
               </div>
             </ContentCard>
-          )}
 
-          {/* Right column - Features or SEO */}
-          {isSeoOnly ? (
-            <ContentCard
-              title="SEO Settings"
-              onEdit={canManageSeo ? () => setSeoModalOpen(true) : undefined}
-            >
-              <div className="space-y-3">
-                <div>
-                  <p className="text-[12px] font-medium text-[#6F6C90]">Meta Title</p>
-                  <p className="text-[14px] font-semibold text-[#0A0A0A]">
-                    {content[tab].seo.metaTitle || "Not set"}
-                  </p>
-                </div>
-                {content[tab].seo.metaDescription && (
-                  <div>
-                    <p className="text-[12px] font-medium text-[#6F6C90]">Meta Description</p>
-                    <p className="text-[14px] text-[#0A0A0A]">
-                      {content[tab].seo.metaDescription}
-                    </p>
-                  </div>
-                )}
-                {content[tab].seo.keywords && (
-                  <div>
-                    <p className="text-[12px] font-medium text-[#6F6C90]">Keywords</p>
-                    <p className="text-[14px] text-[#0A0A0A]">
-                      {content[tab].seo.keywords}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </ContentCard>
-          ) : tab === "home" ? (
             <ContentCard
               title="Features Section"
               onEdit={() => setFeaturesModalOpen(true)}
@@ -201,10 +185,10 @@ export default function WebsiteContentPage() {
                 <div>
                   <p className="text-[12px] font-medium text-[#6F6C90]">Title</p>
                   <p className="text-[14px] font-semibold text-[#0A0A0A]">
-                    {content[tab].features.title || "Not set"}
+                    {content[tab].features?.title || "Not set"}
                   </p>
                 </div>
-                {content[tab].features.subtitle && (
+                {content[tab].features?.subtitle && (
                   <div>
                     <p className="text-[12px] font-medium text-[#6F6C90]">Subtitle</p>
                     <p className="text-[14px] text-[#0A0A0A]">
@@ -214,38 +198,8 @@ export default function WebsiteContentPage() {
                 )}
               </div>
             </ContentCard>
-          ) : (
-            <ContentCard
-              title="SEO Settings"
-              onEdit={canManageSeo ? () => setSeoModalOpen(true) : undefined}
-            >
-              <div className="space-y-3">
-                <div>
-                  <p className="text-[12px] font-medium text-[#6F6C90]">Meta Title</p>
-                  <p className="text-[14px] font-semibold text-[#0A0A0A]">
-                    {content[tab].seo.metaTitle || "Not set"}
-                  </p>
-                </div>
-                {content[tab].seo.metaDescription && (
-                  <div>
-                    <p className="text-[12px] font-medium text-[#6F6C90]">Meta Description</p>
-                    <p className="text-[14px] text-[#0A0A0A]">
-                      {content[tab].seo.metaDescription}
-                    </p>
-                  </div>
-                )}
-                {content[tab].seo.keywords && (
-                  <div>
-                    <p className="text-[12px] font-medium text-[#6F6C90]">Keywords</p>
-                    <p className="text-[14px] text-[#0A0A0A]">
-                      {content[tab].seo.keywords}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </ContentCard>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Modals */}

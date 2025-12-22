@@ -44,7 +44,7 @@ function TypeSelect({
   onChange: (v: PlanType | "All Type") => void;
 }) {
   const [open, setOpen] = useState(false);
-  const opts: Array<PlanType | "All Type"> = ["All Type", "NBN", "Mobile", "Data Only", "Voice Only"];
+  const opts: Array<PlanType | "All Type"> = ["All Type", "NBN", "Business NBN", "Mobile", "Data Only", "Voice Only"];
 
   return (
     <div className="relative">

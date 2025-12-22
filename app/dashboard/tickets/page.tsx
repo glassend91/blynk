@@ -240,6 +240,22 @@ function CreateTicketModal({
     category: "Technical",
   });
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onCreate(formData);
@@ -255,8 +271,43 @@ function CreateTicketModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-lg rounded-[16px] bg-white p-6 shadow-xl">
+    <div
+      className="fixed z-50 flex items-center justify-center"
+      style={{
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh'
+      }}
+    >
+      <div
+        className="fixed bg-black/70"
+        onClick={onClose}
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 50
+        }}
+      />
+      <div
+        className="fixed w-full max-w-lg rounded-[16px] bg-white p-6 shadow-xl"
+        style={{
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 51
+        }}
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[20px] font-bold text-[#0A0A0A]">Create Support Ticket</h2>
           <button
@@ -270,7 +321,12 @@ function CreateTicketModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
           <div>
             <label className="mb-1 block text-[14px] font-semibold text-[#0A0A0A]">Subject</label>
             <input

@@ -33,6 +33,7 @@ export default function BusinessSmeSignupController({
   const [businessName, setBusinessName] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [abn, setAbn] = useState("");
+  const [acn, setAcn] = useState("");
   const [primaryFirstName, setPrimaryFirstName] = useState("");
   const [primaryLastName, setPrimaryLastName] = useState("");
   const [primaryEmail, setPrimaryEmail] = useState("");
@@ -49,6 +50,7 @@ export default function BusinessSmeSignupController({
     setBusinessName("");
     setBusinessType("");
     setAbn("");
+    setAcn("");
     setPrimaryFirstName("");
     setPrimaryLastName("");
     setPrimaryEmail("");
@@ -95,6 +97,7 @@ export default function BusinessSmeSignupController({
                 businessName={businessName}
                 businessType={businessType}
                 abn={abn}
+                acn={acn}
                 primaryFirstName={primaryFirstName}
                 primaryLastName={primaryLastName}
                 primaryEmail={primaryEmail}
@@ -103,6 +106,7 @@ export default function BusinessSmeSignupController({
                 onChangeBusinessName={setBusinessName}
                 onChangeBusinessType={setBusinessType}
                 onChangeAbn={setAbn}
+                onChangeAcn={setAcn}
                 onChangePrimaryFirstName={setPrimaryFirstName}
                 onChangePrimaryLastName={setPrimaryLastName}
                 onChangePrimaryEmail={setPrimaryEmail}
@@ -131,6 +135,7 @@ export default function BusinessSmeSignupController({
                         businessAddress: address,
                         businessType,
                         ABN: abn,
+                        ACN: acn,
                         primaryContact: {
                           firstName: primaryFirstName,
                           lastName: primaryLastName,

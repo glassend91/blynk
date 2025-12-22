@@ -57,6 +57,7 @@ export default function Sidebar({ width = 234 }: { width?: number }) {
         const routes = [
           "/admin/dashboard",
           "/admin/user-management",
+          "/admin/staff-members",
           "/admin/role-management",
           "/admin/service-plans",
           "/admin/website-content",
@@ -136,6 +137,11 @@ export default function Sidebar({ width = 234 }: { width?: number }) {
             label="User Management"
             href="/admin/user-management"
             show={mounted ? (routeAccess["/admin/user-management"] ?? true) : true}
+          />
+          <Item
+            label="Staff Members"
+            href="/admin/staff-members"
+            show={mounted ? (routeAccess["/admin/staff-members"] ?? true) : true}
           />
           <Item
             label="Role Management"

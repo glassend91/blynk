@@ -14,7 +14,7 @@ export default function OverviewStats({
   return (
     <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-4">
       <div className="rounded-[12px] border border-[#E7E4EC] bg-[#FBFBFD] p-4">
-        <div className="mb-3 text-[16px] font-semibold text-[#0A0A0A]">Over View</div>
+        <div className="mb-3 text-[16px] font-semibold text-[#0A0A0A]">Overview</div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Stat label="Total Plans" value={total} />
           <Stat label="Published" value={published} />

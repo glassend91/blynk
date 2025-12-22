@@ -624,10 +624,10 @@ function CustomerDetailsResidential({
                 type="email"
                 autoComplete="email"
                 className={`input w-full ${emailError || emailExists || (email && !isValidEmail(email))
-                    ? "border-red-300 bg-red-50"
-                    : email && isValidEmail(email) && !emailChecking
-                      ? "border-green-300 bg-green-50"
-                      : ""
+                  ? "border-red-300 bg-red-50"
+                  : email && isValidEmail(email) && !emailChecking
+                    ? "border-green-300 bg-green-50"
+                    : ""
                   }`}
                 value={email}
                 onChange={(e) => {
@@ -803,16 +803,31 @@ function CustomerDetailsBusiness({
 
   const isValidABN = (value: string) => {
     const digits = value.replace(/\s/g, "");
-    return digits.length === 11 || digits.length === 9; // ABN is 11 digits, ACN is 9 digits
+    return digits.length === 11; // ABN is 11 digits
+  };
+
+  const isValidACN = (value: string) => {
+    const digits = value.replace(/\s/g, "");
+    return digits.length === 9; // ACN is 9 digits
   };
 
   const validate = (): boolean => {
     const bnErr = !businessName ? "Business name is required" : null;
-    const abnErr = !abn && !acn
-      ? "ABN or ACN is required"
-      : abn && !isValidABN(abn) && acn && !isValidABN(acn)
-        ? "Please enter a valid ABN (11 digits) or ACN (9 digits)"
-        : null;
+
+    // Require at least one of ABN or ACN, and validate format if provided
+    let abnErr: string | null = null;
+    if (!abn && !acn) {
+      abnErr = "ABN or ACN is required (at least one)";
+    } else {
+      // If ABN is provided, it must be valid
+      if (abn && !isValidABN(abn)) {
+        abnErr = "ABN must be 11 digits";
+      }
+      // If ACN is provided, it must be valid
+      if (!abnErr && acn && !isValidACN(acn)) {
+        abnErr = "ACN must be 9 digits";
+      }
+    }
     const pfnErr = !primaryFirstName
       ? "First name is required"
       : !isValidName(primaryFirstName)
@@ -921,7 +936,7 @@ function CustomerDetailsBusiness({
               />
             </FormField>
             <div>
-              <FormField label="ABN (11 digits) *">
+              <FormField label="ABN (11 digits)">
                 <input
                   className={`input w-full ${abnError ? "border-red-300 bg-red-50" : ""}`}
                   value={abn}
@@ -937,13 +952,18 @@ function CustomerDetailsBusiness({
           </div>
 
           <div className="mt-4">
-            <FormField label="ACN (9 digits) - Optional">
+            <FormField label="ACN (9 digits)">
               <input
-                className="input w-full"
+                className={`input w-full ${abnError ? "border-red-300 bg-red-50" : ""}`}
                 value={acn}
-                onChange={(e) => onChangeAcn(e.target.value)}
-                placeholder="Enter ACN if applicable"
+                onChange={(e) => {
+                  onChangeAcn(e.target.value);
+                  if (submitted) setAbnError(null);
+                }}
+                placeholder="Enter ACN"
               />
+              <p className="mt-1 text-xs text-[#6F6C90]">Enter your ABN or ACN (at least one required)</p>
+              {abnError && <p className="mt-1 text-xs text-red-600">{abnError}</p>}
             </FormField>
           </div>
 
@@ -982,10 +1002,10 @@ function CustomerDetailsBusiness({
                 <input
                   type="email"
                   className={`input w-full ${emailError || emailExists || (primaryEmail && !isValidEmail(primaryEmail))
-                      ? "border-red-300 bg-red-50"
-                      : primaryEmail && isValidEmail(primaryEmail) && !emailChecking
-                        ? "border-green-300 bg-green-50"
-                        : ""
+                    ? "border-red-300 bg-red-50"
+                    : primaryEmail && isValidEmail(primaryEmail) && !emailChecking
+                      ? "border-green-300 bg-green-50"
+                      : ""
                     }`}
                   value={primaryEmail}
                   onChange={(e) => {

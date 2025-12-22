@@ -33,6 +33,24 @@ export default function SeoModal({ open, onClose, pageKey, initialValue, onSave 
     }
   }, [open, initialValue]);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [open]);
+
   if (!open) return null;
 
   const handleSubmit = async () => {
@@ -76,9 +94,37 @@ export default function SeoModal({ open, onClose, pageKey, initialValue, onSave 
   };
 
   return (
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="absolute left-1/2 top-1/2 max-h-[95vh] w-[600px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white p-6 shadow-2xl">
+    <div
+      className="fixed z-[90]"
+      style={{
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh',
+        overflow: 'auto'
+      }}
+    >
+      <div
+        className="fixed bg-black/70"
+        onClick={onClose}
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 90
+        }}
+      />
+      <div
+        className="fixed left-1/2 top-1/2 max-h-[95vh] w-[600px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white p-6 shadow-2xl"
+        style={{ zIndex: 91 }}
+      >
         <div className="mb-1 flex items-center justify-between">
           <div>
             <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">Edit Content</p>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import apiClient from "@/lib/apiClient";
+import { usePermission } from "@/lib/permissions";
 
 type FinancialData = {
   accountBalance: number;
@@ -20,6 +21,7 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCreditRefundModal, setShowCreditRefundModal] = useState(false);
+  const canIssueCreditsRefunds = usePermission("billing.credits_refunds");
 
   useEffect(() => {
     if (customerId) {
@@ -115,12 +117,14 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
       <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-6 shadow-[0_37px_37px_rgba(0,0,0,0.05)]">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[20px] font-semibold text-[#0A0A0A]">Financial Overview</h2>
-          <button
-            onClick={() => setShowCreditRefundModal(true)}
-            className="rounded-[8px] bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95"
-          >
-            Apply Credit / Refund
-          </button>
+          {canIssueCreditsRefunds && (
+            <button
+              onClick={() => setShowCreditRefundModal(true)}
+              className="rounded-[8px] bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95"
+            >
+              Apply Credit / Refund
+            </button>
+          )}
         </div>
 
         {error && (
@@ -160,11 +164,10 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
             </div>
             <div className="text-[14px] text-[#0A0A0A]">
               <span
-                className={`inline-block px-3 py-1 rounded-[6px] font-medium ${
-                  financialData?.autoPayStatus === "Active"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-700"
-                }`}
+                className={`inline-block px-3 py-1 rounded-[6px] font-medium ${financialData?.autoPayStatus === "Active"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-100 text-gray-700"
+                  }`}
               >
                 {financialData?.autoPayStatus || "Inactive"}
               </span>
@@ -213,6 +216,22 @@ function CreditRefundModal({
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showRefundInstructions, setShowRefundInstructions] = useState(false);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
 
   const reasonCodes = [
     { value: "overcharge", label: "Overcharge" },
@@ -308,8 +327,44 @@ function CreditRefundModal({
 
   if (showRefundInstructions) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-        <div className="w-full max-w-md rounded-[16px] bg-white p-6 shadow-2xl">
+      <div
+        className="fixed z-50 flex items-center justify-center"
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          margin: 0,
+          padding: 0,
+          width: '100vw',
+          height: '100vh'
+        }}
+      >
+        <div
+          className="fixed bg-black/70"
+          onClick={onClose}
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 50
+          }}
+        />
+        <div
+          className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-2xl"
+          style={{
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            padding: '1.5rem',
+            zIndex: 51
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">Manual Refund Required</h2>
             <button
@@ -373,8 +428,44 @@ function CreditRefundModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md rounded-[16px] bg-white p-6 shadow-2xl">
+    <div
+      className="fixed z-50 flex items-center justify-center"
+      style={{
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh'
+      }}
+    >
+      <div
+        className="fixed bg-black/70"
+        onClick={onClose}
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 50
+        }}
+      />
+      <div
+        className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-2xl"
+        style={{
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          padding: '1.5rem',
+          zIndex: 51
+        }}
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">Apply Credit / Refund</h2>
           <button

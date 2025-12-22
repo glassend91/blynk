@@ -29,6 +29,7 @@ export function AddNoteDialog({
   const [priority, setPriority] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
+  const [isCritical, setIsCritical] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +46,7 @@ export function AddNoteDialog({
       setPriority('');
       setContent('');
       setTags('');
+      setIsCritical(false);
       setSearchQuery('');
       setError(null);
       setSubmitting(false);
@@ -101,6 +103,7 @@ export function AddNoteDialog({
           priority: priority || 'Medium',
           content: content.trim(),
           tags: tagsArray.length > 0 ? tagsArray : undefined,
+          isCritical: isCritical,
         }
       );
 
@@ -119,21 +122,71 @@ export function AddNoteDialog({
 
   if (!open) return null;
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [open]);
+
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center">
+    <div
+      className="fixed z-[80]"
+      style={{
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh',
+        overflow: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+    >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70"
+        className="fixed bg-black/70"
         onClick={(e) => {
           e.stopPropagation();
           onOpenChange(false);
+        }}
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 80
         }}
       />
 
       {/* Modal */}
       <div
-        className="relative z-[81] w-full max-w-[780px] rounded-2xl bg-white p-6 shadow-2xl mx-4"
+        className="fixed z-[81] w-full max-w-[780px] rounded-2xl bg-white p-6 shadow-2xl mx-4"
         onClick={(e) => e.stopPropagation()}
+        style={{
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          maxHeight: '90vh',
+          overflowY: 'auto'
+        }}
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-[22px] font-bold text-[#0A0A0A]">Add Customer Note</h3>
@@ -212,6 +265,19 @@ export function AddNoteDialog({
               className="w-full rounded-lg border border-[#DFDBE3] bg-[#F8F8F8] px-4 py-3 text-[14px] outline-none placeholder:text-[#A39FB8] disabled:opacity-50"
               disabled={submitting}
             />
+          </div>
+          <div className="md:col-span-2 flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="isCriticalDialog"
+              checked={isCritical}
+              onChange={(e) => setIsCritical(e.target.checked)}
+              className="h-4 w-4 accent-[#401B60] mt-0.5 flex-shrink-0"
+              disabled={submitting}
+            />
+            <label htmlFor="isCriticalDialog" className="text-[13px] sm:text-[14px] text-[#0A0A0A] cursor-pointer leading-relaxed">
+              Critical Note (pinned to top, highlighted in red)
+            </label>
           </div>
         </div>
 

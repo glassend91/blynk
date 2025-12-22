@@ -26,6 +26,7 @@ export default function AddNoteModal({ open, onOpenChange, onSuccess }: Props) {
   const [priority, setPriority] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
+  const [isCritical, setIsCritical] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export default function AddNoteModal({ open, onOpenChange, onSuccess }: Props) {
       setPriority('');
       setContent('');
       setTags('');
+      setIsCritical(false);
       setSearchQuery('');
       setError(null);
       setSubmitting(false);
@@ -114,6 +116,7 @@ export default function AddNoteModal({ open, onOpenChange, onSuccess }: Props) {
           priority: priority || 'Medium',
           content: contentStr,
           tags: tagsArray.length > 0 ? tagsArray : undefined,
+          isCritical: isCritical,
         }
       );
 
@@ -145,17 +148,39 @@ export default function AddNoteModal({ open, onOpenChange, onSuccess }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
-      onClick={handleBackdropClick}
+      className="fixed z-[100] flex items-center justify-center"
+      style={{
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh'
+      }}
     >
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+        className="fixed bg-black/60 backdrop-blur-sm z-[100]"
         onClick={handleClose}
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh'
+        }}
       />
       <div
-        className="relative z-[101] w-full max-w-[940px] rounded-[16px] bg-white p-4 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="fixed z-[101] w-full max-w-[940px] rounded-[16px] bg-white p-4 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
+        style={{
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}
       >
         <div className="mb-4 sm:mb-5 flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
@@ -244,6 +269,20 @@ export default function AddNoteModal({ open, onOpenChange, onSuccess }: Props) {
                   disabled={submitting}
                 />
               </Field>
+            </div>
+
+            <div className="md:col-span-2 flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="isCritical"
+                checked={isCritical}
+                onChange={(e) => setIsCritical(e.target.checked)}
+                className="h-4 w-4 accent-[#401B60] mt-0.5 flex-shrink-0"
+                disabled={submitting}
+              />
+              <label htmlFor="isCritical" className="text-[13px] sm:text-[14px] text-[#0A0A0A] cursor-pointer leading-relaxed">
+                Critical Note (pinned to top, highlighted in red)
+              </label>
             </div>
           </div>
 

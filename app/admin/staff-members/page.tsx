@@ -2,17 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import TableHeader from "./_local/components/TableHeader";
-import UsersTable from "./_local/components/UsersTable";
-import { allStatuses, Role, Status, UserRow } from "./_local/data";
+import TableHeader from "../user-management/_local/components/TableHeader";
+import UsersTable from "../user-management/_local/components/UsersTable";
+import InviteUserModal from "../user-management/_local/components/InviteUserModal";
+import { allStatuses, Role, Status, UserRow } from "../user-management/_local/data";
 import apiClient from "@/lib/apiClient";
 import { usePermission } from "@/lib/permissions";
 import { getRoles } from "@/lib/services/roles";
 
-export default function UserManagementPage() {
+export default function StaffMembersPage() {
   const [query, setQuery] = useState("");
   const [role, setRole] = useState<Role | "All Roles">("All Roles");
   const [status, setStatus] = useState<Status | "All Status">("All Status");
+  const [openInvite, setOpenInvite] = useState(false);
+  const canInvite = usePermission("user.invite");
   const canEdit = usePermission("user.edit");
   const canDelete = usePermission("user.delete");
   const [rows, setRows] = useState<UserRow[]>([]);
@@ -44,8 +47,6 @@ export default function UserManagementPage() {
         }
       } catch (err) {
         console.error("Failed to load users or roles", err);
-        // Optional: if you still want a fallback, uncomment the next line
-        // setRows(initialUsers);
       }
       setLoading(false);
     }
@@ -74,9 +75,9 @@ export default function UserManagementPage() {
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
-      // Only show customers (role === 'Customer')
-      const isCustomer = r.role === "Customer";
-      if (!isCustomer) return false;
+      // Only show staff members (exclude customers - role !== 'Customer')
+      const isStaff = r.role !== "Customer";
+      if (!isStaff) return false;
 
       const q = query.trim().toLowerCase();
       const byQuery =
@@ -94,9 +95,9 @@ export default function UserManagementPage() {
     <section className="space-y-6">
       {/* Page heading matches layout */}
       <header className="space-y-1">
-        <h1 className="text-[26px] font-bold leading-[28px] text-[#0A0A0A]">Customer Management</h1>
+        <h1 className="text-[26px] font-bold leading-[28px] text-[#0A0A0A]">Staff Members</h1>
         <p className="text-[16px] leading-[21px] text-[#6F6C90]">
-          Manage customer accounts for your telecommunications platform.
+          Manage staff access and permissions for your telecommunications platform.
         </p>
       </header>
 
@@ -108,14 +109,15 @@ export default function UserManagementPage() {
         onRole={setRole}
         status={status}
         onStatus={setStatus}
+        onInvite={canInvite ? () => setOpenInvite(true) : undefined}
         availableRoles={availableRoles}
-        isCustomerOnly={true}
+        isCustomerOnly={false}
       />
 
       {/* Data table */}
       {loading ? (
         <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-6 text-[14px] text-[#6F6C90]">
-          Loading users...
+          Loading staff members...
         </div>
       ) : (
         <UsersTable
@@ -129,6 +131,22 @@ export default function UserManagementPage() {
           onDelete={canDelete ? (u) => {
             setDeleteUser(u);
           } : undefined}
+        />
+      )}
+
+      {/* Invite modal - only show if user has permission */}
+      {canInvite && (
+        <InviteUserModal
+          open={openInvite}
+          onClose={() => setOpenInvite(false)}
+          onInvite={(newUser) => {
+            setRows((prev) => {
+              const next = [newUser, ...prev];
+              return next.map((row, index) => ({ ...row, id: index + 1 }));
+            });
+            setOpenInvite(false);
+          }}
+          availableRoles={availableRoles}
         />
       )}
 
@@ -172,7 +190,7 @@ export default function UserManagementPage() {
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">User Details</h2>
+              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">Staff Member Details</h2>
               <button
                 type="button"
                 onClick={() => setViewUser(null)}
@@ -241,6 +259,7 @@ export default function UserManagementPage() {
         >
           <div
             className="fixed bg-black/70"
+            onClick={() => setEditUser(null)}
             style={{
               top: 0,
               left: 0,
@@ -250,7 +269,6 @@ export default function UserManagementPage() {
               height: '100vh',
               zIndex: 40
             }}
-            onClick={() => setEditUser(null)}
           />
           <div
             className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
@@ -264,7 +282,7 @@ export default function UserManagementPage() {
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">Edit User</h2>
+              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">Edit Staff Member</h2>
               <button
                 type="button"
                 onClick={() => setEditUser(null)}
@@ -275,6 +293,8 @@ export default function UserManagementPage() {
             </div>
             <form
               className="space-y-4 text-[14px]"
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
               onSubmit={async (e) => {
                 e.preventDefault();
                 if (!editUser?.userId) {
@@ -411,7 +431,7 @@ export default function UserManagementPage() {
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">Delete User</h2>
+              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">Delete Staff Member</h2>
               <button
                 type="button"
                 onClick={() => setDeleteUser(null)}

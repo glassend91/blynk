@@ -17,14 +17,67 @@ export default function ViewTicketModal({ open, onClose, ticket }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [open]);
+
   if (!open || !ticket) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className="fixed z-[90]"
+      style={{
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh',
+        overflow: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+    >
       {/* backdrop */}
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      <div
+        className="fixed bg-black/70"
+        onClick={onClose}
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 90
+        }}
+      />
       {/* dialog */}
-      <div className="relative z-10 w-[720px] max-w-[92vw] rounded-2xl bg-white p-6 shadow-xl">
+      <div
+        className="fixed z-[91] w-[720px] max-w-[92vw] rounded-2xl bg-white p-6 shadow-xl"
+        style={{
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}
+      >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-[20px] font-bold text-[#0A0A0A]">Ticket Details</h3>
           <button
@@ -46,9 +99,9 @@ export default function ViewTicketModal({ open, onClose, ticket }: Props) {
             <Item label="Assignee" value={ticket.assignee} />
             <Item label="Created" value={ticket.createdAgo} />
           </div>
-          <div className="pt-2 text-[#6F6C90]">
+          {/* <div className="pt-2 text-[#6F6C90]">
             (This modal is a stub—hook it to your real data/actions as needed.)
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-6 flex justify-end gap-3">

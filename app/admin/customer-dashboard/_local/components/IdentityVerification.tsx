@@ -47,6 +47,7 @@ export default function IdentityVerification({
             setPhone(customerPhone || "");
         }
     }, [customerId, customerEmail, customerPhone, onCustomerDataLoaded]);
+
     const [channel, setChannel] = useState<"mobile" | "email">("mobile");
     const [otpCode, setOtpCode] = useState("");
     const [sending, setSending] = useState(false);
@@ -54,6 +55,29 @@ export default function IdentityVerification({
     const [verified, setVerified] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [otpSent, setOtpSent] = useState(false);
+    const [resendTimer, setResendTimer] = useState(0); // Timer in seconds (2 minutes = 120 seconds)
+
+    // Countdown timer effect
+    useEffect(() => {
+        let interval: NodeJS.Timeout | null = null;
+
+        if (resendTimer > 0) {
+            interval = setInterval(() => {
+                setResendTimer((prev) => {
+                    if (prev <= 1) {
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+
+        return () => {
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
+    }, [resendTimer]);
 
     if (!customerId || (!email && !phone)) {
         return (
@@ -71,22 +95,37 @@ export default function IdentityVerification({
     const handleSendCode = async () => {
         if (!customerId) return;
 
+        // Show alert if mobile channel is selected
+        if (channel === "mobile") {
+            setError("This is coming soon. Try with email.");
+            return;
+        }
+
+        // For email channel, use the correct API endpoint and payload
+        if (!email) {
+            setError("Email address is required");
+            return;
+        }
+
         try {
             setSending(true);
             setError(null);
             setOtpSent(false);
             setVerified(false);
 
-            const endpoint = channel === "mobile" ? "/customer-verification/send-otp" : "/customer-verification/send-otp-email";
-            const payload = channel === "mobile"
-                ? { customerId, phone: phone }
-                : { customerId, email: email };
+            const endpoint = "/customer-verification/send-otp";
+            const payload = {
+                emailOrPhone: email,
+                channel: "email",
+                purpose: "customer_verification"
+            };
 
             const { data } = await apiClient.post<{ success: boolean; message?: string }>(endpoint, payload);
 
             if (data?.success) {
                 setOtpSent(true);
                 setError(null);
+                setResendTimer(120); // Start 2-minute countdown timer
             } else {
                 setError(data?.message || "Failed to send OTP");
             }
@@ -100,6 +139,12 @@ export default function IdentityVerification({
     const handleVerifyCode = async () => {
         if (!customerId || !otpCode.trim()) return;
 
+        // For email channel, we need to send emailOrPhone
+        if (channel === "email" && !email) {
+            setError("Email address is required for verification");
+            return;
+        }
+
         try {
             setVerifying(true);
             setError(null);
@@ -107,9 +152,8 @@ export default function IdentityVerification({
             const { data } = await apiClient.post<{ success: boolean; message?: string }>(
                 "/customer-verification/verify-otp",
                 {
-                    customerId,
-                    otp: otpCode.trim(),
-                    channel,
+                    emailOrPhone: channel === "email" ? email : phone,
+                    otpCode: otpCode.trim(),
                 }
             );
 
@@ -207,6 +251,7 @@ export default function IdentityVerification({
                                     setOtpSent(false);
                                     setVerified(false);
                                     setOtpCode("");
+                                    setResendTimer(0);
                                 }}
                                 className="h-4 w-4 accent-[#401B60]"
                             />
@@ -228,6 +273,7 @@ export default function IdentityVerification({
                                     setOtpSent(false);
                                     setVerified(false);
                                     setOtpCode("");
+                                    setResendTimer(0);
                                 }}
                                 className="h-4 w-4 accent-[#401B60]"
                             />
@@ -244,10 +290,15 @@ export default function IdentityVerification({
                 {/* Send Code Button */}
                 <button
                     onClick={handleSendCode}
-                    disabled={sending || verified}
+                    disabled={sending || verified || resendTimer > 0}
                     className="w-full rounded-[10px] bg-[#401B60] px-4 py-3 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                    {sending ? "Sending..." : "Send Code"}
+                    {sending
+                        ? "Sending..."
+                        : resendTimer > 0
+                            ? `Resend OTP in ${Math.floor(resendTimer / 60)}:${String(resendTimer % 60).padStart(2, '0')}`
+                            : "Send Code"
+                    }
                 </button>
 
                 {otpSent && !verified && (

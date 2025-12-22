@@ -473,8 +473,41 @@ export default function AccountManagement() {
 
       {/* Change Password Modal */}
       {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl">
+        <div
+          className="fixed z-50 flex items-center justify-center"
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            margin: 0,
+            padding: 0,
+            width: '100vw',
+            height: '100vh'
+          }}
+        >
+          <div
+            className="fixed bg-black"
+            onClick={handleClosePasswordModal}
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 50,
+              opacity: 0.5
+            }}
+          />
+          <div
+            className="fixed z-51 w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-[20px] font-bold text-[#0A0A0A]">Change Password</h2>
               <button
@@ -551,8 +584,41 @@ export default function AccountManagement() {
 
       {/* Confirmation Modal for Toggle Changes */}
       {confirmModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl">
+        <div
+          className="fixed z-50 flex items-center justify-center"
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            margin: 0,
+            padding: 0,
+            width: '100vw',
+            height: '100vh'
+          }}
+        >
+          <div
+            className="fixed bg-black"
+            onClick={() => setConfirmModal({ isOpen: false, field: "", label: "", newValue: false })}
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 50,
+              opacity: 0.5
+            }}
+          />
+          <div
+            className="fixed z-51 w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
             <div className="mb-4">
               <h2 className="text-[20px] font-bold text-[#0A0A0A]">Confirm Change</h2>
             </div>

@@ -24,7 +24,9 @@ export type SeoBlock = {
 };
 
 export type CmsPageData = {
-  hero: HeroBlock;
-  features: FeaturesBlock;
+  hero?: HeroBlock;
+  features?: FeaturesBlock;
+  bodyContent?: string;
+  pageTitle?: string;
   seo: SeoBlock;
 };

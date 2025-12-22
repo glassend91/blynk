@@ -3,7 +3,7 @@ import apiClient from '../apiClient';
 export interface Service {
     _id: string;
     serviceName: string;
-    serviceType: 'NBN' | 'Mobile' | 'Data Only' | 'Voice Only';
+    serviceType: 'NBN' | 'Business NBN' | 'Mobile' | 'Data Only' | 'Voice Only';
     specifications: {
         downloadSpeed?: number;
         uploadSpeed?: number;

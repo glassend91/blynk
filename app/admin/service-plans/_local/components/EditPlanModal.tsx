@@ -7,8 +7,9 @@ import { hasPermission } from "@/lib/permissions";
 
 type Props = {
   open: boolean;
+  plan: PlanRow | null;
   onClose: () => void;
-  onCreate: (plan: PlanRow) => void;
+  onUpdate: (plan: PlanRow) => void;
 };
 
 const planTypeOptions: PlanType[] = ["NBN", "Business NBN", "Mobile", "Data Only", "Voice Only"];
@@ -23,7 +24,7 @@ const currencyOptions = ["AUD", "USD", "EUR", "GBP"];
 const fieldClass =
   "w-full rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none placeholder-[#6F6C90]";
 
-export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
+export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) {
   const [name, setName] = useState("");
   const [type, setType] = useState<PlanType>("NBN");
   const [price, setPrice] = useState("69.95");
@@ -37,20 +38,94 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
   const [slaDetails, setSlaDetails] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+
+  // Load plan data when modal opens
+  useEffect(() => {
+    if (open && plan && plan.serviceId) {
+      setLoadingDetails(true);
+      // Fetch full service details
+      apiClient.get<{ success: boolean; service: any }>(`/services/admin/${plan.serviceId}`)
+        .then((response) => {
+          if (response.data?.success && response.data.service) {
+            const service = response.data.service;
+            setName(service.serviceName || plan.name || "");
+            setType(service.serviceType || plan.type || "NBN");
+            setPrice(String(service.price || 69.95));
+            setCurrency(service.currency || "AUD");
+            setBillingCycle(service.billingCycle || "monthly");
+
+            // Determine speedOrData from specifications
+            const specs = service.specifications || {};
+            if ((service.serviceType === 'NBN' || service.serviceType === 'Business NBN') && specs.downloadSpeed && specs.uploadSpeed) {
+              setSpeed(`${specs.downloadSpeed}/${specs.uploadSpeed} Mbps`);
+            } else if ((service.serviceType === 'NBN' || service.serviceType === 'Business NBN') && specs.downloadSpeed) {
+              setSpeed(`${specs.downloadSpeed} Mbps`);
+            } else if (service.serviceType === 'Mobile' || service.serviceType === 'Data Only') {
+              setSpeed(specs.dataAllowance || plan.speedOrData || "");
+            } else if (service.serviceType === 'Voice Only') {
+              setSpeed(specs.voiceMinutes || plan.speedOrData || "");
+            } else {
+              setSpeed(plan.speedOrData || "");
+            }
+
+            // Load business-specific fields
+            if (service.serviceType === 'Business NBN') {
+              setStaticIP(specs.staticIP || false);
+              setSlaDetails(specs.slaDetails || "");
+            } else {
+              setStaticIP(false);
+              setSlaDetails("");
+            }
+
+            // Format features
+            if (typeof service.features === 'string') {
+              setFeatures(service.features);
+            } else if (Array.isArray(service.features)) {
+              setFeatures(service.features.map((f: any) => f.name || f).join('\n'));
+            } else {
+              setFeatures("");
+            }
+
+            setDesc(service.description || plan.details || "");
+            setStatus(service.isActive ? "Published" : "Draft");
+          } else {
+            // Fallback to plan data if API fails
+            setName(plan.name || "");
+            setType(plan.type || "NBN");
+            const priceMatch = plan.price?.match(/(\d+\.?\d*)/);
+            setPrice(priceMatch ? priceMatch[1] : "69.95");
+            setCurrency("AUD");
+            setBillingCycle("monthly");
+            setSpeed(plan.speedOrData || "");
+            setFeatures("");
+            setDesc(plan.details || "");
+            setStatus(plan.status || "Published");
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load service details", err);
+          // Fallback to plan data
+          setName(plan.name || "");
+          setType(plan.type || "NBN");
+          const priceMatch = plan.price?.match(/(\d+\.?\d*)/);
+          setPrice(priceMatch ? priceMatch[1] : "69.95");
+          setCurrency("AUD");
+          setBillingCycle("monthly");
+          setSpeed(plan.speedOrData || "");
+          setFeatures("");
+          setDesc(plan.details || "");
+          setStatus(plan.status || "Published");
+        })
+        .finally(() => {
+          setLoadingDetails(false);
+          setError(null);
+        });
+    }
+  }, [open, plan]);
 
   useEffect(() => {
     if (!open) {
-      setName("");
-      setType("NBN");
-      setPrice("69.95");
-      setCurrency("AUD");
-      setBillingCycle("monthly");
-      setSpeed("");
-      setFeatures("");
-      setDesc("");
-      setStatus("Published");
-      setStaticIP(false);
-      setSlaDetails("");
       setError(null);
       setSubmitting(false);
     }
@@ -59,12 +134,15 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
   // Lock body scroll when modal is open
   useEffect(() => {
     if (open) {
+      // Save current scroll position
       const scrollY = window.scrollY;
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
+
       return () => {
+        // Restore scroll position
         document.body.style.position = '';
         document.body.style.top = '';
         document.body.style.width = '';
@@ -81,12 +159,12 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
       .filter(Boolean);
   }, [features]);
 
-  if (!open) return null;
+  if (!open || !plan || !plan.serviceId) return null;
 
   const handleSubmit = async () => {
     // Check permission before submitting
     if (!hasPermission("plans.create")) {
-      setError("You do not have permission to create plans.");
+      setError("You do not have permission to edit plans.");
       return;
     }
 
@@ -120,15 +198,18 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
         }),
       };
 
-      const { data } = await apiClient.post<{ success: boolean; service: PlanRow }>("/services/admin", payload);
+      const { data } = await apiClient.put<{ success: boolean; service: PlanRow }>(
+        `/services/admin/${plan.serviceId}`,
+        payload
+      );
       if (data?.success && data.service) {
-        onCreate(data.service);
+        onUpdate(data.service);
         onClose();
         return;
       }
-      setError("Failed to create plan. Please try again.");
+      setError("Failed to update plan. Please try again.");
     } catch (err: any) {
-      setError(err?.message || "Failed to create plan. Please try again.");
+      setError(err?.response?.data?.message || err?.message || "Failed to update plan. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -163,13 +244,13 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
         }}
       />
       <div
-        className="fixed left-1/2 top-1/2 max-h-[95vh] w-[960px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white p-6 shadow-2xl"
+        className="fixed left-1/2 top-1/2 max-h-[90vh] w-[960px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white p-6 shadow-2xl"
         style={{ zIndex: 91 }}
       >
         <div className="mb-1 flex items-center justify-between">
           <div>
             <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">Plan Builder</p>
-            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">Create New Service Plan</h2>
+            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">Edit Service Plan</h2>
           </div>
           <button
             onClick={onClose}
@@ -181,9 +262,14 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
         </div>
 
         <p className="text-[14px] text-[#6F6C90]">
-          Define how this plan appears in the catalogue. Customers will see the name, highlights, pricing, and speed/data
-          headline.
+          Update plan details. Changes will be reflected immediately for new customers.
         </p>
+
+        {loadingDetails && (
+          <div className="mt-4 rounded-[10px] border border-[#DFDBE3] bg-[#F8F8F8] px-4 py-3 text-[13px] text-[#6F6C90]">
+            Loading plan details...
+          </div>
+        )}
 
         <div className="mt-6 space-y-5">
           <SectionCard title="General details" description="Core information customers use to compare plans.">
@@ -346,12 +432,12 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                   <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
-                      id="staticIP"
+                      id="staticIP-edit"
                       checked={staticIP}
                       onChange={(e) => setStaticIP(e.target.checked)}
                       className="h-4 w-4 accent-[#401B60]"
                     />
-                    <label htmlFor="staticIP" className="text-[14px] text-[#0A0A0A] cursor-pointer">
+                    <label htmlFor="staticIP-edit" className="text-[14px] text-[#0A0A0A] cursor-pointer">
                       Include static IP address
                     </label>
                   </div>
@@ -392,7 +478,7 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
             disabled={submitting}
             className="h-[46px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Creating..." : "Create plan"}
+            {submitting ? "Updating..." : "Update plan"}
           </button>
         </div>
       </div>
