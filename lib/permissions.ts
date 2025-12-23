@@ -24,6 +24,7 @@ export type PermissionKey =
     | "services.manage"
     | "sim.manage"
     | "billing.credits_refunds"
+    | "can_manage_customer_payment_details"
     | "sys.settings"
     | "sys.logs";
 

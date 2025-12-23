@@ -187,3 +187,74 @@ export const updateAutoPaySettings = async (data: UpdateAutoPaySettingsRequest):
         throw error;
     }
 };
+
+// Admin functions for managing customer payment methods
+export interface AdminPaymentMethodsResponse {
+    success: boolean;
+    data?: { paymentMethods: PaymentMethod[] };
+    message?: string;
+}
+
+// Get payment methods for a specific customer (Admin)
+export const getCustomerPaymentMethods = async (customerId: string): Promise<AdminPaymentMethodsResponse> => {
+    try {
+        const response = await apiClient.get(`/v1/customer/${customerId}/payment-methods`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching customer payment methods:', error);
+        throw error;
+    }
+};
+
+// Create setup intent for a specific customer (Admin)
+export const createCustomerSetupIntent = async (customerId: string): Promise<SetupIntentResponse> => {
+    try {
+        const response = await apiClient.post(`/v1/customer/${customerId}/payment-methods/setup-intent`);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating customer setup intent:', error);
+        throw error;
+    }
+};
+
+// Add payment method for a specific customer (Admin)
+export const createCustomerPaymentMethod = async (
+    customerId: string,
+    data: CreatePaymentMethodRequest
+): Promise<{ success: boolean; message: string; data?: { paymentMethod: PaymentMethod } }> => {
+    try {
+        const response = await apiClient.post(`/v1/customer/${customerId}/payment-methods`, data);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating customer payment method:', error);
+        throw error;
+    }
+};
+
+// Set default payment method for a specific customer (Admin)
+export const setCustomerDefaultPaymentMethod = async (
+    customerId: string,
+    paymentMethodId: string
+): Promise<{ success: boolean; message: string; data?: { paymentMethod: PaymentMethod } }> => {
+    try {
+        const response = await apiClient.put(`/v1/customer/${customerId}/payment-methods/${paymentMethodId}/default`);
+        return response.data;
+    } catch (error) {
+        console.error('Error setting customer default payment method:', error);
+        throw error;
+    }
+};
+
+// Delete payment method for a specific customer (Admin)
+export const deleteCustomerPaymentMethod = async (
+    customerId: string,
+    paymentMethodId: string
+): Promise<{ success: boolean; message: string }> => {
+    try {
+        const response = await apiClient.delete(`/v1/customer/${customerId}/payment-methods/${paymentMethodId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting customer payment method:', error);
+        throw error;
+    }
+};

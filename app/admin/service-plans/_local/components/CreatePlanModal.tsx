@@ -12,7 +12,7 @@ type Props = {
 };
 
 const planTypeOptions: PlanType[] = ["NBN", "Business NBN", "Mobile", "Data Only", "Voice Only"];
-const statusOptions: PlanStatus[] = ["Published", "Draft"];
+const statusOptions: PlanStatus[] = ["Published", "Draft", "Staff-Only", "Hidden"];
 const billingCycleOptions = [
   { value: "monthly", label: "Monthly" },
   { value: "quarterly", label: "Quarterly" },

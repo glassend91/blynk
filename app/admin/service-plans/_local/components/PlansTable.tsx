@@ -6,8 +6,10 @@ function StatusBadge({ value }: { value: PlanRow["status"] }) {
   const map = {
     Published: "text-[#19BF66]",
     Draft: "text-[#F59E0B]",
+    "Staff-Only": "text-[#6366F1]",
+    Hidden: "text-[#6F6C90]",
   } as const;
-  return <span className={["text-[14px] font-semibold", map[value]].join(" ")}>{value}</span>;
+  return <span className={["text-[14px] font-semibold", map[value] || "text-[#6F6C90]"].join(" ")}>{value}</span>;
 }
 
 const IconEdit = () => (
@@ -103,7 +105,7 @@ export default function PlansTable({ rows, onEdit, onToggleActive, onDelete }: P
                             type="button"
                             onClick={() => onToggleActive(r)}
                             className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white hover:bg-[#F8F8F8]"
-                            title={r.status === "Published" ? "Hide plan" : "Show plan"}
+                            title={r.status === "Published" ? "Hide plan" : r.status === "Hidden" ? "Show plan" : "Toggle visibility"}
                           >
                             {r.status === "Published" ? <IconEyeOff /> : <IconEye />}
                           </button>

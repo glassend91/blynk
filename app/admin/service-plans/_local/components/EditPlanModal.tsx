@@ -13,7 +13,7 @@ type Props = {
 };
 
 const planTypeOptions: PlanType[] = ["NBN", "Business NBN", "Mobile", "Data Only", "Voice Only"];
-const statusOptions: PlanStatus[] = ["Published", "Draft"];
+const statusOptions: PlanStatus[] = ["Published", "Draft", "Staff-Only", "Hidden"];
 const billingCycleOptions = [
   { value: "monthly", label: "Monthly" },
   { value: "quarterly", label: "Quarterly" },
@@ -88,7 +88,14 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
             }
 
             setDesc(service.description || plan.details || "");
-            setStatus(service.isActive ? "Published" : "Draft");
+            // Map visibilityStatus to status
+            if (service.visibilityStatus === 'internal') {
+              setStatus("Staff-Only");
+            } else if (service.visibilityStatus === 'hidden') {
+              setStatus("Hidden");
+            } else {
+              setStatus(service.isActive ? "Published" : "Draft");
+            }
           } else {
             // Fallback to plan data if API fails
             setName(plan.name || "");
@@ -100,7 +107,8 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
             setSpeed(plan.speedOrData || "");
             setFeatures("");
             setDesc(plan.details || "");
-            setStatus(plan.status || "Published");
+            // Use plan.status which should already include Staff-Only or Hidden if applicable
+            setStatus((plan.status as PlanStatus) || "Published");
           }
         })
         .catch((err) => {

@@ -15,7 +15,10 @@ import SignupModal5 from "@/components/nbn/modals/SignupModal5";
 import SignupModal6 from "@/components/nbn/modals/SignupModal6";
 
 type CustomerType = "residential" | "business";
-type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+// NEW service category (NBN vs Mobile)
+type ServiceType = "NBN" | "MOBILE";
+// Extend wizard steps to include an initial Service-Type chooser (0)
+type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 type AuthorizedContact = {
   firstName: string;
@@ -29,7 +32,8 @@ export default function UnifiedCustomerSignupController({
   open: boolean;
   onClose: () => void;
 }) {
-  const [step, setStep] = useState<Step>(1);
+  const [step, setStep] = useState<Step>(0); // start wizard at Service-Type selector
+  const [serviceType, setServiceType] = useState<ServiceType | null>(null);
   const [customerType, setCustomerType] = useState<CustomerType | null>(null);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   const [apiLoading, setApiLoading] = useState(false);
@@ -40,6 +44,10 @@ export default function UnifiedCustomerSignupController({
   const [serviceAddress, setServiceAddress] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number } | null>(null);
   const [identity, setIdentity] = useState<any>(null);
+
+  // Mobile-only fields
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [isPortIn, setIsPortIn] = useState(false);
 
   // Residential fields
   const [firstName, setFirstName] = useState("");
@@ -66,7 +74,8 @@ export default function UnifiedCustomerSignupController({
   ]);
 
   const closeAll = useCallback(() => {
-    setStep(1);
+    setStep(0);
+    setServiceType(null);
     setCustomerType(null);
     setApiLoading(false);
     setApiError(null);
@@ -75,6 +84,8 @@ export default function UnifiedCustomerSignupController({
     setServiceAddress("");
     setSelectedPlan(null);
     setIdentity(null);
+    setMobileNumber("");
+    setIsPortIn(false);
     setFirstName("");
     setLastName("");
     setEmail("");
@@ -104,6 +115,25 @@ export default function UnifiedCustomerSignupController({
     try {
       setApiLoading(true);
       setApiError(null);
+
+      // ----- MOBILE SERVICE SIGNUP -----
+      if (serviceType === "MOBILE") {
+        await signup({
+          type: "MBL",
+          mblSelectedNumber: !isPortIn ? mobileNumber : undefined,
+          mblKeepExistingNumber: isPortIn || undefined,
+          mblCurrentMobileNumber: isPortIn ? mobileNumber : undefined,
+          selectedPlan: selectedPlan || undefined,
+          customerType,
+          firstName: customerType === "business" ? primaryFirstName : firstName,
+          lastName: customerType === "business" ? primaryLastName : lastName,
+          email: customerType === "business" ? primaryEmail : email,
+          phone: customerType === "business" ? primaryPhone : phone,
+          password: customerType === "business" ? businessPassword : password,
+        });
+        setShowSuccess(true);
+        return;
+      }
 
       if (customerType === "residential") {
         await signup({
@@ -183,29 +213,64 @@ export default function UnifiedCustomerSignupController({
     primaryPhone,
     businessPassword,
     authorizedContacts,
+    serviceType,
+    mobileNumber,
+    isPortIn,
   ]);
 
   const goNext = useCallback(() => {
+    // Final step triggers completion
     if (step === 6) {
       handleComplete();
       return;
     }
-    // For business customers, skip ID check step (step 5)
-    if (customerType === "business" && step === 4) {
-      setStep(6); // Skip to payment
+
+    // ----- SERVICE-TYPE SPECIFIC FLOW CONTROL -----
+    if (serviceType === "MOBILE") {
+      // After mobile plan (step 2) go straight to customer details (step 4)
+      if (step === 2) {
+        setStep(4);
+        return;
+      }
+      // After details jump straight to payment (step 6)
+      if (step === 4) {
+        setStep(6);
+        return;
+      }
+    }
+
+    // Existing business customer optimisation (NBN only)
+    if (serviceType === "NBN" && customerType === "business" && step === 4) {
+      setStep(6);
       return;
     }
+
+    // Default advance
     setStep((s) => Math.min(7, (s + 1)) as Step);
-  }, [step, handleComplete, customerType]);
+  }, [step, handleComplete, serviceType, customerType]);
 
   const goBack = useCallback(() => {
-    // For business customers, skip ID check step when going back
-    if (customerType === "business" && step === 6) {
-      setStep(4); // Go back to customer details
+    // ----- SERVICE-TYPE SPECIFIC FLOW CONTROL -----
+    if (serviceType === "MOBILE") {
+      if (step === 6) {
+        setStep(4); // back to customer details
+        return;
+      }
+      if (step === 4) {
+        setStep(2); // back to mobile plan selection
+        return;
+      }
+    }
+
+    // NBN business path skipping ID check
+    if (serviceType === "NBN" && customerType === "business" && step === 6) {
+      setStep(4);
       return;
     }
-    setStep((s) => Math.max(1, (s - 1)) as Step);
-  }, [step, customerType]);
+
+    // Default back (ensure we don't go below 0)
+    setStep((s) => Math.max(0, (s - 1)) as Step);
+  }, [step, serviceType, customerType]);
 
   const addAuthorizedContact = () => {
     if (authorizedContacts.length < 3) {
@@ -230,6 +295,46 @@ export default function UnifiedCustomerSignupController({
   return (
     <>
       <div className="fixed inset-0 z-[90] grid place-items-center bg-black/55 p-4">
+        {/* Step 0: Service Type Selection */}
+        {step === 0 && (
+          <ModalShell onClose={handleCloseClick} size="default">
+            <Stepper active={1} />
+            <SectionPanel>
+              <div className="text-center">
+                <h2 className="modal-h1">Select Service Type</h2>
+                <p className="modal-sub mt-1">Is this an NBN or a Mobile service?</p>
+              </div>
+
+              <div className="mx-auto mt-8 max-w-[600px] space-y-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setServiceType("NBN");
+                    setStep(1);
+                  }}
+                  className="w-full rounded-[12px] border-2 border-[#E7E4EC] bg-white p-6 text-left transition-all hover:border-[#401B60] hover:shadow-md"
+                >
+                  <h3 className="text-[18px] font-semibold text-[#0A0A0A]">NBN (Fixed-Line)</h3>
+                  <p className="mt-1 text-[14px] text-[#6F6C90]">Broadband & VOIP</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setServiceType("MOBILE");
+                    setStep(1);
+                  }}
+                  className="w-full rounded-[12px] border-2 border-[#E7E4EC] bg-white p-6 text-left transition-all hover:border-[#401B60] hover:shadow-md"
+                >
+                  <h3 className="text-[18px] font-semibold text-[#0A0A0A]">Mobile</h3>
+                  <p className="mt-1 text-[14px] text-[#6F6C90]">Voice + Data / Data-only</p>
+                </button>
+              </div>
+            </SectionPanel>
+            <BarActions onBack={closeAll} onNext={() => { }} nextDisabled={true} />
+          </ModalShell>
+        )}
+
         {/* Step 1: Customer Type Selection */}
         {step === 1 && (
           <ModalShell onClose={handleCloseClick} size="default">
@@ -311,7 +416,7 @@ export default function UnifiedCustomerSignupController({
         )}
 
         {/* Step 2: Address Check (same for both) */}
-        {step === 2 && customerType && (
+        {step === 2 && serviceType === "NBN" && customerType && (
           <SignupModal1
             onNext={goNext}
             onBack={goBack}
@@ -321,8 +426,63 @@ export default function UnifiedCustomerSignupController({
           />
         )}
 
+        {/* Step 2 (Mobile): Number & Plan */}
+        {step === 2 && serviceType === "MOBILE" && (
+          <ModalShell onClose={handleCloseClick} size="wide">
+            <Stepper active={2} />
+            <SectionPanel>
+              <div className="text-center">
+                <h2 className="modal-h1">Mobile Service Details</h2>
+                <p className="modal-sub mt-1">Choose a plan and supply the mobile number</p>
+              </div>
+
+              <div className="card mx-auto mt-8 max-w-[860px] p-6 space-y-6">
+                <FormField label="Port-in existing number?">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={isPortIn}
+                      onChange={(e) => setIsPortIn(e.target.checked)}
+                      className="accent-[var(--cl-brand)]"
+                    />
+                    Yes, customer is porting in
+                  </label>
+                </FormField>
+
+                <FormField label={isPortIn ? "Existing Mobile Number" : "Preferred New Number"}>
+                  <input
+                    className="input w-full"
+                    placeholder="04xxxxxxxx"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                  />
+                </FormField>
+
+                <FormField label="Mobile Plan">
+                  <select
+                    className="input w-full"
+                    value={selectedPlan?.name || ""}
+                    onChange={(e) =>
+                      setSelectedPlan(
+                        e.target.value
+                          ? { name: e.target.value, price: 0 }
+                          : null
+                      )
+                    }
+                  >
+                    <option value="">-- Choose plan --</option>
+                    <option value="VOICE_40">Voice + 40 GB</option>
+                    <option value="DATA_100">Data-only 100 GB</option>
+                  </select>
+                </FormField>
+              </div>
+            </SectionPanel>
+            <BarActions onBack={goBack} onNext={goNext} nextDisabled={!selectedPlan || !mobileNumber} />
+          </ModalShell>
+        )}
+
         {/* Step 3: Plan Selection (same for both) */}
-        {step === 3 && customerType && (
+        {step === 3 && serviceType === "NBN" && customerType && (
           <SignupModal2
             onNext={goNext}
             onBack={goBack}
@@ -390,7 +550,7 @@ export default function UnifiedCustomerSignupController({
         )}
 
         {/* Step 5: ID Check (only for residential) */}
-        {step === 5 && customerType === "residential" && (
+        {step === 5 && serviceType === "NBN" && customerType === "residential" && (
           <SignupModal5 onNext={goNext} onBack={goBack} onClose={handleCloseClick} />
         )}
 
