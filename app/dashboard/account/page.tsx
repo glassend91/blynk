@@ -474,17 +474,17 @@ export default function AccountManagement() {
       {/* Change Password Modal */}
       {isPasswordModalOpen && (
         <div
-          className="fixed z-50 flex items-center justify-center"
-          style={{
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            margin: 0,
-            padding: 0,
-            width: '100vw',
-            height: '100vh'
-          }}
+          // className="fixed z-50 flex items-center justify-center"
+          // style={{
+          //   top: 0,
+          //   left: 0,
+          //   right: 0,
+          //   bottom: 0,
+          //   margin: 0,
+          //   padding: 0,
+          //   width: '100vw',
+          //   height: '100vh'
+          // }}
         >
           <div
             className="fixed bg-black"
@@ -494,9 +494,9 @@ export default function AccountManagement() {
               left: 0,
               right: 0,
               bottom: 0,
-              width: '100vw',
-              height: '100vh',
-              zIndex: 50,
+              // width: '100vw',
+              // height: '100vh',
+              // zIndex: 50,
               opacity: 0.5
             }}
           />

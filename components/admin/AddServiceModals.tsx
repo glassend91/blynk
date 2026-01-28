@@ -828,6 +828,8 @@ export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onCl
     const [step, setStep] = useState(1);
     const [customerId, setCustomerId] = useState(customerIdFromUrl || "");
     const [simType, setSimType] = useState<"eSim" | "physical">("eSim");
+    const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
+    const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
     const [numberChoice, setNumberChoice] = useState<"new" | "port">("new");
     const [selectedNumber, setSelectedNumber] = useState("");
     const [portingNumber, setPortingNumber] = useState("");
@@ -985,15 +987,41 @@ export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onCl
             return;
         }
 
+        // Validate conditional SIM fields
+        if (simType === "physical" && !simNumber?.trim()) {
+            setError("SIM Card Number (ICCID) is required for physical SIM");
+            return;
+        }
+
+        if (simType === "eSim") {
+            // Get customer email to default esimNotificationEmail if not provided
+            const customer = customers.find(c => (c.id || c.userId) === actualCustomerId);
+            const defaultEmail = customer?.email || "";
+            const finalEsimEmail = esimNotificationEmail?.trim() || defaultEmail;
+            
+            if (!finalEsimEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(finalEsimEmail)) {
+                setError("eSIM Notification Email is required and must be a valid email address");
+                return;
+            }
+        }
+
         try {
             setLoading(true);
             setError(null);
+
+            // Get customer email for eSIM notification email default
+            const customer = customers.find(c => (c.id || c.userId) === actualCustomerId);
+            const defaultEmail = customer?.email || "";
+            const finalEsimEmail = simType === "eSim" ? (esimNotificationEmail?.trim() || defaultEmail) : undefined;
 
             await apiClient.post("/customer-plans/add-service", {
                 customerId: actualCustomerId,
                 serviceId: selectedPlan.id,
                 assignedNumber: numberChoice === "new" ? selectedNumber : portingNumber,
                 assignedAddress: undefined, // Mobile Voice doesn't need address
+                simType: simType,
+                simNumber: simType === "physical" ? simNumber?.trim() : undefined, // Only include if physical SIM
+                esimNotificationEmail: finalEsimEmail, // Include if eSIM
             });
 
             const authUser = getAuthUser<{ firstName?: string; lastName?: string; email?: string }>();
@@ -1157,7 +1185,10 @@ export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onCl
                                             name="simType"
                                             value="eSim"
                                             checked={simType === "eSim"}
-                                            onChange={() => setSimType("eSim")}
+                                            onChange={() => {
+                                                setSimType("eSim");
+                                                setSimNumber(""); // Clear ICCID when switching to eSIM
+                                            }}
                                             className="h-4 w-4 accent-[#401B60]"
                                         />
                                         <span className="text-[14px] text-[#0A0A0A]">eSIM</span>
@@ -1168,13 +1199,51 @@ export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onCl
                                             name="simType"
                                             value="physical"
                                             checked={simType === "physical"}
-                                            onChange={() => setSimType("physical")}
+                                            onChange={() => {
+                                                setSimType("physical");
+                                                setEsimNotificationEmail(""); // Clear eSIM email when switching to physical
+                                            }}
                                             className="h-4 w-4 accent-[#401B60]"
                                         />
                                         <span className="text-[14px] text-[#0A0A0A]">Physical SIM</span>
                                     </label>
                                 </div>
                             </FormField>
+
+                            {/* Conditional SIM Fields */}
+                            {simType === "physical" && (
+                                <FormField label="SIM Card Number (ICCID) *">
+                                    <input
+                                        type="text"
+                                        value={simNumber}
+                                        onChange={(e) => setSimNumber(e.target.value)}
+                                        className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                                        placeholder="Enter SIM Card Number (ICCID)"
+                                    />
+                                    <p className="mt-1 text-xs text-[#6F6C90]">
+                                        The ICCID is printed on the physical SIM card. This is required for physical SIM provisioning.
+                                    </p>
+                                </FormField>
+                            )}
+
+                            {simType === "eSim" && (
+                                <FormField label="eSIM Notification Email *">
+                                    <input
+                                        type="email"
+                                        value={esimNotificationEmail}
+                                        onChange={(e) => setEsimNotificationEmail(e.target.value)}
+                                        className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                                        placeholder={(() => {
+                                            const customer = customers.find(c => (c.id || c.userId) === customerId);
+                                            return customer?.email || "Enter email for eSIM notifications";
+                                        })()}
+                                    />
+                                    <p className="mt-1 text-xs text-[#6F6C90]">
+                                        This email will receive the eSIM activation QR code and instructions. Defaults to customer's account email but can be changed.
+                                    </p>
+                                </FormField>
+                            )}
+
                             <div className="flex items-center justify-between gap-3 mt-6">
                                 <button
                                     type="button"
@@ -1185,7 +1254,24 @@ export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onCl
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setStep(4)}
+                                    onClick={() => {
+                                        // Validate SIM fields before proceeding
+                                        if (simType === "physical" && !simNumber?.trim()) {
+                                            setError("SIM Card Number (ICCID) is required for physical SIM");
+                                            return;
+                                        }
+                                        if (simType === "eSim") {
+                                            const customer = customers.find(c => (c.id || c.userId) === customerId);
+                                            const defaultEmail = customer?.email || "";
+                                            const finalEsimEmail = esimNotificationEmail?.trim() || defaultEmail;
+                                            if (!finalEsimEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(finalEsimEmail)) {
+                                                setError("eSIM Notification Email is required and must be a valid email address");
+                                                return;
+                                            }
+                                        }
+                                        setError(null);
+                                        setStep(4);
+                                    }}
                                     className="rounded-[10px] bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 ml-auto"
                                 >
                                     Next →
@@ -1478,6 +1564,9 @@ export function MobileBroadbandServiceModal({ open, onClose }: { open: boolean; 
     const [step, setStep] = useState(1);
     const [customerId, setCustomerId] = useState(customerIdFromUrl || "");
     const [selectedPlan, setSelectedPlan] = useState<{ id: string; name: string; price: number; serviceType: string } | null>(null);
+    const [simType, setSimType] = useState<"eSim" | "physical">("eSim");
+    const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
+    const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
     const [useCardOnFile, setUseCardOnFile] = useState(true);
     const [termsVerified, setTermsVerified] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -1560,15 +1649,41 @@ export function MobileBroadbandServiceModal({ open, onClose }: { open: boolean; 
             return;
         }
 
+        // Validate conditional SIM fields
+        if (simType === "physical" && !simNumber?.trim()) {
+            setError("SIM Card Number (ICCID) is required for physical SIM");
+            return;
+        }
+
+        if (simType === "eSim") {
+            // Get customer email to default esimNotificationEmail if not provided
+            const customer = customers.find(c => (c.id || c.userId) === actualCustomerId);
+            const defaultEmail = customer?.email || "";
+            const finalEsimEmail = esimNotificationEmail?.trim() || defaultEmail;
+            
+            if (!finalEsimEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(finalEsimEmail)) {
+                setError("eSIM Notification Email is required and must be a valid email address");
+                return;
+            }
+        }
+
         try {
             setLoading(true);
             setError(null);
+
+            // Get customer email for eSIM notification email default
+            const customer = customers.find(c => (c.id || c.userId) === actualCustomerId);
+            const defaultEmail = customer?.email || "";
+            const finalEsimEmail = simType === "eSim" ? (esimNotificationEmail?.trim() || defaultEmail) : undefined;
 
             await apiClient.post("/customer-plans/add-service", {
                 customerId: actualCustomerId,
                 serviceId: selectedPlan.id,
                 assignedAddress: undefined, // Mobile Broadband doesn't need address
                 assignedNumber: undefined, // Mobile Broadband doesn't need number
+                simType: simType,
+                simNumber: simType === "physical" ? simNumber?.trim() : undefined, // Only include if physical SIM
+                esimNotificationEmail: finalEsimEmail, // Include if eSIM
             });
 
             const authUser = getAuthUser<{ firstName?: string; lastName?: string; email?: string }>();
@@ -1714,8 +1829,114 @@ export function MobileBroadbandServiceModal({ open, onClose }: { open: boolean; 
                         </div>
                     )}
 
-                    {/* Step 3: Payment & Agreements */}
+                    {/* Step 3: SIM Type */}
                     {step === 3 && (
+                        <div className="space-y-4">
+                            <FormField label="SIM Type *">
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="simType"
+                                            value="eSim"
+                                            checked={simType === "eSim"}
+                                            onChange={() => {
+                                                setSimType("eSim");
+                                                setSimNumber(""); // Clear ICCID when switching to eSIM
+                                            }}
+                                            className="h-4 w-4 accent-[#401B60]"
+                                        />
+                                        <span className="text-[14px] text-[#0A0A0A]">eSIM</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="simType"
+                                            value="physical"
+                                            checked={simType === "physical"}
+                                            onChange={() => {
+                                                setSimType("physical");
+                                                setEsimNotificationEmail(""); // Clear eSIM email when switching to physical
+                                            }}
+                                            className="h-4 w-4 accent-[#401B60]"
+                                        />
+                                        <span className="text-[14px] text-[#0A0A0A]">Physical SIM</span>
+                                    </label>
+                                </div>
+                            </FormField>
+
+                            {/* Conditional SIM Fields */}
+                            {simType === "physical" && (
+                                <FormField label="SIM Card Number (ICCID) *">
+                                    <input
+                                        type="text"
+                                        value={simNumber}
+                                        onChange={(e) => setSimNumber(e.target.value)}
+                                        className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                                        placeholder="Enter SIM Card Number (ICCID)"
+                                    />
+                                    <p className="mt-1 text-xs text-[#6F6C90]">
+                                        The ICCID is printed on the physical SIM card. This is required for physical SIM provisioning.
+                                    </p>
+                                </FormField>
+                            )}
+
+                            {simType === "eSim" && (
+                                <FormField label="eSIM Notification Email *">
+                                    <input
+                                        type="email"
+                                        value={esimNotificationEmail}
+                                        onChange={(e) => setEsimNotificationEmail(e.target.value)}
+                                        className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                                        placeholder={(() => {
+                                            const customer = customers.find(c => (c.id || c.userId) === customerId);
+                                            return customer?.email || "Enter email for eSIM notifications";
+                                        })()}
+                                    />
+                                    <p className="mt-1 text-xs text-[#6F6C90]">
+                                        This email will receive the eSIM activation QR code and instructions. Defaults to customer's account email but can be changed.
+                                    </p>
+                                </FormField>
+                            )}
+
+                            <div className="flex items-center justify-between gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setStep(2)}
+                                    className="rounded-[10px] border border-[#DFDBE3] px-4 py-2 text-[14px] font-semibold text-[#6F6C90] hover:bg-[#F8F8F8]"
+                                >
+                                    ← Back
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        // Validate SIM fields before proceeding
+                                        if (simType === "physical" && !simNumber?.trim()) {
+                                            setError("SIM Card Number (ICCID) is required for physical SIM");
+                                            return;
+                                        }
+                                        if (simType === "eSim") {
+                                            const customer = customers.find(c => (c.id || c.userId) === customerId);
+                                            const defaultEmail = customer?.email || "";
+                                            const finalEsimEmail = esimNotificationEmail?.trim() || defaultEmail;
+                                            if (!finalEsimEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(finalEsimEmail)) {
+                                                setError("eSIM Notification Email is required and must be a valid email address");
+                                                return;
+                                            }
+                                        }
+                                        setError(null);
+                                        setStep(4);
+                                    }}
+                                    className="rounded-[10px] bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 ml-auto"
+                                >
+                                    Next →
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 4: Payment & Agreements */}
+                    {step === 4 && (
                         <div className="space-y-4">
                             <FormField label="Payment Method">
                                 <label className="flex items-center gap-2 cursor-pointer">
@@ -1757,7 +1978,7 @@ export function MobileBroadbandServiceModal({ open, onClose }: { open: boolean; 
                             <div className="flex items-center justify-between gap-3 mt-6">
                                 <button
                                     type="button"
-                                    onClick={() => setStep(2)}
+                                    onClick={() => setStep(3)}
                                     className="rounded-[10px] border border-[#DFDBE3] px-4 py-2 text-[14px] font-semibold text-[#6F6C90] hover:bg-[#F8F8F8]"
                                 >
                                     ← Back

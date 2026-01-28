@@ -27,6 +27,8 @@ export default function MobileVoiceSignup4({
   simType,
   identity,
   otpVerified: initialOtpVerified,
+  simNumber,
+  esimNotificationEmail,
   onChangeFirstName,
   onChangeLastName,
   onChangeEmail,
@@ -38,6 +40,8 @@ export default function MobileVoiceSignup4({
   onChangeCurrentNumber,
   onChangeCurrentProvider,
   onOtpVerified,
+  onChangeSimNumber,
+  onChangeEsimNotificationEmail,
 }: {
   onNext: () => void;
   onBack: () => void;
@@ -56,6 +60,8 @@ export default function MobileVoiceSignup4({
   simType: "ESIM" | "PHYSICAL";
   identity: any;
   otpVerified?: boolean;
+  simNumber?: string;
+  esimNotificationEmail?: string;
   onChangeFirstName: (v: string) => void;
   onChangeLastName: (v: string) => void;
   onChangeEmail: (v: string) => void;
@@ -67,6 +73,8 @@ export default function MobileVoiceSignup4({
   onChangeCurrentNumber: (v: string) => void;
   onChangeCurrentProvider: (v: string) => void;
   onOtpVerified?: (verified: boolean) => void;
+  onChangeSimNumber?: (v: string) => void;
+  onChangeEsimNotificationEmail?: (v: string) => void;
 }) {
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
@@ -82,6 +90,8 @@ export default function MobileVoiceSignup4({
   const [billingAddressError, setBillingAddressError] = useState<string | null>(null);
   const [currentNumberError, setCurrentNumberError] = useState<string | null>(null);
   const [currentProviderError, setCurrentProviderError] = useState<string | null>(null);
+  const [simNumberError, setSimNumberError] = useState<string | null>(null);
+  const [esimNotificationEmailError, setEsimNotificationEmailError] = useState<string | null>(null);
 
   // OTP states
   const [otpCode, setOtpCode] = useState("");
@@ -155,6 +165,11 @@ export default function MobileVoiceSignup4({
     const cpErr = keepExisting && !currentProvider ? "Current provider is required for porting" : null;
     const otpErr = keepExisting && !otpVerified ? "Please verify number ownership with OTP" : null;
 
+    // SIM provisioning validation (conditional based on simType)
+    const simNumErr = simType === "PHYSICAL" && (!simNumber || !simNumber.trim()) ? "SIM Card Number (ICCID) is required for physical SIM" : null;
+    const esimEmailErr = simType === "ESIM" && (!esimNotificationEmail || !esimNotificationEmail.trim() || !isValidEmail(esimNotificationEmail))
+      ? "eSIM Notification Email is required and must be a valid email address" : null;
+
     setFirstNameError(fnErr);
     setLastNameError(lnErr);
     setPhoneError(phErr);
@@ -164,8 +179,10 @@ export default function MobileVoiceSignup4({
     setEmailError(emErr);
     setCurrentNumberError(cnErr);
     setCurrentProviderError(cpErr);
+    setSimNumberError(simNumErr);
+    setEsimNotificationEmailError(esimEmailErr);
 
-    return !fnErr && !lnErr && !phErr && !dbErr && !pwErr && !baErr && !emErr && !cnErr && !cpErr && !otpErr;
+    return !fnErr && !lnErr && !phErr && !dbErr && !pwErr && !baErr && !emErr && !cnErr && !cpErr && !otpErr && !simNumErr && !esimEmailErr;
   };
 
   useEffect(() => {
@@ -296,7 +313,10 @@ export default function MobileVoiceSignup4({
     password && password.length >= 6 &&
     billingAddress &&
     (!keepExisting || (currentNumber && currentProvider && otpVerified)) &&
-    (keepExisting || mblSelectedNumber)
+    (keepExisting || mblSelectedNumber) &&
+    // SIM provisioning fields validation
+    (simType === "PHYSICAL" ? (simNumber && simNumber.trim()) : true) &&
+    (simType === "ESIM" ? (esimNotificationEmail && esimNotificationEmail.trim() && isValidEmail(esimNotificationEmail)) : true)
   );
 
   return (
@@ -435,6 +455,58 @@ export default function MobileVoiceSignup4({
             </div>
           </div>
 
+          {/* Conditional SIM Provisioning Fields */}
+          {(simType === "PHYSICAL" || simType === "ESIM") && (
+            <div className="mt-6 border-t border-[#E9E3F2] pt-6">
+              <h3 className="text-[16px] font-semibold text-[#2E2745] mb-4">
+                {simType === "PHYSICAL" ? "Physical SIM Details" : "eSIM Details"}
+              </h3>
+
+              {simType === "PHYSICAL" && (
+                <div>
+                  <label className="text-[12px] font-semibold text-[#3B3551]">
+                    SIM Card Number (ICCID) <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    value={simNumber || ""}
+                    onChange={(e) => {
+                      if (onChangeSimNumber) onChangeSimNumber(e.target.value);
+                      if (submitted) setSimNumberError(null);
+                    }}
+                    className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${simNumberError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
+                    placeholder="Enter SIM Card Number (ICCID)"
+                  />
+                  {simNumberError && <p className="mt-1 text-xs text-red-600">{simNumberError}</p>}
+                  <p className="mt-1 text-xs text-[#6F6C90]">
+                    The ICCID is printed on the physical SIM card. This is required for physical SIM provisioning.
+                  </p>
+                </div>
+              )}
+
+              {simType === "ESIM" && (
+                <div>
+                  <label className="text-[12px] font-semibold text-[#3B3551]">
+                    eSIM Notification Email <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={esimNotificationEmail || email || ""}
+                    onChange={(e) => {
+                      if (onChangeEsimNotificationEmail) onChangeEsimNotificationEmail(e.target.value);
+                      if (submitted) setEsimNotificationEmailError(null);
+                    }}
+                    className={`mt-2 w-full rounded-[10px] border px-4 py-3 outline-none focus:ring-2 focus:ring-[#401B60]/20 ${esimNotificationEmailError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
+                    placeholder="Enter email for eSIM notifications"
+                  />
+                  {esimNotificationEmailError && <p className="mt-1 text-xs text-red-600">{esimNotificationEmailError}</p>}
+                  <p className="mt-1 text-xs text-[#6F6C90]">
+                    This email will receive the eSIM activation QR code and instructions. Defaults to your account email but can be changed.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Conditional Porting Section - Only show if keeping existing number */}
           {keepExisting && (
             <>
@@ -528,6 +600,18 @@ export default function MobileVoiceSignup4({
                           : "Resend OTP"}
                     </button>
                   )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtpVerified(true);
+                      setOtpMessage("OTP Flow Skipped (Temporary)");
+                      if (onOtpVerified) onOtpVerified(true);
+                    }}
+                    className="h-[48px] rounded-[10px] border border-dashed border-red-300 bg-red-50 px-4 text-[13px] font-semibold text-red-600 hover:bg-red-100"
+                  >
+                    Skip (Dev)
+                  </button>
 
                   <button
                     type="button"

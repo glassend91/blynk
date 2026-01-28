@@ -95,27 +95,27 @@ export default function BusinessSmeSignup6({
 
             {/* Payment Form - Right Column */}
             <div className="rounded-[16px] border border-[#E7E4EC] bg-white p-6 shadow-[0_24px_60px_rgba(64,27,118,0.08)]">
-          <StripeProvider>
-            <div className="space-y-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <div className="grid h-8 w-8 place-items-center rounded-full bg-blue-100">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
-                    </svg>
+              <StripeProvider>
+                <div className="space-y-6">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-8 w-8 place-items-center rounded-full bg-blue-100">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-blue-800">Secure Business Payment</p>
+                        <p className="text-sm text-blue-600">Your payment information is encrypted and secure</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-blue-800">Secure Business Payment</p>
-                    <p className="text-sm text-blue-600">Your payment information is encrypted and secure</p>
-                  </div>
-                </div>
-              </div>
 
-              <StripeCardElement
-                onPaymentSuccess={handlePaymentSuccess}
-                onPaymentError={handlePaymentError}
-                amount={paymentAmount}
-                currency="aud"
+                  <StripeCardElement
+                    onPaymentSuccess={handlePaymentSuccess}
+                    onPaymentError={handlePaymentError}
+                    amount={paymentAmount}
+                    currency="aud"
                     hideButton={true}
                     onSubmitRef={(fn) => setSubmitPaymentFn(() => fn)}
                     formId="payment-form-sme"
@@ -167,36 +167,36 @@ export default function BusinessSmeSignup6({
                     {isProcessing ? "Processing Payment..." : "Process Payment"}
                   </button>
 
-              {paymentError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-8 w-8 place-items-center rounded-full bg-red-100">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
-                      </svg>
+                  {paymentError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="grid h-8 w-8 place-items-center rounded-full bg-red-100">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-red-800">Payment Error</p>
+                          <p className="text-sm text-red-600">{paymentError}</p>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold text-red-800">Payment Error</p>
-                      <p className="text-sm text-red-600">{paymentError}</p>
-                    </div>
+                  )}
+
+                  <label className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 accent-[#4F1C76]"
+                      checked={invoiceRequested}
+                      onChange={(e) => setInvoiceRequested(e.target.checked)}
+                    />
+                    <span className="text-[14px] text-[#3B3551]">Request monthly invoices for business records</span>
+                  </label>
+                  <div className="text-[12px] text-[#9A93B3]">
+                    Invoices will be sent to your registered business email
                   </div>
                 </div>
-              )}
-
-              <label className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                      className="mt-1 h-4 w-4 accent-[#4F1C76]"
-                  checked={invoiceRequested}
-                  onChange={(e) => setInvoiceRequested(e.target.checked)}
-                />
-                <span className="text-[14px] text-[#3B3551]">Request monthly invoices for business records</span>
-              </label>
-              <div className="text-[12px] text-[#9A93B3]">
-                Invoices will be sent to your registered business email
-              </div>
-            </div>
-          </StripeProvider>
+              </StripeProvider>
             </div>
           </div>
         )}

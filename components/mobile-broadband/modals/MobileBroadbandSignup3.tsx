@@ -21,6 +21,8 @@ export default function MobileBroadbandSignup3({
   serviceAddress,
   simType,
   identity,
+  simNumber,
+  esimNotificationEmail,
   onChangeFirstName,
   onChangeLastName,
   onChangeEmail,
@@ -29,6 +31,8 @@ export default function MobileBroadbandSignup3({
   onChangePassword,
   onChangeBillingAddress,
   onChangeServiceAddress,
+  onChangeSimNumber,
+  onChangeEsimNotificationEmail,
 }: {
   onNext: () => void;
   onBack: () => void;
@@ -43,6 +47,8 @@ export default function MobileBroadbandSignup3({
   serviceAddress: string;
   simType: "eSim" | "physical";
   identity: any;
+  simNumber?: string;
+  esimNotificationEmail?: string;
   onChangeFirstName: (v: string) => void;
   onChangeLastName: (v: string) => void;
   onChangeEmail: (v: string) => void;
@@ -51,6 +57,8 @@ export default function MobileBroadbandSignup3({
   onChangePassword: (v: string) => void;
   onChangeBillingAddress: (v: string) => void;
   onChangeServiceAddress: (v: string) => void;
+  onChangeSimNumber?: (v: string) => void;
+  onChangeEsimNotificationEmail?: (v: string) => void;
 }) {
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
@@ -61,6 +69,8 @@ export default function MobileBroadbandSignup3({
   const [dobError, setDobError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [billingAddressError, setBillingAddressError] = useState<string | null>(null);
+  const [simNumberError, setSimNumberError] = useState<string | null>(null);
+  const [esimNotificationEmailError, setEsimNotificationEmailError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   const isValidEmail = (email: string) => {
@@ -119,6 +129,11 @@ export default function MobileBroadbandSignup3({
     const baErr = !billingAddress ? "Billing address is required" : null;
     const emErr = !email ? "Email is required" : !isValidEmail(email) ? "Please enter a valid email address" : emailExists ? (emailError || "Email already registered") : null;
 
+    // SIM provisioning validation (conditional based on simType)
+    const simNumErr = simType === "physical" && (!simNumber || !simNumber.trim()) ? "SIM Card Number (ICCID) is required for physical SIM" : null;
+    const esimEmailErr = simType === "eSim" && (!esimNotificationEmail || !esimNotificationEmail.trim() || !isValidEmail(esimNotificationEmail))
+      ? "eSIM Notification Email is required and must be a valid email address" : null;
+
     setFirstNameError(fnErr);
     setLastNameError(lnErr);
     setPhoneError(phErr);
@@ -126,8 +141,10 @@ export default function MobileBroadbandSignup3({
     setPasswordError(pwErr);
     setBillingAddressError(baErr);
     setEmailError(emErr);
+    setSimNumberError(simNumErr);
+    setEsimNotificationEmailError(esimEmailErr);
 
-    return !fnErr && !lnErr && !phErr && !dbErr && !pwErr && !baErr && !emErr;
+    return !fnErr && !lnErr && !phErr && !dbErr && !pwErr && !baErr && !emErr && !simNumErr && !esimEmailErr;
   };
   return (
     <ModalShell onClose={onClose} size="wide">
@@ -236,6 +253,58 @@ export default function MobileBroadbandSignup3({
             />
             {billingAddressError && <p className="mt-1 text-xs text-red-600">{billingAddressError}</p>}
           </div>
+
+          {/* Conditional SIM Provisioning Fields */}
+          {(simType === "physical" || simType === "eSim") && (
+            <div className="mt-6 border-t border-[#E7E4EC] pt-6">
+              <h3 className="text-[16px] font-semibold text-[#2E2745] mb-4">
+                {simType === "physical" ? "Physical SIM Details" : "eSIM Details"}
+              </h3>
+
+              {simType === "physical" && (
+                <div>
+                  <label className="mb-1 block text-sm text-[#6B6478]">
+                    SIM Card Number (ICCID) <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    value={simNumber || ""}
+                    onChange={(e) => {
+                      if (onChangeSimNumber) onChangeSimNumber(e.target.value);
+                      if (submitted) setSimNumberError(null);
+                    }}
+                    className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${simNumberError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
+                    placeholder="Enter SIM Card Number (ICCID)"
+                  />
+                  {simNumberError && <p className="mt-1 text-xs text-red-600">{simNumberError}</p>}
+                  <p className="mt-1 text-xs text-[#6F6C90]">
+                    The ICCID is printed on the physical SIM card. This is required for physical SIM provisioning.
+                  </p>
+                </div>
+              )}
+
+              {simType === "eSim" && (
+                <div>
+                  <label className="mb-1 block text-sm text-[#6B6478]">
+                    eSIM Notification Email <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={esimNotificationEmail || email || ""}
+                    onChange={(e) => {
+                      if (onChangeEsimNotificationEmail) onChangeEsimNotificationEmail(e.target.value);
+                      if (submitted) setEsimNotificationEmailError(null);
+                    }}
+                    className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${esimNotificationEmailError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
+                    placeholder="Enter email for eSIM notifications"
+                  />
+                  {esimNotificationEmailError && <p className="mt-1 text-xs text-red-600">{esimNotificationEmailError}</p>}
+                  <p className="mt-1 text-xs text-[#6F6C90]">
+                    This email will receive the eSIM activation QR code and instructions. Defaults to your account email but can be changed.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </SectionPanel>
 

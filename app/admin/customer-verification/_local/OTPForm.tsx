@@ -103,6 +103,12 @@ export function OTPForm({ onSuccess }: { onSuccess?: () => void }) {
         >
           {submitting && channel === 'email' ? 'Sending...' : 'Send Email'}
         </button>
+        <button
+          className="rounded-md border border-dashed border-red-300 bg-red-50 px-4 py-2 text-[13px] font-semibold text-red-600 hover:bg-red-100"
+          onClick={() => onSuccess?.()}
+        >
+          Skip
+        </button>
       </div>
     </div>
   );

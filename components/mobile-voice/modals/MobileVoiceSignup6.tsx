@@ -38,7 +38,7 @@ export default function MobileVoiceSignup6({
     setPaymentSuccess(true);
     setPaymentError(null);
     setIsProcessing(false);
-    
+
     // Call signup API after payment success
     if (onPaymentSuccess) {
       try {

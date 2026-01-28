@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { getServices, subscribeToService, type Service } from '../lib/services/services';
+import { getCurrentUser } from '../lib/services/auth';
+import { useRouter } from 'next/navigation';
 import { getPaymentMethods, type PaymentMethod } from '../lib/services/paymentMethods';
 
 interface BuyServiceModalProps {
@@ -24,6 +26,8 @@ function ServiceSelection({ onClose, onSuccess }: ServiceSelectionProps) {
     const [loading, setLoading] = useState(true);
     const [subscribing, setSubscribing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
+    const router = useRouter();
     const [step, setStep] = useState<'services' | 'addons' | 'payment' | 'review'>('services');
 
     useEffect(() => {
@@ -34,13 +38,32 @@ function ServiceSelection({ onClose, onSuccess }: ServiceSelectionProps) {
         try {
             setLoading(true);
             setError(null);
+
+            // Determine which serviceType to request based on current user's type
+            let serviceParams: { serviceType?: string } | undefined = undefined;
+            try {
+                const userResp = await getCurrentUser();
+                const userType = userResp?.user?.type;
+                const TYPE_TO_SERVICE_TYPE: Record<string, string> = {
+                    NBN: 'NBN',
+                    MBL: 'Mobile',
+                    MBB: 'Data Only',
+                    SME: 'Business NBN'
+                };
+                if (userType && TYPE_TO_SERVICE_TYPE[userType]) {
+                    serviceParams = { serviceType: TYPE_TO_SERVICE_TYPE[userType] };
+                }
+            } catch (e) {
+                // If fetching user fails, fall back to requesting all services
+            }
+
             const [servicesData, paymentMethodsData] = await Promise.all([
-                getServices(),
+                getServices(serviceParams),
                 getPaymentMethods()
             ]);
-            console.log('Loaded payment methods:', paymentMethodsData.paymentMethods);
-            setServices(servicesData.services);
-            setPaymentMethods(paymentMethodsData.paymentMethods);
+            console.log('Loaded payment methods:', servicesData);
+            setServices(servicesData.services || []);
+            setPaymentMethods(paymentMethodsData.paymentMethods || []);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load data');
         } finally {
@@ -104,13 +127,13 @@ function ServiceSelection({ onClose, onSuccess }: ServiceSelectionProps) {
     const calculateTotalPrice = () => {
         if (!selectedService) return 0;
 
-        let total = selectedService.price;
-        const selectedAddOnObjects = selectedService.addOns.filter(addon =>
-            selectedAddOns.includes(addon._id)
+        let total = selectedService?.price;
+        const selectedAddOnObjects = selectedService?.addOns?.filter(addon =>
+            selectedAddOns.includes(addon?._id)
         );
 
-        selectedAddOnObjects.forEach(addon => {
-            total += addon.price;
+        selectedAddOnObjects?.forEach(addon => {
+            total += addon?.price;
         });
 
         return total;
@@ -266,11 +289,21 @@ function ServiceSelection({ onClose, onSuccess }: ServiceSelectionProps) {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-8">
-                            <p className="text-gray-500 mb-4">No payment methods found.</p>
-                            <p className="text-sm text-gray-400">Please add a payment method first.</p>
+                        <div className="text-center py-8 space-y-3">
+                            <p className="text-gray-500 mb-2">Payment method not found.</p>
+                            <p className="text-sm text-gray-400">Create a payment method to continue.</p>
+                            <div>
+                                <button
+                                    onClick={() => router.push('/dashboard/payment-method')}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-[#3F205F] border border-transparent rounded-md hover:bg-[#2D1A4A]"
+                                >
+                                    Create Payment Method
+                                </button>
+                            </div>
                         </div>
                     )}
+
+                    {/* Navigates to the payment methods page for creating new methods */}
                 </div>
             )}
 

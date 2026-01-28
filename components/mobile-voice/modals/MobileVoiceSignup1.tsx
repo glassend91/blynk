@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ModalShell from "@/components/shared/ModalShell";
 import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
@@ -7,13 +7,16 @@ import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
 
 type Plan = {
+  id?: string;
   name: string;
   price: number;
   perks: string[];
   badge?: string;
 };
 
-const plans: Plan[] = [
+import apiClient from "@/lib/apiClient";
+
+const fallbackPlans: Plan[] = [
   { name: "Mobile Basic", price: 25, perks: ["5GB Data", "Unlimited National", "Unlimited SMS"] },
   { name: "Mobile Standard", price: 35, perks: ["20GB Data", "Unlimited National", "Unlimited SMS"], badge: "Most Popular" },
   { name: "Mobile Premium", price: 55, perks: ["100GB Data", "Unlimited National & International", "Unlimited SMS"] },
@@ -32,9 +35,37 @@ export default function MobileVoiceSignup1({
   selectedPlan?: { name: string; price: number } | null;
   onPlanSelect?: (plan: { name: string; price: number }) => void;
 }) {
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(
-    initialSelectedPlan ? plans.find(p => p.name === initialSelectedPlan.name) || null : null
-  );
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const resp = await apiClient.get('/services', { params: { serviceType: 'Mobile' } });
+        const data = resp.data && resp.data.data ? resp.data.data : resp.data;
+        if (!mounted) return;
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((s: any) => ({ id: s._id, name: s.serviceName || 'Mobile Plan', price: s.price || 0, perks: (s.features || []).map((f: any) => (typeof f === 'string' ? f : f.name || '')) }));
+          setPlans(mapped);
+          if (initialSelectedPlan) {
+            const found = mapped.find((p: any) => p.name === initialSelectedPlan.name);
+            if (found) setSelectedPlan(found);
+          }
+        }
+      } catch (err: any) {
+        console.error('Failed to load Mobile services:', err);
+        setLoadError(err?.message || 'Failed to load plans');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan);
@@ -65,60 +96,71 @@ export default function MobileVoiceSignup1({
         </div>
 
         <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {plans.map((plan) => {
-            const isSelected = selectedPlan?.name === plan.name;
-            return (
-              <button
-                key={plan.name}
-                type="button"
-                onClick={() => handlePlanSelect(plan)}
-                className={[
-                  "text-left rounded-[16px] border bg-white p-6 shadow-[0_40px_60px_rgba(0,0,0,0.06)] transition-all",
-                  isSelected ? "border-2 border-[#5C3B86] bg-[#FBF8FF]" : "border border-[#DFDBE3] hover:border-[#5C3B86]/50",
-                ].join(" ")}
-              >
-                {isSelected && (
-                  <div className="mb-3 flex items-center justify-end">
-                    <div className="grid h-6 w-6 place-items-center rounded-full bg-[#5C3B86] text-white">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+          {loading ? (
+            [1,2,3].map(i => (
+              <div key={i} className="p-6 rounded-[16px] border bg-white animate-pulse">
+                <div className="h-6 w-6 mb-3 rounded-full bg-gray-200" />
+                <div className="h-6 w-1/2 bg-gray-200 mb-4 rounded" />
+                <div className="h-10 w-1/4 bg-gray-200 mb-4 rounded" />
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-200 rounded" />
+                  <div className="h-3 bg-gray-200 rounded w-5/6" />
+                </div>
+              </div>
+            ))
+          ) : loadError ? (
+            <div className="col-span-3 text-center text-red-600">Failed to load plans. Please try again later.</div>
+          ) : plans.length === 0 ? (
+            <div className="col-span-3 text-center">No plans available</div>
+          ) : (
+            plans.map((plan) => {
+              const isSelected = selectedPlan?.name === plan.name;
+              return (
+                <button
+                  key={plan.name}
+                  type="button"
+                  onClick={() => handlePlanSelect(plan)}
+                  className={[
+                    "text-left rounded-[16px] border bg-white p-6 shadow-[0_40px_60px_rgba(0,0,0,0.06)] transition-all",
+                    isSelected ? "border-2 border-[#5C3B86] bg-[#FBF8FF]" : "border border-[#DFDBE3] hover:border-[#5C3B86]/50",
+                  ].join(" ")}
+                >
+                  {isSelected && (
+                    <div className="mb-3 flex items-center justify-end">
+                      <div className="grid h-6 w-6 place-items-center rounded-full bg-[#5C3B86] text-white">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
                     </div>
-                  </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <div className={["text-[18px] font-semibold", isSelected ? "text-[#5C3B86]" : "text-[#7C7396]"].join(" ")}>
+                  )}
+                  <div className={[("text-[18px] font-semibold"), isSelected ? "text-[#5C3B86]" : "text-[#7C7396]"].join(" ")}>
                     {plan.name}
                   </div>
-                  {plan.badge && (
-                    <span className="rounded-[8px] bg-[#1C1232] px-2 py-1 text-[12px] font-semibold text-white">
-                      {plan.badge}
-                    </span>
-                  )}
-                </div>
 
-                <div className="mt-3 text-[32px] font-extrabold text-[#2F2151]">
-                  ${plan.price}
-                  <span className="ml-1 text-[16px] font-semibold">/month</span>
-                </div>
+                  <div className="mt-3 text-[32px] font-extrabold text-[#2F2151]">
+                    ${plan.price}
+                    <span className="ml-1 text-[16px] font-semibold">/month</span>
+                  </div>
 
-                <ul className="mt-4 space-y-2 text-[14px] text-[#5D5875]">
-                  {plan.perks.map((p, idx) => (
-                    <li key={idx} className="flex items-center gap-2">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-                        <path d="M20 6 9 17l-5-5" stroke="#3EB164" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              </button>
-            );
-          })}
+                  <ul className="mt-4 space-y-2 text-[14px] text-[#5D5875]">
+                    {plan.perks.map((p, idx) => (
+                      <li key={idx} className="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+                          <path d="M20 6 9 17l-5-5" stroke="#3EB164" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                </button>
+              );
+            })
+          )}
         </div>
       </SectionPanel>
 
-      <BarActions onBack={onBack} onNext={onNext} nextDisabled={!selectedPlan} />
+      <BarActions onBack={onBack} onNext={onNext} nextDisabled={!selectedPlan || loading || !!loadError} />
     </ModalShell>
   );
 }

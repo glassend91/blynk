@@ -48,6 +48,9 @@ export default function UnifiedCustomerSignupController({
   // Mobile-only fields
   const [mobileNumber, setMobileNumber] = useState("");
   const [isPortIn, setIsPortIn] = useState(false);
+  const [simType, setSimType] = useState<"eSim" | "physical">("eSim");
+  const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
+  const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
 
   // Residential fields
   const [firstName, setFirstName] = useState("");
@@ -86,6 +89,9 @@ export default function UnifiedCustomerSignupController({
     setIdentity(null);
     setMobileNumber("");
     setIsPortIn(false);
+    setSimType("eSim");
+    setSimNumber("");
+    setEsimNotificationEmail("");
     setFirstName("");
     setLastName("");
     setEmail("");
@@ -118,6 +124,7 @@ export default function UnifiedCustomerSignupController({
 
       // ----- MOBILE SERVICE SIGNUP -----
       if (serviceType === "MOBILE") {
+        const customerEmail = customerType === "business" ? primaryEmail : email;
         await signup({
           type: "MBL",
           mblSelectedNumber: !isPortIn ? mobileNumber : undefined,
@@ -127,9 +134,12 @@ export default function UnifiedCustomerSignupController({
           customerType,
           firstName: customerType === "business" ? primaryFirstName : firstName,
           lastName: customerType === "business" ? primaryLastName : lastName,
-          email: customerType === "business" ? primaryEmail : email,
+          email: customerEmail,
           phone: customerType === "business" ? primaryPhone : phone,
           password: customerType === "business" ? businessPassword : password,
+          simType: simType,
+          simNumber: simType === "physical" ? simNumber : undefined, // Only include if physical SIM
+          esimNotificationEmail: simType === "eSim" ? (esimNotificationEmail || customerEmail) : undefined, // Default to account email if not provided
         });
         setShowSuccess(true);
         return;
@@ -216,6 +226,9 @@ export default function UnifiedCustomerSignupController({
     serviceType,
     mobileNumber,
     isPortIn,
+    simType,
+    simNumber,
+    esimNotificationEmail,
   ]);
 
   const goNext = useCallback(() => {
@@ -475,9 +488,82 @@ export default function UnifiedCustomerSignupController({
                     <option value="DATA_100">Data-only 100 GB</option>
                   </select>
                 </FormField>
+
+                <FormField label="SIM Type *">
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="simType"
+                        value="eSim"
+                        checked={simType === "eSim"}
+                        onChange={() => {
+                          setSimType("eSim");
+                          setSimNumber(""); // Clear ICCID when switching to eSIM
+                        }}
+                        className="h-4 w-4 accent-[#401B60]"
+                      />
+                      <span className="text-[14px] text-[#0A0A0A]">eSIM</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="simType"
+                        value="physical"
+                        checked={simType === "physical"}
+                        onChange={() => {
+                          setSimType("physical");
+                          setEsimNotificationEmail(""); // Clear eSIM email when switching to physical
+                        }}
+                        className="h-4 w-4 accent-[#401B60]"
+                      />
+                      <span className="text-[14px] text-[#0A0A0A]">Physical SIM</span>
+                    </label>
+                  </div>
+                </FormField>
+
+                {/* Conditional SIM Fields */}
+                {simType === "physical" && (
+                  <FormField label="SIM Card Number (ICCID) *">
+                    <input
+                      type="text"
+                      className="input w-full"
+                      value={simNumber}
+                      onChange={(e) => setSimNumber(e.target.value)}
+                      placeholder="Enter SIM Card Number (ICCID)"
+                    />
+                    <p className="mt-1 text-xs text-[#6F6C90]">
+                      The ICCID is printed on the physical SIM card. This is required for physical SIM provisioning.
+                    </p>
+                  </FormField>
+                )}
+
+                {simType === "eSim" && (
+                  <FormField label="eSIM Notification Email *">
+                    <input
+                      type="email"
+                      className="input w-full"
+                      value={esimNotificationEmail}
+                      onChange={(e) => setEsimNotificationEmail(e.target.value)}
+                      placeholder="Enter email for eSIM notifications (defaults to customer email)"
+                    />
+                    <p className="mt-1 text-xs text-[#6F6C90]">
+                      This email will receive the eSIM activation QR code and instructions. Defaults to customer's account email but can be changed.
+                    </p>
+                  </FormField>
+                )}
               </div>
             </SectionPanel>
-            <BarActions onBack={goBack} onNext={goNext} nextDisabled={!selectedPlan || !mobileNumber} />
+            <BarActions 
+              onBack={goBack} 
+              onNext={goNext} 
+              nextDisabled={
+                !selectedPlan || 
+                !mobileNumber || 
+                (simType === "physical" && !simNumber?.trim()) ||
+                (simType === "eSim" && !esimNotificationEmail?.trim() && !email?.trim() && !primaryEmail?.trim())
+              } 
+            />
           </ModalShell>
         )}
 

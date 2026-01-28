@@ -184,7 +184,7 @@ export const getServices = async (params?: {
 }): Promise<{ services: Service[] }> => {
     try {
         const response = await apiClient.get('/services', { params });
-        return response.data;
+        return {services: response.data};
     } catch (error) {
         console.error('Error fetching services:', error);
         throw error;

@@ -42,6 +42,8 @@ export default function MbbSignupController({
   const [billingAddress, setBillingAddress] = useState("");
   const [serviceAddress, setServiceAddress] = useState("");
   const [identity, setIdentity] = useState<any>(null);
+  const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
+  const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
 
   const closeAll = useCallback(() => {
     setStep(1);
@@ -60,6 +62,8 @@ export default function MbbSignupController({
     setBillingAddress("");
     setServiceAddress("");
     setIdentity(null);
+    setSimNumber("");
+    setEsimNotificationEmail("");
     onClose();
   }, [onClose]);
 
@@ -85,6 +89,8 @@ export default function MbbSignupController({
         serviceAddress,
         identity,
         simType,
+        simNumber: simType === "physical" ? simNumber : undefined, // Only include if physical SIM
+        esimNotificationEmail: simType === "eSim" ? (esimNotificationEmail || email) : undefined, // Default to account email if not provided
         selectedPlan: selectedPlan || undefined,
       });
       
@@ -94,7 +100,7 @@ export default function MbbSignupController({
     } finally {
       setLoading(false);
     }
-  }, [firstName, lastName, email, password, phone, dateOfBirth, billingAddress, serviceAddress, identity, simType, selectedPlan]);
+  }, [firstName, lastName, email, password, phone, dateOfBirth, billingAddress, serviceAddress, identity, simType, simNumber, esimNotificationEmail, selectedPlan]);
 
   const goNext = useCallback(() => {
     if (step === 5) {
@@ -163,6 +169,8 @@ export default function MbbSignupController({
               serviceAddress={serviceAddress}
               simType={simType}
               identity={identity}
+              simNumber={simNumber}
+              esimNotificationEmail={esimNotificationEmail}
               onChangeFirstName={setFirstName}
               onChangeLastName={setLastName}
               onChangeEmail={setEmail}
@@ -171,6 +179,8 @@ export default function MbbSignupController({
               onChangePassword={setPassword}
               onChangeBillingAddress={setBillingAddress}
               onChangeServiceAddress={setServiceAddress}
+              onChangeSimNumber={setSimNumber}
+              onChangeEsimNotificationEmail={setEsimNotificationEmail}
             />
           )}
           {/* Step 4: ID Verification */}

@@ -47,6 +47,8 @@ export default function MobileVoiceSignupController({
   const [mblCurrentProvider, setMblCurrentProvider] = useState("");
   const [identity, setIdentity] = useState<any>(null);
   const [otpVerified, setOtpVerified] = useState(false);
+  const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
+  const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
   const canProceedIdentity = !!identity;
 
   const closeAll = useCallback(() => {
@@ -71,6 +73,8 @@ export default function MobileVoiceSignupController({
     setMblCurrentProvider("");
     setIdentity(null);
     setOtpVerified(false);
+    setSimNumber("");
+    setEsimNotificationEmail("");
     onClose();
   }, [onClose]);
 
@@ -98,6 +102,8 @@ export default function MobileVoiceSignupController({
         mblCurrentProvider,
         identity,
         simType: simType === "ESIM" ? "eSim" : "physical",
+        simNumber: simType === "PHYSICAL" ? simNumber : undefined, // Only include if physical SIM
+        esimNotificationEmail: simType === "ESIM" ? (esimNotificationEmail || email) : undefined, // Default to account email if not provided
         billingAddress,
         selectedPlan: selectedPlan || undefined,
       });
@@ -108,7 +114,7 @@ export default function MobileVoiceSignupController({
     } finally {
       setLoading(false);
     }
-  }, [firstName, lastName, email, password, phone, dateOfBirth, mblSelectedNumber, mblKeepExistingNumber, mblCurrentMobileNumber, mblCurrentProvider, identity, simType, billingAddress, selectedPlan]);
+  }, [firstName, lastName, email, password, phone, dateOfBirth, mblSelectedNumber, mblKeepExistingNumber, mblCurrentMobileNumber, mblCurrentProvider, identity, simType, simNumber, esimNotificationEmail, billingAddress, selectedPlan]);
 
   const goNext = useCallback(() => {
     const idx = order.indexOf(step);
@@ -202,6 +208,8 @@ export default function MobileVoiceSignupController({
             simType={simType}
             identity={identity}
             otpVerified={otpVerified}
+            simNumber={simNumber}
+            esimNotificationEmail={esimNotificationEmail}
             onChangeFirstName={setFirstName}
             onChangeLastName={setLastName}
             onChangeEmail={setEmail}
@@ -213,6 +221,8 @@ export default function MobileVoiceSignupController({
             onChangeCurrentNumber={setMblCurrentMobileNumber}
             onChangeCurrentProvider={setMblCurrentProvider}
             onOtpVerified={setOtpVerified}
+            onChangeSimNumber={setSimNumber}
+            onChangeEsimNotificationEmail={setEsimNotificationEmail}
           />
         )}
 

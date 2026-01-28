@@ -16,6 +16,8 @@ export type SignupPayload = {
     identity?: any;
     businessDetails?: any;
     simType?: "eSim" | "physical";
+    simNumber?: string; // ICCID for physical SIM (mandatory when simType is 'physical')
+    esimNotificationEmail?: string; // Email for eSIM notifications (mandatory when simType is 'eSim')
     selectedPlan?: {
         name: string;
         price: number;

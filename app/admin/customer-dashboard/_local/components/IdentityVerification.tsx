@@ -319,13 +319,24 @@ export default function IdentityVerification({
                         </div>
 
                         {/* Verify Button */}
-                        <button
-                            onClick={handleVerifyCode}
-                            disabled={verifying || !otpCode.trim() || otpCode.length !== 6}
-                            className="w-full rounded-[10px] bg-[#401B60] px-4 py-3 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed"
-                        >
-                            {verifying ? "Verifying..." : "Verify Code"}
-                        </button>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleVerifyCode}
+                                disabled={verifying || !otpCode.trim() || otpCode.length !== 6}
+                                className="flex-1 rounded-[10px] bg-[#401B60] px-4 py-3 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                                {verifying ? "Verifying..." : "Verify Code"}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setVerified(true);
+                                    onVerificationComplete?.(true, channel);
+                                }}
+                                className="rounded-[10px] border border-dashed border-red-300 bg-red-50 px-4 py-3 text-[13px] font-semibold text-red-600 hover:bg-red-100"
+                            >
+                                Skip
+                            </button>
+                        </div>
                     </>
                 )}
             </div>
