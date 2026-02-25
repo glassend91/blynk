@@ -13,11 +13,15 @@ export default function SignupModal6({
   onBack,
   onClose,
   selectedPlan,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
   selectedPlan?: { name: string; price: number } | null;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -54,7 +58,7 @@ export default function SignupModal6({
 
   return (
     <ModalShell onClose={onClose} size="wide">
-      <Stepper active={6} />
+      <Stepper active={6} onStepClick={onStepClick} maxReached={maxReached} />
 
       <SectionPanel>
         <div className="text-center">
@@ -101,27 +105,27 @@ export default function SignupModal6({
 
               {/* Payment Form - Right Column */}
               <div className="card p-6">
-            <StripeProvider>
-              <div className="space-y-6">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-8 w-8 place-items-center rounded-full bg-blue-100">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
-                      </svg>
+                <StripeProvider>
+                  <div className="space-y-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="grid h-8 w-8 place-items-center rounded-full bg-blue-100">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-blue-800">Secure Payment</p>
+                          <p className="text-sm text-blue-600">Your payment information is encrypted and secure</p>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold text-blue-800">Secure Payment</p>
-                      <p className="text-sm text-blue-600">Your payment information is encrypted and secure</p>
-                    </div>
-                  </div>
-                </div>
 
-                <StripeCardElement
-                  onPaymentSuccess={handlePaymentSuccess}
-                  onPaymentError={handlePaymentError}
-                  amount={paymentAmount}
-                  currency="aud"
+                    <StripeCardElement
+                      onPaymentSuccess={handlePaymentSuccess}
+                      onPaymentError={handlePaymentError}
+                      amount={paymentAmount}
+                      currency="aud"
                       hideButton={true}
                       onSubmitRef={(fn) => setSubmitPaymentFn(() => fn)}
                       formId="payment-form-nbn"
@@ -173,23 +177,23 @@ export default function SignupModal6({
                       {isProcessing ? "Processing Payment..." : "Process Payment"}
                     </button>
 
-                {paymentError && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="grid h-8 w-8 place-items-center rounded-full bg-red-100">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
-                        </svg>
+                    {paymentError && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="grid h-8 w-8 place-items-center rounded-full bg-red-100">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                              <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-red-800">Payment Error</p>
+                            <p className="text-sm text-red-600">{paymentError}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-red-800">Payment Error</p>
-                        <p className="text-sm text-red-600">{paymentError}</p>
-                      </div>
-                    </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </StripeProvider>
+                </StripeProvider>
               </div>
             </div>
           )}

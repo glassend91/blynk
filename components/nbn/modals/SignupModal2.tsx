@@ -28,55 +28,53 @@ export default function SignupModal2({
   onClose,
   selectedPlan: initialSelectedPlan,
   onPlanSelect,
+  availablePlans,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
-  selectedPlan?: { name: string; price: number } | null;
-  onPlanSelect?: (plan: { name: string; price: number }) => void;
+  selectedPlan?: { name: string; price: number; id?: string } | null;
+  onPlanSelect?: (plan: { name: string; price: number; id?: string }) => void;
+  availablePlans?: any[];
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      setLoading(true);
-      setLoadError(null);
-      try {
-        const resp = await apiClient.get('/services', { params: { serviceType: 'NBN' } });
-        const data = resp.data && resp.data.data ? resp.data.data : resp.data;
-        if (!mounted) return;
-        if (Array.isArray(data) && data.length > 0) {
-          const mapped = data.map((s: any) => ({ id: s._id, name: s.serviceName || s.name || 'Plan', price: s.price || 0, features: (s.features || []).map((f: any) => (typeof f === 'string' ? f : f.name || '')) }));
-          setPlans(mapped);
-          if (initialSelectedPlan) {
-            const found = mapped.find((p: any) => p.name === initialSelectedPlan.name);
-            if (found) setSelectedPlan(found);
-          }
-        }
-      } catch (err: any) {
-        console.error('Failed to load NBN services:', err);
-        setLoadError(err?.message || 'Failed to load plans');
-      } finally {
-        if (mounted) setLoading(false);
+    if (availablePlans && availablePlans.length > 0) {
+      const mapped = availablePlans.map((p: any) => ({
+        id: p.id,
+        name: p.label || 'NBN Plan',
+        price: parseFloat(p.fee) || 0,
+        features: ["Unlimited Data", "24/7 Support", "No Lock-in Contract"]
+      }));
+      setPlans(mapped);
+
+      if (initialSelectedPlan) {
+        const found = mapped.find((p: any) => p.id === initialSelectedPlan.id || p.name === initialSelectedPlan.name);
+        if (found) setSelectedPlan(found);
       }
-    })();
-    return () => { mounted = false; };
-  }, []);
+    } else {
+      setLoadError("No plans available for this location.");
+    }
+  }, [availablePlans, initialSelectedPlan]);
 
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan);
     if (onPlanSelect) {
-      onPlanSelect({ name: plan.name, price: plan.price });
+      onPlanSelect({ name: plan.name, price: plan.price, id: plan.id });
     }
   };
 
   return (
     <ModalShell onClose={onClose} size="wide">
-      <Stepper active={2} />
+      <Stepper active={2} onStepClick={onStepClick} maxReached={maxReached} />
 
       <SectionPanel>
         <div className="text-center">
@@ -128,7 +126,7 @@ export default function SignupModal2({
                         </div>
                       </div>
                     )}
-                    <div className={("text-[20px] font-semibold") + (isSelected ? " text-[#5C3B86]" : " text-[#7C7396]") }>
+                    <div className={("text-[20px] font-semibold") + (isSelected ? " text-[#5C3B86]" : " text-[#7C7396]")}>
                       {plan.name}
                     </div>
                     <div className="mt-3 text-[34px] font-extrabold text-[var(--cl-brand-ink)]">

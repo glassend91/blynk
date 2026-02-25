@@ -24,6 +24,8 @@ export default function SignupModal4({
   onChangePhone,
   onChangeServiceAddress,
   onChangePassword,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
@@ -40,6 +42,8 @@ export default function SignupModal4({
   onChangePhone: (v: string) => void;
   onChangeServiceAddress: (v: string) => void;
   onChangePassword: (v: string) => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
@@ -143,7 +147,7 @@ export default function SignupModal4({
 
   return (
     <ModalShell onClose={onClose} size="wide">
-      <Stepper active={4} />
+      <Stepper active={4} onStepClick={onStepClick} maxReached={maxReached} />
 
       <SectionPanel>
         <div className="text-center">

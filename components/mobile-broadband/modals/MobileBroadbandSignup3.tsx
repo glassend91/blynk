@@ -33,6 +33,8 @@ export default function MobileBroadbandSignup3({
   onChangeServiceAddress,
   onChangeSimNumber,
   onChangeEsimNotificationEmail,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
@@ -59,6 +61,8 @@ export default function MobileBroadbandSignup3({
   onChangeServiceAddress: (v: string) => void;
   onChangeSimNumber?: (v: string) => void;
   onChangeEsimNotificationEmail?: (v: string) => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
@@ -116,20 +120,15 @@ export default function MobileBroadbandSignup3({
     return () => clearTimeout(timeout);
   }, [email]);
 
-  // User account will be created after payment success, not here
-  // Removed automatic signup call - signup happens only after payment
-
-  // Validate only on Next click (no live validation)
   const validate = (): boolean => {
     const fnErr = !firstName ? "First name is required" : !isValidName(firstName) ? "Enter a valid first name" : null;
     const lnErr = !lastName ? "Last name is required" : !isValidName(lastName) ? "Enter a valid last name" : null;
-    const phErr = phone && !isValidPhone(phone) ? "Enter a valid phone number" : null; // Phone is now optional
+    const phErr = phone && !isValidPhone(phone) ? "Enter a valid phone number" : null;
     const dbErr = !dateOfBirth ? "Date of birth is required" : !isAdult(dateOfBirth) ? "You must be at least 18 years old" : null;
     const pwErr = !password ? "Password is required" : password.length < 6 ? "Password must be at least 6 characters" : null;
     const baErr = !billingAddress ? "Billing address is required" : null;
     const emErr = !email ? "Email is required" : !isValidEmail(email) ? "Please enter a valid email address" : emailExists ? (emailError || "Email already registered") : null;
 
-    // SIM provisioning validation (conditional based on simType)
     const simNumErr = simType === "physical" && (!simNumber || !simNumber.trim()) ? "SIM Card Number (ICCID) is required for physical SIM" : null;
     const esimEmailErr = simType === "eSim" && (!esimNotificationEmail || !esimNotificationEmail.trim() || !isValidEmail(esimNotificationEmail))
       ? "eSIM Notification Email is required and must be a valid email address" : null;
@@ -146,10 +145,11 @@ export default function MobileBroadbandSignup3({
 
     return !fnErr && !lnErr && !phErr && !dbErr && !pwErr && !baErr && !emErr && !simNumErr && !esimEmailErr;
   };
+
   return (
     <ModalShell onClose={onClose} size="wide">
       <MbbHeaderBanner />
-      <div className="mt-6"><MbbStepper active={3} /></div>
+      <div className="mt-6"><MbbStepper active={3} onStepClick={onStepClick} maxReached={maxReached} /></div>
 
       <SectionPanel>
         <div className="text-center">
@@ -159,7 +159,7 @@ export default function MobileBroadbandSignup3({
               <path d="M4 18c0-3 3.6-5 8-5s8 2 8 5" />
             </svg>
           </div>
-          <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Customer Detaials</h2>
+          <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Customer Details</h2>
           <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Please provide your contact information</p>
         </div>
 
@@ -254,7 +254,6 @@ export default function MobileBroadbandSignup3({
             {billingAddressError && <p className="mt-1 text-xs text-red-600">{billingAddressError}</p>}
           </div>
 
-          {/* Conditional SIM Provisioning Fields */}
           {(simType === "physical" || simType === "eSim") && (
             <div className="mt-6 border-t border-[#E7E4EC] pt-6">
               <h3 className="text-[16px] font-semibold text-[#2E2745] mb-4">

@@ -7,7 +7,7 @@ import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
 
 type Plan = {
-  id?: string;
+  id?: string | number;
   name: string;
   price: number;
   perks: string[];
@@ -28,12 +28,16 @@ export default function MobileVoiceSignup1({
   onClose,
   selectedPlan: initialSelectedPlan,
   onPlanSelect,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
-  selectedPlan?: { name: string; price: number } | null;
-  onPlanSelect?: (plan: { name: string; price: number }) => void;
+  selectedPlan?: { id?: string | number; name: string; price: number } | null;
+  onPlanSelect?: (plan: { id?: string | number; name: string; price: number }) => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
@@ -46,19 +50,37 @@ export default function MobileVoiceSignup1({
       setLoading(true);
       setLoadError(null);
       try {
-        const resp = await apiClient.get('/services', { params: { serviceType: 'Mobile' } });
-        const data = resp.data && resp.data.data ? resp.data.data : resp.data;
+        const resp = await apiClient.get('/services/wholesaler/rate-plans');
+        const rootData = resp.data && resp.data.data ? resp.data.data : resp.data;
+
         if (!mounted) return;
-        if (Array.isArray(data) && data.length > 0) {
-          const mapped = data.map((s: any) => ({ id: s._id, name: s.serviceName || 'Mobile Plan', price: s.price || 0, perks: (s.features || []).map((f: any) => (typeof f === 'string' ? f : f.name || '')) }));
+
+        // Combine dataBankPlans and dataPoolPlans if they exist
+        const allPlans = [
+          ...(rootData.dataBankPlans || []),
+          ...(rootData.dataPoolPlans || [])
+        ];
+
+        // Filter for Broadband
+        const broadbandPlans = allPlans.filter((p: any) => p.connection_type_name === 'Broadband');
+
+        if (broadbandPlans.length > 0) {
+          const mapped = broadbandPlans.map((s: any) => ({
+            id: s.value?.toString(),
+            name: s.label || 'Broadband Plan',
+            price: 0, // Price is missing from the rate-plans API response
+            perks: s.label ? [s.label.split('UTB:')[0].trim()] : []
+          }));
           setPlans(mapped);
           if (initialSelectedPlan) {
             const found = mapped.find((p: any) => p.name === initialSelectedPlan.name);
             if (found) setSelectedPlan(found);
           }
+        } else {
+          setPlans([]);
         }
       } catch (err: any) {
-        console.error('Failed to load Mobile services:', err);
+        console.error('Failed to load Wholesaler rate plans:', err);
         setLoadError(err?.message || 'Failed to load plans');
       } finally {
         if (mounted) setLoading(false);
@@ -70,14 +92,14 @@ export default function MobileVoiceSignup1({
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan);
     if (onPlanSelect) {
-      onPlanSelect({ name: plan.name, price: plan.price });
+      onPlanSelect({ id: plan.id, name: plan.name, price: plan.price });
     }
   };
 
   return (
     <ModalShell onClose={onClose} size="wide">
       <MVHeaderBanner />
-      <div className="mt-6"><MVStepper active={1} /></div>
+      <div className="mt-6"><MVStepper active={1} onStepClick={onStepClick} maxReached={maxReached} /></div>
 
       <SectionPanel>
         <div className="text-center">
@@ -97,7 +119,7 @@ export default function MobileVoiceSignup1({
 
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {loading ? (
-            [1,2,3].map(i => (
+            [1, 2, 3].map(i => (
               <div key={i} className="p-6 rounded-[16px] border bg-white animate-pulse">
                 <div className="h-6 w-6 mb-3 rounded-full bg-gray-200" />
                 <div className="h-6 w-1/2 bg-gray-200 mb-4 rounded" />

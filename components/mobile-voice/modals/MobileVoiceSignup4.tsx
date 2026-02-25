@@ -42,6 +42,8 @@ export default function MobileVoiceSignup4({
   onOtpVerified,
   onChangeSimNumber,
   onChangeEsimNotificationEmail,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
@@ -75,6 +77,8 @@ export default function MobileVoiceSignup4({
   onOtpVerified?: (verified: boolean) => void;
   onChangeSimNumber?: (v: string) => void;
   onChangeEsimNotificationEmail?: (v: string) => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
@@ -167,7 +171,10 @@ export default function MobileVoiceSignup4({
 
     // SIM provisioning validation (conditional based on simType)
     const simNumErr = simType === "PHYSICAL" && (!simNumber || !simNumber.trim()) ? "SIM Card Number (ICCID) is required for physical SIM" : null;
-    const esimEmailErr = simType === "ESIM" && (!esimNotificationEmail || !esimNotificationEmail.trim() || !isValidEmail(esimNotificationEmail))
+
+    // Use fallback email if notification email is not explicitly set
+    const effectiveEsimEmail = esimNotificationEmail || email;
+    const esimEmailErr = simType === "ESIM" && (!effectiveEsimEmail || !effectiveEsimEmail.trim() || !isValidEmail(effectiveEsimEmail))
       ? "eSIM Notification Email is required and must be a valid email address" : null;
 
     setFirstNameError(fnErr);
@@ -316,13 +323,13 @@ export default function MobileVoiceSignup4({
     (keepExisting || mblSelectedNumber) &&
     // SIM provisioning fields validation
     (simType === "PHYSICAL" ? (simNumber && simNumber.trim()) : true) &&
-    (simType === "ESIM" ? (esimNotificationEmail && esimNotificationEmail.trim() && isValidEmail(esimNotificationEmail)) : true)
+    (simType === "ESIM" ? ((esimNotificationEmail || email) && (esimNotificationEmail || email).trim() && isValidEmail(esimNotificationEmail || email)) : true)
   );
 
   return (
     <ModalShell onClose={onClose} size="wide">
       <MVHeaderBanner />
-      <div className="mt-6"><MVStepper active={5} /></div>
+      <div className="mt-6"><MVStepper active={5} onStepClick={onStepClick} maxReached={maxReached} /></div>
 
       <SectionPanel>
         <div className="text-center">

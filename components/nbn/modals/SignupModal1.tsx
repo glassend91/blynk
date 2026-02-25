@@ -4,6 +4,8 @@ import ModalShell from "@/components/shared/ModalShell";
 import Stepper from "@/components/shared/Stepper";
 import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
+import { useEffect, useState } from "react";
+import apiClient from "@/lib/apiClient";
 
 export default function SignupModal1({
   onNext,
@@ -11,16 +13,87 @@ export default function SignupModal1({
   onClose,
   address,
   onChangeAddress,
+  onAvailablePlans,
+  onLocId,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
   address: string;
-  onChangeAddress: (value: string) => void;
+  onChangeAddress: (addr: string) => void;
+  onAvailablePlans?: (plans: any[]) => void;
+  onLocId?: (id: string) => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isSelection, setIsSelection] = useState(false);
+
+  useEffect(() => {
+    if (!address || address.length < 3 || isSelection) {
+      if (isSelection) setIsSelection(false);
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    const handler = setTimeout(async () => {
+      try {
+        setIsLoadingSuggestions(true);
+        const response = await apiClient.get(`/services/wholesaler/address-autocomplete`, {
+          params: { query: address }
+        });
+
+        if (response.data?.addresses) {
+          setSuggestions(response.data.addresses);
+          setShowDropdown(response.data.addresses.length > 0);
+        }
+      } catch (err) {
+        console.error("Failed to fetch address suggestions:", err);
+      } finally {
+        setIsLoadingSuggestions(false);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(handler);
+  }, [address]);
+
+  const handleSelect = (label: string) => {
+    setIsSelection(true);
+    onChangeAddress(label);
+    setShowDropdown(false);
+  };
+
+  const handleCheck = async () => {
+    if (!address) return;
+
+    try {
+      setIsLoadingAvailability(true);
+      const response = await apiClient.post('/services/wholesaler/nbn-availability', { address });
+
+      if (response.data?.success) {
+        if (onAvailablePlans) onAvailablePlans(response.data.bandwidths || []);
+        if (onLocId) onLocId(response.data.locId || "");
+        onNext();
+      } else {
+        alert(response.data?.message || "Address check failed. Please check the address and try again.");
+      }
+    } catch (err: any) {
+      console.error("Failed to check NBN availability:", err);
+      alert(err.message || "Failed to check NBN availability.");
+    } finally {
+      setIsLoadingAvailability(false);
+    }
+  };
+
   return (
     <ModalShell onClose={onClose} size="wide">
-      <Stepper active={1} />
+      <Stepper active={1} onStepClick={onStepClick} maxReached={maxReached} />
 
       <SectionPanel>
         <div className="mx-auto max-w-[760px] text-center">
@@ -30,19 +103,45 @@ export default function SignupModal1({
           <h2 className="modal-h1 mt-4">Check NBN Availability</h2>
           <p className="modal-sub mt-1">Enter your address to see available plans</p>
 
-          <div className="mt-6 text-left">
+          <div className="mt-6 text-left relative">
             <label htmlFor="serviceAddress" className="text-sm font-semibold text-[#3B3551]">Your Address</label>
-            <input
-              id="serviceAddress"
-              name="serviceAddress"
-              autoComplete="street-address"
-              className="input mt-2 w-full"
-              placeholder="Enter your full address"
-              value={address}
-              onChange={(e) => onChangeAddress(e.target.value)}
-            />
-            <button type="button" onClick={onNext} disabled={!address} className="btn-primary mt-5 w-full disabled:opacity-60">
-              Check
+            <div className="relative">
+              <input
+                id="serviceAddress"
+                name="serviceAddress"
+                autoComplete="off"
+                className="input mt-2 w-full pr-10"
+                placeholder="Enter your full address"
+                value={address}
+                onChange={(e) => onChangeAddress(e.target.value)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                onFocus={() => address.length >= 3 && suggestions.length > 0 && setShowDropdown(true)}
+              />
+              {(isLoadingSuggestions || isLoadingAvailability) && (
+                <div className="absolute right-3 top-[18px]">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--cl-brand-ink)] border-t-transparent"></div>
+                </div>
+              )}
+            </div>
+
+            {/* Suggestions Dropdown */}
+            {showDropdown && suggestions.length > 0 && (
+              <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border border-[#DFDBE3] bg-white shadow-lg">
+                {suggestions.map((suggestion, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="w-full px-4 py-3 text-left hover:bg-[#FBF8FF] transition-colors border-b last:border-b-0 border-[#F0F0F0]"
+                    onClick={() => handleSelect(suggestion.label)}
+                  >
+                    <div className="text-[14px] text-[#3B3551] font-medium">{suggestion.label}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <button type="button" onClick={handleCheck} disabled={!address || isLoadingAvailability || isLoadingSuggestions} className="btn-primary mt-5 w-full disabled:opacity-60 transition-all">
+              {isLoadingAvailability ? "Checking availability..." : "Check"}
             </button>
           </div>
 

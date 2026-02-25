@@ -5,6 +5,7 @@ import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
 import MbbHeaderBanner from "../MbbHeaderBanner";
 import MbbStepper from "../MbbStepper";
+import apiClient from "@/lib/apiClient";
 
 type Plan = {
   id?: string;
@@ -13,8 +14,6 @@ type Plan = {
   bullets: string[];
   badge?: string;
 };
-
-import apiClient from "@/lib/apiClient";
 
 const fallbackPlans: Plan[] = [
   { title: "Data Light", price: 20, bullets: ["10GB Data", "4G/5G Network", "30 days validity"] },
@@ -28,12 +27,16 @@ export default function MobileBroadbandSignup1({
   onClose,
   selectedPlan: initialSelectedPlan,
   onPlanSelect,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
   selectedPlan?: { name: string; price: number } | null;
   onPlanSelect?: (plan: { name: string; price: number }) => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
@@ -77,7 +80,7 @@ export default function MobileBroadbandSignup1({
   return (
     <ModalShell onClose={onClose} size="wide">
       <MbbHeaderBanner />
-      <div className="mt-6"><MbbStepper active={1} /></div>
+      <div className="mt-6"><MbbStepper active={1} onStepClick={onStepClick} maxReached={maxReached} /></div>
 
       <SectionPanel>
         <div className="text-center">
@@ -90,7 +93,7 @@ export default function MobileBroadbandSignup1({
 
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {loading ? (
-            [1,2,3].map(i => (
+            [1, 2, 3].map(i => (
               <div key={i} className="p-6 rounded-[16px] border bg-white animate-pulse">
                 <div className="h-6 w-6 mb-3 rounded-full bg-gray-200" />
                 <div className="h-6 w-1/2 bg-gray-200 mb-4 rounded" />
@@ -140,7 +143,7 @@ export default function MobileBroadbandSignup1({
                     {!isSelected && (
                       <span className="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#CFC6DC]">
                         <span className="h-2.5 w-2.5 rounded-full bg-transparent" />
-                    </span>
+                      </span>
                     )}
                   </div>
 

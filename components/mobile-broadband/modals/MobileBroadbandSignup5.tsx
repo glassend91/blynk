@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ModalShell from "@/components/shared/ModalShell";
 import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
@@ -14,11 +14,15 @@ export default function MobileBroadbandSignup5({
   onBack,
   onClose,
   selectedPlan,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
   selectedPlan?: { name: string; price: number } | null;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -56,7 +60,7 @@ export default function MobileBroadbandSignup5({
   return (
     <ModalShell onClose={onClose} size="wide">
       <MbbHeaderBanner />
-      <div className="mt-6"><MbbStepper active={5} /></div>
+      <div className="mt-6"><MbbStepper active={5} onStepClick={onStepClick} maxReached={maxReached} /></div>
 
       <SectionPanel>
         <div className="text-center">

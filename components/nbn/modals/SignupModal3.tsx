@@ -10,15 +10,19 @@ export default function SignupModal3({
   onBack,
   onClose,
   onOpenStaticIp,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
   onOpenStaticIp: () => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   return (
     <ModalShell onClose={onClose} size="wide">
-      <Stepper active={3} />
+      <Stepper active={3} onStepClick={onStepClick} maxReached={maxReached} />
 
       <SectionPanel>
         <h2 className="modal-h1 text-center">Add-on Selection</h2>

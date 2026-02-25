@@ -11,6 +11,8 @@ export default function MobileVoiceSignup7({
   loading,
   error,
   selectedPlan,
+  onStepClick,
+  maxReached,
 }: {
   onComplete: () => void;
   onBack: () => void;
@@ -18,6 +20,8 @@ export default function MobileVoiceSignup7({
   loading?: boolean;
   error?: string;
   selectedPlan?: { name: string; price: number } | null;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const planName = selectedPlan?.name || "Mobile Voice Plan";
   const planPrice = selectedPlan?.price || 35.00;
@@ -25,7 +29,7 @@ export default function MobileVoiceSignup7({
   return (
     <ModalShell onClose={onClose} size="wide">
       <MVHeaderBanner />
-      <div className="mt-6"><MVStepper active={8} /></div>
+      <div className="mt-6"><MVStepper active={8} onStepClick={onStepClick} maxReached={maxReached} /></div>
 
       <SectionPanel>
         <div className="text-center">

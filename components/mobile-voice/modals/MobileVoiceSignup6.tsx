@@ -15,6 +15,8 @@ export default function MobileVoiceSignup6({
   selectedPlan,
   onPaymentSuccess,
   loading,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
@@ -22,6 +24,8 @@ export default function MobileVoiceSignup6({
   selectedPlan?: { name: string; price: number } | null;
   onPaymentSuccess?: () => Promise<void>;
   loading?: boolean;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -75,7 +79,7 @@ export default function MobileVoiceSignup6({
   return (
     <ModalShell onClose={onClose} size="wide">
       <MVHeaderBanner />
-      <div className="mt-6"><MVStepper active={7} /></div>
+      <div className="mt-6"><MVStepper active={7} onStepClick={onStepClick} maxReached={maxReached} /></div>
 
       <SectionPanel>
         <div className="text-center">

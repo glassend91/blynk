@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import MVSignup1 from "./modals/MobileVoiceSignup1";
 import MVSignup2 from "./modals/MobileVoiceSignup2";
 import MVSignup3 from "./modals/MobileVoiceSignup3";
@@ -25,13 +25,29 @@ export default function MobileVoiceSignupController({
 }) {
   const order: Step[] = [1, 2, 3, 4, 5, 6, 7, 8];
   const [step, setStep] = useState<Step>(1);
+  const [maxReached, setMaxReached] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("mbl_max_reached");
+      return saved ? parseInt(saved, 10) : 1;
+    }
+    return 1;
+  });
+
+  // Update maxReached whenever step increases
+  useEffect(() => {
+    if (step > maxReached) {
+      setMaxReached(step);
+      sessionStorage.setItem("mbl_max_reached", step.toString());
+    }
+  }, [step, maxReached]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
 
   // Collected data across steps
-  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number } | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<{ id?: string | number; name: string; price: number } | null>(null);
   const [mblSelectedNumber, setMblSelectedNumber] = useState<string>("");
   const [simType, setSimType] = useState<"ESIM" | "PHYSICAL">("ESIM");
   const [numberChoice, setNumberChoice] = useState<"keep" | "new" | null>(null);
@@ -53,6 +69,8 @@ export default function MobileVoiceSignupController({
 
   const closeAll = useCallback(() => {
     setStep(1);
+    setMaxReached(1);
+    sessionStorage.removeItem("mbl_max_reached");
     setLoading(false);
     setError(null);
     setShowSuccess(false);
@@ -136,6 +154,18 @@ export default function MobileVoiceSignupController({
     setStep(prevStep);
   }, [step, numberChoice, order]);
 
+  const handleStepClick = useCallback((s: number) => {
+    // Allow clicking on any step already reached
+    if (s <= maxReached && s !== step) {
+      let targetStep = s as Step;
+      // Skip step 4 if keeping existing number
+      if (targetStep === 4 && numberChoice === "keep") {
+        targetStep = 3;
+      }
+      setStep(targetStep);
+    }
+  }, [maxReached, step, numberChoice]);
+
   if (!open) return null;
 
   return (
@@ -149,6 +179,8 @@ export default function MobileVoiceSignupController({
             onClose={handleCloseClick}
             selectedPlan={selectedPlan}
             onPlanSelect={setSelectedPlan}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
 
@@ -160,6 +192,8 @@ export default function MobileVoiceSignupController({
             onClose={handleCloseClick}
             simType={simType}
             onChangeSimType={setSimType}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
 
@@ -174,6 +208,8 @@ export default function MobileVoiceSignupController({
               setNumberChoice(choice);
               setMblKeepExistingNumber(choice === "keep");
             }}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
 
@@ -185,6 +221,8 @@ export default function MobileVoiceSignupController({
             onClose={handleCloseClick}
             selectedNumber={mblSelectedNumber}
             onChangeSelectedNumber={setMblSelectedNumber}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
 
@@ -223,6 +261,8 @@ export default function MobileVoiceSignupController({
             onOtpVerified={setOtpVerified}
             onChangeSimNumber={setSimNumber}
             onChangeEsimNotificationEmail={setEsimNotificationEmail}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
 
@@ -234,6 +274,8 @@ export default function MobileVoiceSignupController({
             onClose={handleCloseClick}
             onIdentityVerified={setIdentity}
             canProceed={canProceedIdentity}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
 
@@ -246,6 +288,8 @@ export default function MobileVoiceSignupController({
             selectedPlan={selectedPlan}
             onPaymentSuccess={handleComplete}
             loading={loading}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
 
@@ -258,6 +302,8 @@ export default function MobileVoiceSignupController({
             loading={false}
             error={error || undefined}
             selectedPlan={selectedPlan}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
 

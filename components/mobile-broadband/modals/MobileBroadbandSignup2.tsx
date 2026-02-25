@@ -11,12 +11,16 @@ export default function MobileBroadbandSignup2({
   onClose,
   type,
   onChangeType,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
   type: "eSim" | "physical";
   onChangeType: (v: "eSim" | "physical") => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   // Ensure eSIM is always selected (non-changeable)
   if (type !== "eSim") {
@@ -26,7 +30,7 @@ export default function MobileBroadbandSignup2({
   return (
     <ModalShell onClose={onClose} size="wide">
       <MbbHeaderBanner />
-      <div className="mt-6"><MbbStepper active={2} /></div>
+      <div className="mt-6"><MbbStepper active={2} onStepClick={onStepClick} maxReached={maxReached} /></div>
 
       <SectionPanel>
         <div className="text-center">
@@ -46,10 +50,10 @@ export default function MobileBroadbandSignup2({
           <div className="rounded-[14px] border-2 border-[#4F1C76] bg-[#FBF8FF] p-4 shadow-[0_24px_60px_rgba(64,27,118,0.10)]">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                    <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                   <span className="text-[16px] font-semibold text-[#3B3551]">eSIM</span>
                   <span className="rounded-full bg-black/5 px-2 py-[2px] text-[11px] font-semibold text-[#111827]">SELECTED</span>
-                    </div>
+                </div>
                 <div className="mt-2 text-[13px] text-[#6B6478]">
                   Instant activation, environmentally friendly
                 </div>
