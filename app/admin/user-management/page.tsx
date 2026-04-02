@@ -20,11 +20,18 @@ export default function UserManagementPage() {
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [viewUser, setViewUser] = useState<UserRow | null>(null);
   const [editUser, setEditUser] = useState<UserRow | null>(null);
+  const [chargeUser, setChargeUser] = useState<UserRow | null>(null);
+  const [invoicesUser, setInvoicesUser] = useState<UserRow | null>(null);
   const [editName, setEditName] = useState("");
   const [editStatus, setEditStatus] = useState<Status>("Active");
   const [deleteUser, setDeleteUser] = useState<UserRow | null>(null);
+  const [chargeAmount, setChargeAmount] = useState("");
+  const [chargeDescription, setChargeDescription] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
+  const [chargeLoading, setChargeLoading] = useState(false);
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [invoicesLoading, setInvoicesLoading] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -55,7 +62,7 @@ export default function UserManagementPage() {
 
   // Lock body scroll when any modal is open
   useEffect(() => {
-    const isModalOpen = viewUser || editUser || deleteUser;
+    const isModalOpen = viewUser || editUser || deleteUser || chargeUser || invoicesUser;
     if (isModalOpen) {
       const scrollY = window.scrollY;
       document.body.style.position = 'fixed';
@@ -129,6 +136,25 @@ export default function UserManagementPage() {
           onDelete={canDelete ? (u) => {
             setDeleteUser(u);
           } : undefined}
+          onCharge={(u) => {
+            setChargeUser(u);
+            setChargeAmount("");
+            setChargeDescription("");
+          }}
+          onInvoices={async (u) => {
+            setInvoicesUser(u);
+            setInvoicesLoading(true);
+            try {
+              const { data } = await apiClient.get(`/billing/admin/customers/${u.userId}/invoices`);
+              if (data?.success) {
+                setInvoices(data.data.invoices || []);
+              }
+            } catch (err) {
+              console.error("Failed to fetch invoices", err);
+            } finally {
+              setInvoicesLoading(false);
+            }
+          }}
         />
       )}
 
@@ -455,6 +481,285 @@ export default function UserManagementPage() {
                 className="rounded-[10px] bg-[#E0342F] px-4 py-2 text-[14px] font-semibold text-white disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {deleteLoading ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Charge Modal */}
+      {chargeUser && (
+        <div
+          className="fixed z-40 flex items-center justify-center font-sans text-[14px]"
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            margin: 0,
+            padding: 0,
+            width: '100vw',
+            height: '100vh'
+          }}
+        >
+          <div
+            className="fixed bg-black/70"
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 40
+            }}
+            onClick={() => !chargeLoading && setChargeUser(null)}
+          />
+          <div
+            className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 41
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex flex-col">
+                <h2 className="text-[18px] font-bold text-[#0A0A0A]">Manual Charge</h2>
+                <p className="text-[13px] text-[#6F6C90]">Customer: {chargeUser.name}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => !chargeLoading && setChargeUser(null)}
+                className="h-7 w-7 rounded-full border border-[#DFDBE3] text-[#6F6C90] hover:bg-gray-50 flex items-center justify-center"
+              >
+                ×
+              </button>
+            </div>
+
+            <form
+              className="space-y-4"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!chargeUser?.userId || !chargeAmount || !chargeDescription) return;
+
+                const amountNum = parseFloat(chargeAmount);
+                if (isNaN(amountNum) || amountNum <= 0) {
+                  alert("Please enter a valid positive amount.");
+                  return;
+                }
+
+                try {
+                  setChargeLoading(true);
+                  const { data } = await apiClient.post(`/billing/admin/customers/${chargeUser.userId}/manual-charge`, {
+                    amount: amountNum,
+                    description: chargeDescription
+                  });
+
+                  if (data?.success) {
+                    alert("Charge processed successfully!");
+                    setChargeUser(null);
+                  } else {
+                    alert(data?.message || "Failed to process charge.");
+                  }
+                } catch (err: any) {
+                  console.error("Manual charge failed", err);
+                  const msg = err.response?.data?.message || err.message || "An error occurred.";
+                  alert(`Error: ${msg}`);
+                } finally {
+                  setChargeLoading(false);
+                }
+              }}
+            >
+              <div>
+                <label className="block text-[12px] font-semibold uppercase tracking-wide text-[#6F6C90] mb-1">
+                  Charge Amount (AUD)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6F6C90] font-medium">$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={chargeAmount}
+                    onChange={(e) => setChargeAmount(e.target.value)}
+                    required
+                    disabled={chargeLoading}
+                    className="w-full rounded-[10px] border border-[#DFDBE3] pl-7 pr-3 py-2 text-[15px] font-medium text-[#0A0A0A] outline-none focus:border-[#401B60] transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[12px] font-semibold uppercase tracking-wide text-[#6F6C90] mb-1">
+                  Description / Note
+                </label>
+                <textarea
+                  placeholder="e.g. Late payment fee, custom setup fee..."
+                  value={chargeDescription}
+                  onChange={(e) => setChargeDescription(e.target.value)}
+                  required
+                  disabled={chargeLoading}
+                  className="w-full rounded-[10px] border border-[#DFDBE3] px-3 py-2 text-[14px] outline-none focus:border-[#401B60] transition-colors min-h-[80px]"
+                />
+              </div>
+
+              <div className="bg-[#FBFAFD] rounded-[10px] p-4 text-[13px] text-[#6F6C90] border border-[#F0EEF3]">
+                <p><strong>Note:</strong> This will immediately charge the customer's default payment method on file and generate a paid invoice.</p>
+              </div>
+
+              <div className="mt-6 flex justify-end gap-2">
+                <button
+                  type="button"
+                  disabled={chargeLoading}
+                  onClick={() => setChargeUser(null)}
+                  className="rounded-[10px] border border-[#DFDBE3] px-4 py-2 text-[14px] font-semibold text-[#6F6C90] hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={chargeLoading || !chargeAmount || !chargeDescription}
+                  className="rounded-[10px] bg-[#19BF66] px-6 py-2 text-[14px] font-bold text-white shadow-md hover:bg-[#15A357] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {chargeLoading ? "Processing..." : `Charge $${parseFloat(chargeAmount || '0').toFixed(2)}`}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Customer Invoices Modal */}
+      {invoicesUser && (
+        <div
+          className="fixed z-40 flex items-center justify-center font-sans text-[14px]"
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            margin: 0,
+            padding: 0,
+            width: '100vw',
+            height: '100vh'
+          }}
+        >
+          <div
+            className="fixed bg-black/70"
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 40
+            }}
+            onClick={() => setInvoicesUser(null)}
+          />
+          <div
+            className="fixed w-full max-w-2xl rounded-[16px] bg-white p-6 shadow-xl"
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 41
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex flex-col">
+                <h2 className="text-[18px] font-bold text-[#0A0A0A]">Customer Invoices</h2>
+                <p className="text-[13px] text-[#6F6C90]">User: {invoicesUser.name}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInvoicesUser(null)}
+                className="h-7 w-7 rounded-full border border-[#DFDBE3] text-[#6F6C90] hover:bg-gray-50 flex items-center justify-center"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="max-h-[60vh] overflow-y-auto">
+              {invoicesLoading ? (
+                <div className="py-10 text-center text-[#6F6C90]">Loading invoices...</div>
+              ) : invoices.length === 0 ? (
+                <div className="py-10 text-center text-[#6F6C90]">No invoices found for this customer.</div>
+              ) : (
+                <table className="w-full border-collapse">
+                  <thead className="sticky top-0 bg-[#F8F8F8] text-[12px] text-[#6F6C90] uppercase tracking-wider">
+                    <tr className="[&>th]:px-4 [&>th]:py-3 text-left">
+                      <th>Invoice #</th>
+                      <th>Date</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th className="text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F0EEF3]">
+                    {invoices.map((inv) => (
+                      <tr key={inv._id} className="hover:bg-[#FBFAFD] [&>td]:px-4 [&>td]:py-3">
+                        <td className="font-medium font-mono text-[13px]">{inv.invoiceNumber}</td>
+                        <td className="text-[#6F6C90]">{new Date(inv.billingPeriod?.startDate).toLocaleDateString()}</td>
+                        <td className="font-semibold text-[#0A0A0A]">${inv.total?.toFixed(2)}</td>
+                        <td>
+                          <span className={`text-[12px] font-bold px-2 py-0.5 rounded-full ${inv.status === 'paid' ? 'bg-[#E7F9EF] text-[#19BF66]' :
+                            inv.status === 'refunded' ? 'bg-[#FEEBEB] text-[#E0342F]' :
+                              inv.status === 'cancelled' ? 'bg-[#F0EEF3] text-[#6F6C90]' :
+                                'bg-[#FEF3C7] text-[#D97706]'
+                            }`}>
+                            {inv.status.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="text-right">
+                          {inv.status === 'paid' && (
+                            <button
+                              onClick={async () => {
+                                if (!confirm(`Are you sure you want to refund invoice ${inv.invoiceNumber}?`)) return;
+                                try {
+                                  setInvoicesLoading(true);
+                                  const { data } = await apiClient.post(`/billing/admin/invoices/${inv._id}/refund`, {
+                                    reason: "Admin initiated refund from portal"
+                                  });
+                                  if (data?.success) {
+                                    alert("Refund processed successfully!");
+                                    // Refresh invoices
+                                    const { data: refreshData } = await apiClient.get(`/billing/admin/customers/${invoicesUser.userId}/invoices`);
+                                    if (refreshData?.success) setInvoices(refreshData.data.invoices || []);
+                                  }
+                                } catch (err: any) {
+                                  alert("Refund failed: " + (err.response?.data?.message || err.message));
+                                } finally {
+                                  setInvoicesLoading(false);
+                                }
+                              }}
+                              className="text-[12px] font-bold text-[#E0342F] hover:underline"
+                            >
+                              REFUND
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setInvoicesUser(null)}
+                className="rounded-[10px] border border-[#DFDBE3] px-6 py-2 text-[14px] font-semibold text-[#6F6C90] hover:bg-gray-50 transition-colors"
+              >
+                Close
               </button>
             </div>
           </div>

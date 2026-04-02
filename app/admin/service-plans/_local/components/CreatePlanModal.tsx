@@ -37,6 +37,8 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
   const [slaDetails, setSlaDetails] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [wholesalerOptions, setWholesalerOptions] = useState<any[]>([]);
+  const [wholesalerPlanLink, setWholesalerPlanLink] = useState("");
 
   useEffect(() => {
     if (!open) {
@@ -53,8 +55,36 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
       setSlaDetails("");
       setError(null);
       setSubmitting(false);
+      setWholesalerPlanLink("");
     }
   }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      const fetchWholesalerPlans = async () => {
+        try {
+          const { data } = await apiClient.get("/wholesaler-plans");
+          if (data?.success) {
+            setWholesalerOptions(data.data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch wholesaler plans", err);
+        }
+      };
+      fetchWholesalerPlans();
+    }
+  }, [open]);
+
+  const filteredWholesalePlans = useMemo(() => {
+    // Map retail type to wholesale type enum
+    // NBN/Business NBN -> nbn
+    // Mobile/Data Only/Voice Only -> dataBankPlans or dataPoolPlans
+    const isNbn = type === "NBN" || type === "Business NBN";
+    return wholesalerOptions.filter((p: any) => {
+      if (isNbn) return p.type === "nbn";
+      return p.type === "dataBankPlans" || p.type === "dataPoolPlans";
+    });
+  }, [wholesalerOptions, type]);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -83,7 +113,7 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
 
   if (!open) return null;
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (publish: boolean = true) => {
     // Check permission before submitting
     if (!hasPermission("plans.create")) {
       setError("You do not have permission to create plans.");
@@ -114,6 +144,9 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
         description: desc.trim(),
         speedOrData: speed.trim(),
         features: featurePreview,
+        wholesalerPlanId: wholesalerPlanLink || undefined,
+        visibilityStatus: publish ? "public" : "internal",
+        isActive: true,
         ...(type === "Business NBN" && {
           staticIP,
           slaDetails: slaDetails.trim(),
@@ -282,6 +315,38 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                   </div>
                 </div>
               </Field>
+
+              <Field label="Backend Wholesale Reference" hint="Links this retail plan to a wholesale ID for ordering and billing.">
+                <div className="relative">
+                  <select
+                    value={wholesalerPlanLink}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setWholesalerPlanLink(selectedId);
+
+                      // Auto-fill price and speed if selected
+                      const selectedPlan = filteredWholesalePlans.find(p => p._id === selectedId);
+                      if (selectedPlan) {
+                        if (selectedPlan.custom_name && !name) setName(selectedPlan.custom_name);
+                        if (selectedPlan.price && (!price || price === "69.95")) setPrice(selectedPlan.price.toString());
+                        if (selectedPlan.speed && !speed) setSpeed(selectedPlan.speed);
+                        if (selectedPlan.features && selectedPlan.features.length > 0 && !features) {
+                          setFeatures(selectedPlan.features.join('\n'));
+                        }
+                      }
+                    }}
+                    className={`${fieldClass} appearance-none pr-9`}
+                  >
+                    <option value="">-- No Wholesale Link --</option>
+                    {filteredWholesalePlans.map((option) => (
+                      <option key={option._id} value={option._id}>
+                        {option.label} {option.speed ? `(${option.speed})` : ""} [{option.type === 'nbn' ? option.bandwidth_id : option.value}]
+                      </option>
+                    ))}
+                  </select>
+                  <Caret />
+                </div>
+              </Field>
             </div>
           </SectionCard>
 
@@ -305,7 +370,7 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                 />
               </Field>
 
-              <Field label="Feature highlights" hint="Separate by comma or new line.">
+              <Field label="Key Benefits" hint="Customer facing highlights. Separate by comma or new line.">
                 <textarea
                   value={features}
                   onChange={(e) => setFeatures(e.target.value)}
@@ -388,11 +453,18 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
             Cancel
           </button>
           <button
-            onClick={handleSubmit}
+            onClick={() => handleSubmit(false)}
+            disabled={submitting}
+            className="h-[46px] flex-1 rounded-[10px] border border-[#401B60] text-[14px] font-semibold text-[#401B60] hover:bg-[#401B60]/5 disabled:opacity-60"
+          >
+            {submitting ? "Saving..." : "Save (CMS Only)"}
+          </button>
+          <button
+            onClick={() => handleSubmit(true)}
             disabled={submitting}
             className="h-[46px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Creating..." : "Create plan"}
+            {submitting ? "Publishing..." : "Save and Publish"}
           </button>
         </div>
       </div>

@@ -39,6 +39,8 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [wholesalerOptions, setWholesalerOptions] = useState<any[]>([]);
+  const [wholesalerPlanLink, setWholesalerPlanLink] = useState("");
 
   // Load plan data when modal opens
   useEffect(() => {
@@ -54,6 +56,7 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
             setPrice(String(service.price || 69.95));
             setCurrency(service.currency || "AUD");
             setBillingCycle(service.billingCycle || "monthly");
+            setWholesalerPlanLink(service.wholesalerPlanId || "");
 
             // Determine speedOrData from specifications
             const specs = service.specifications || {};
@@ -133,6 +136,30 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
   }, [open, plan]);
 
   useEffect(() => {
+    if (open) {
+      const fetchWholesalerPlans = async () => {
+        try {
+          const { data } = await apiClient.get("/wholesaler-plans");
+          if (data?.success) {
+            setWholesalerOptions(data.data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch wholesaler plans", err);
+        }
+      };
+      fetchWholesalerPlans();
+    }
+  }, [open]);
+
+  const filteredWholesalePlans = useMemo(() => {
+    const isNbn = type === "NBN" || type === "Business NBN";
+    return wholesalerOptions.filter((p: any) => {
+      if (isNbn) return p.type === "nbn";
+      return p.type === "dataBankPlans" || p.type === "dataPoolPlans";
+    });
+  }, [wholesalerOptions, type]);
+
+  useEffect(() => {
     if (!open) {
       setError(null);
       setSubmitting(false);
@@ -169,7 +196,7 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
 
   if (!open || !plan || !plan.serviceId) return null;
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (publish: boolean = true) => {
     // Check permission before submitting
     if (!hasPermission("plans.create")) {
       setError("You do not have permission to edit plans.");
@@ -200,6 +227,9 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
         description: desc.trim(),
         speedOrData: speed.trim(),
         features: featurePreview,
+        wholesalerPlanId: wholesalerPlanLink || undefined,
+        visibilityStatus: publish ? "public" : "internal",
+        isActive: true,
         ...(type === "Business NBN" && {
           staticIP,
           slaDetails: slaDetails.trim(),
@@ -376,6 +406,38 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
                   </div>
                 </div>
               </Field>
+
+              <Field label="Backend Wholesale Reference" hint="Update link to the wholesale library for ordering system.">
+                <div className="relative">
+                  <select
+                    value={wholesalerPlanLink}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setWholesalerPlanLink(selectedId);
+
+                      // Auto-fill defaults
+                      const selectedPlan = filteredWholesalePlans.find(p => p._id === selectedId);
+                      if (selectedPlan) {
+                        if (selectedPlan.custom_name && !name) setName(selectedPlan.custom_name);
+                        if (selectedPlan.price && (!price || price === "69.95")) setPrice(selectedPlan.price.toString());
+                        if (selectedPlan.speed && !speed) setSpeed(selectedPlan.speed);
+                        if (selectedPlan.features && selectedPlan.features.length > 0 && !features) {
+                          setFeatures(selectedPlan.features.join('\n'));
+                        }
+                      }
+                    }}
+                    className={`${fieldClass} appearance-none pr-9`}
+                  >
+                    <option value="">-- No Wholesale Link --</option>
+                    {filteredWholesalePlans.map((option) => (
+                      <option key={option._id} value={option._id}>
+                        {option.label} {option.speed ? `(${option.speed})` : ""} [{option.type === 'nbn' ? option.bandwidth_id : option.value}]
+                      </option>
+                    ))}
+                  </select>
+                  <Caret />
+                </div>
+              </Field>
             </div>
           </SectionCard>
 
@@ -399,7 +461,7 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
                 />
               </Field>
 
-              <Field label="Feature highlights" hint="Separate by comma or new line.">
+              <Field label="Key Benefits" hint="Customer facing highlights. Separate by comma or new line.">
                 <textarea
                   value={features}
                   onChange={(e) => setFeatures(e.target.value)}
@@ -482,11 +544,18 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
             Cancel
           </button>
           <button
-            onClick={handleSubmit}
+            onClick={() => handleSubmit(false)}
+            disabled={submitting}
+            className="h-[46px] flex-1 rounded-[10px] border border-[#401B60] text-[14px] font-semibold text-[#401B60] hover:bg-[#401B60]/5 disabled:opacity-60"
+          >
+            {submitting ? "Saving..." : "Update (CMS Only)"}
+          </button>
+          <button
+            onClick={() => handleSubmit(true)}
             disabled={submitting}
             className="h-[46px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Updating..." : "Update plan"}
+            {submitting ? "Updating..." : "Update and Publish"}
           </button>
         </div>
       </div>

@@ -31,17 +31,30 @@ const IconView = () => (
     <circle cx="12" cy="12" r="3" stroke="#6F6C90" strokeWidth="1.6" />
   </svg>
 );
+const IconCharge = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <path d="M12 2v20M17 5H9.5a4.5 4.5 0 0 0 0 9h5a4.5 4.5 0 0 1 0 9H7" stroke="#19BF66" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+const IconReceipt = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h6m-6 4h6" stroke="#6F6C90" strokeWidth="1.6" strokeLinecap="round" />
+  </svg>
+);
 
 type Props = {
   rows: UserRow[];
   onView?: (user: UserRow) => void;
   onEdit?: (user: UserRow) => void;
   onDelete?: (user: UserRow) => void;
+  onCharge?: (user: UserRow) => void;
+  onInvoices?: (user: UserRow) => void;
 };
 
-export default function UsersTable({ rows, onView, onEdit, onDelete }: Props) {
+export default function UsersTable({ rows, onView, onEdit, onDelete, onCharge, onInvoices }: Props) {
   const canEdit = usePermission("user.edit");
   const canDelete = usePermission("user.delete");
+  const canCharge = usePermission("billing.credits_refunds");
 
   return (
     <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-4">
@@ -56,7 +69,7 @@ export default function UsersTable({ rows, onView, onEdit, onDelete }: Props) {
                 <th>Type</th>
                 <th>Role</th>
                 <th>Status</th>
-                <th>Last Login</th>
+                {/* <th>Last Login</th> */}
                 <th>Created</th>
                 <th className="w-[120px] text-center">ACTION</th>
               </tr>
@@ -76,10 +89,18 @@ export default function UsersTable({ rows, onView, onEdit, onDelete }: Props) {
                   <td>
                     <StatusPill value={r.status} />
                   </td>
-                  <td className="text-[#6F6C90]">{r.lastLogin}</td>
+                  {/* <td className="text-[#6F6C90]">{r.lastLogin}</td> */}
                   <td className="text-[#6F6C90]">{r.created}</td>
                   <td>
                     <div className="flex items-center justify-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => onInvoices?.(r)}
+                        className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white hover:bg-[#F8F8F8]"
+                        title="View invoices"
+                      >
+                        <IconReceipt />
+                      </button>
                       <button
                         type="button"
                         onClick={() => onView?.(r)}
@@ -87,6 +108,16 @@ export default function UsersTable({ rows, onView, onEdit, onDelete }: Props) {
                       >
                         <IconView />
                       </button>
+                      {canCharge && (
+                        <button
+                          type="button"
+                          onClick={() => onCharge?.(r)}
+                          className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white hover:bg-[#F8F8F8]"
+                          title="Charge customer"
+                        >
+                          <IconCharge />
+                        </button>
+                      )}
                       {canEdit && (
                         <button
                           type="button"
@@ -122,6 +153,6 @@ export default function UsersTable({ rows, onView, onEdit, onDelete }: Props) {
           </table>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
