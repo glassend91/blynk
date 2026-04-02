@@ -18,15 +18,15 @@ export const STRIPE_CONFIG = {
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
 };
 
-// Payment intent creation
+// Payment intent/Invoice creation response
 export const createPaymentIntent = async (amount: number, currency: string = 'aud') => {
     try {
         const response = await apiClient.post('/stripe/create-payment-intent', {
-            amount: Math.round(amount * 100), // Convert to cents
+            amount: Math.round(amount * 100), // convert to cents
             currency,
         });
 
-        return response.data.clientSecret;
+        return response.data;
     } catch (error) {
         console.error('Error creating payment intent:', error);
         throw error;

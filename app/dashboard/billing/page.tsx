@@ -50,8 +50,9 @@ export default function Billing() {
     try {
       setDownloadingInvoice(invoiceId);
       const result = await downloadInvoice(invoiceId);
-      // In a real implementation, you would trigger the download here
-      console.log('Download URL:', result.downloadUrl);
+      if (result.downloadUrl) {
+        window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to download invoice');
     } finally {
@@ -75,15 +76,18 @@ export default function Billing() {
   };
 
   const getStatusTone = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'paid':
+      case 'succeeded':
         return 'green';
       case 'overdue':
+      case 'failed':
         return 'red';
       case 'sent':
+      case 'open':
+      case 'pending':
         return 'yellow';
       case 'draft':
-        return 'grey';
       case 'cancelled':
         return 'grey';
       default:
@@ -94,15 +98,15 @@ export default function Billing() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading billing information...</div>
+        <div className="text-lg text-[#3F205F] font-semibold animate-pulse">Loading billing information...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="mb-4 rounded-md bg-red-50 p-4">
-        <div className="text-sm text-red-700">{error}</div>
+      <div className="mb-4 rounded-md bg-red-50 p-4 border border-red-200">
+        <div className="text-sm text-red-700 font-medium">{error}</div>
       </div>
     );
   }
@@ -150,31 +154,36 @@ export default function Billing() {
         <Panel className="col-span-2 p-6">
           <div className="mb-3 flex items-center justify-between">
             <div className="text-[16px] font-semibold text-[#0A0A0A]">Recent Invoices</div>
-            <button className="rounded-[10px] border border-[#D9D4E5] px-3 py-1.5 text-[12px] font-semibold text-[#3F205F]">View All</button>
+            <button className="rounded-[10px] border border-[#D9D4E5] px-3 py-1.5 text-[12px] font-semibold text-[#3F205F] hover:bg-gray-50">View All</button>
           </div>
           <div className="space-y-3">
             {invoices.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No invoices found.
+              <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-[12px] border border-dashed border-gray-200">
+                No invoices or payments found.
               </div>
             ) : (
               invoices.map((invoice) => (
-                <div key={invoice._id} className="flex items-center justify-between rounded-[12px] border border-[#EEEAF4] bg-[#FAFAFD] px-4 py-3">
+                <div key={invoice.id} className="flex items-center justify-between rounded-[12px] border border-[#EEEAF4] bg-[#FAFAFD] px-4 py-3 hover:shadow-sm transition-shadow">
                   <div>
-                    <div className="text-[14px] font-semibold text-[#0A0A0A]">{invoice.invoiceNumber}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-[14px] font-semibold text-[#0A0A0A]">{invoice.invoiceNumber}</div>
+                      {invoice.type === 'payment' && (
+                        <span className="text-[10px] bg-[#EEF2FF] text-[#4338CA] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Payment</span>
+                      )}
+                    </div>
                     <div className="text-[12px] text-[#6F6C90]">
-                      {formatDate(invoice.billingPeriod.startDate)} • {invoice.lineItems.map(item => item.description).join(', ')}
+                      {formatDate(invoice.createdAt)} • {invoice.lineItems.map(item => item.description).join(', ')}
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-[14px] font-semibold text-[#0A0A0A]">{formatCurrency(invoice.total)}</div>
                     <Pill tone={getStatusTone(invoice.status) as any}>{invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}</Pill>
                     <button
-                      onClick={() => handleDownloadInvoice(invoice._id)}
-                      disabled={downloadingInvoice === invoice._id}
-                      className="rounded-[8px] border border-[#D9D4E5] px-2.5 py-1 text-[12px] text-[#3F205F] hover:bg-gray-50 disabled:opacity-50"
+                      onClick={() => handleDownloadInvoice(invoice.id)}
+                      disabled={downloadingInvoice === invoice.id}
+                      className="rounded-[8px] border border-[#D9D4E5] px-2.5 py-1 text-[12px] font-semibold text-[#3F205F] hover:bg-[#F3E8FF] disabled:opacity-50 transition-colors"
                     >
-                      {downloadingInvoice === invoice._id ? 'Downloading...' : 'Download'}
+                      {downloadingInvoice === invoice.id ? 'Loading...' : invoice.type === 'payment' ? 'Receipt' : 'Download'}
                     </button>
                   </div>
                 </div>

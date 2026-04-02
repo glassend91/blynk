@@ -105,8 +105,8 @@ export default function MobileVoiceSignupController({
       setLoading(true);
       setError(null);
 
-      // Create user account after payment success
-      await signup({
+      // Create user account
+      const response = await signup({
         type: "MBL",
         firstName,
         lastName,
@@ -126,9 +126,11 @@ export default function MobileVoiceSignupController({
         selectedPlan: selectedPlan || undefined,
       });
 
-      setShowSuccess(true);
+      return response;
     } catch (e: any) {
-      setError(e?.message || "Signup failed");
+      const msg = e?.response?.data?.message || e?.message || "Signup failed";
+      setError(msg);
+      throw e; // Re-throw to allow caller (MVSignup6) to handle failure
     } finally {
       setLoading(false);
     }

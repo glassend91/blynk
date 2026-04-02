@@ -1,40 +1,67 @@
 import apiClient from "@/lib/apiClient";
+import { setAuthToken, setAuthUser } from "../auth";
 
 export type SignupPayload = {
     firstName: string;
     lastName: string;
     email: string;
-    password: string;
-    phone?: string;
-    serviceAddress?: string;
-    type?: "NBN" | "MBL" | "MBB" | "SME";
+    phone: string;
+    password?: string;
+    type?: "MBL" | "NBN" | "SME" | "MBB";
     mblSelectedNumber?: string;
     mblKeepExistingNumber?: boolean;
     mblCurrentMobileNumber?: string;
     mblCurrentProvider?: string;
+    selectedPlan?: { name: string; price: number };
+    customerType?: "residential" | "business";
+    serviceAddress?: string;
+    billingAddress?: string;
     dateOfBirth?: string;
     identity?: any;
-    businessDetails?: any;
     simType?: "eSim" | "physical";
-    simNumber?: string; // ICCID for physical SIM (mandatory when simType is 'physical')
-    esimNotificationEmail?: string; // Email for eSIM notifications (mandatory when simType is 'eSim')
-    selectedPlan?: {
-        id?: string | number;
-        name: string;
-        price: number;
+    simNumber?: string;
+    esimNotificationEmail?: string;
+    locId?: string;
+    ntdId?: string;
+    port?: string;
+    serviceRef?: string;
+    wantsStaticIp?: boolean;
+    businessDetails?: {
+        businessName: string;
+        businessAddress: string;
+        businessType: string;
+        ABN: string;
+        ACN: string;
+        primaryContact?: {
+            firstName: string;
+            lastName: string;
+            phone: string;
+            email: string;
+        };
+        authorizedContacts?: {
+            firstName: string;
+            lastName: string;
+        }[];
     };
-    billingAddress?: string;
-    customerType?: "residential" | "business";
 };
 
 export type SignupResponse = {
     success: boolean;
-    userId?: string;
-    message?: string;
+    message: string;
+    user?: any;
+    token?: string;
 };
 
 export async function signup(payload: SignupPayload): Promise<SignupResponse> {
-    const { data } = await apiClient.post<SignupResponse>("/auth/signup", payload);
+    const { data } = await apiClient.post<SignupResponse & { token?: string, user?: any }>("/auth/signup", payload);
+
+    if (data.success && data.token) {
+        setAuthToken(data.token);
+        if (data.user) {
+            setAuthUser(data.user);
+        }
+    }
+
     return data;
 }
 

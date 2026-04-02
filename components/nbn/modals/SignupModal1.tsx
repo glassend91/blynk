@@ -15,6 +15,9 @@ export default function SignupModal1({
   onChangeAddress,
   onAvailablePlans,
   onLocId,
+  onNtdId,
+  onPort,
+  onServiceRef,
   onStepClick,
   maxReached,
 }: {
@@ -25,6 +28,9 @@ export default function SignupModal1({
   onChangeAddress: (addr: string) => void;
   onAvailablePlans?: (plans: any[]) => void;
   onLocId?: (id: string) => void;
+  onNtdId?: (id: string) => void;
+  onPort?: (port: string) => void;
+  onServiceRef?: (ref: string) => void;
   onStepClick?: (step: number) => void;
   maxReached?: number;
 }) {
@@ -33,9 +39,10 @@ export default function SignupModal1({
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isSelection, setIsSelection] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
-    if (!address || address.length < 3 || isSelection) {
+    if (!address || address.length < 3 || isSelection || !isDirty) {
       if (isSelection) setIsSelection(false);
       setSuggestions([]);
       setShowDropdown(false);
@@ -79,6 +86,40 @@ export default function SignupModal1({
       if (response.data?.success) {
         if (onAvailablePlans) onAvailablePlans(response.data.bandwidths || []);
         if (onLocId) onLocId(response.data.locId || "");
+
+        // Extract Line (NTD ID), Port, and Service Ref (AVC) from current services
+        const services = response.data?.current?.services || [];
+        let ntdId = "NEW";
+        let port = "";
+        let serviceRef = "";
+
+        if (services.length > 0) {
+          // Look for the first "Free" port
+          let selectedService = services.find((s: any) => s.status === "Free");
+
+          // If no free port, look for a "Used" port (Churn case)
+          if (!selectedService) {
+            selectedService = services.find((s: any) => s.status === "Used");
+          }
+
+          // Fallback to the first available service if nothing specific found
+          if (!selectedService) {
+            selectedService = services[0];
+          }
+
+          ntdId = selectedService.line || "NEW";
+          port = selectedService.port || "";
+
+          // Churn logic: If port is "Used", extract active AVC
+          if (selectedService.status === "Used" && selectedService.service_ref) {
+            serviceRef = selectedService.service_ref;
+          }
+        }
+
+        if (onNtdId) onNtdId(ntdId);
+        if (onPort) onPort(port);
+        if (onServiceRef) onServiceRef(serviceRef);
+
         onNext();
       } else {
         alert(response.data?.message || "Address check failed. Please check the address and try again.");
@@ -113,7 +154,10 @@ export default function SignupModal1({
                 className="input mt-2 w-full pr-10"
                 placeholder="Enter your full address"
                 value={address}
-                onChange={(e) => onChangeAddress(e.target.value)}
+                onChange={(e) => {
+                  setIsDirty(true);
+                  onChangeAddress(e.target.value);
+                }}
                 onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
                 onFocus={() => address.length >= 3 && suggestions.length > 0 && setShowDropdown(true)}
               />

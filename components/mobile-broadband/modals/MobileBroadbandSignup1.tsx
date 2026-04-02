@@ -33,8 +33,8 @@ export default function MobileBroadbandSignup1({
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
-  selectedPlan?: { name: string; price: number } | null;
-  onPlanSelect?: (plan: { name: string; price: number }) => void;
+  selectedPlan?: { id?: string | number; name: string; price: number } | null;
+  onPlanSelect?: (plan: { id?: string | number; name: string; price: number }) => void;
   onStepClick?: (step: number) => void;
   maxReached?: number;
 }) {
@@ -49,11 +49,17 @@ export default function MobileBroadbandSignup1({
       setLoading(true);
       setLoadError(null);
       try {
-        const resp = await apiClient.get('/services', { params: { serviceType: 'Data Only' } });
+        const resp = await apiClient.get('/wholesaler-plans');
         const data = resp.data && resp.data.data ? resp.data.data : resp.data;
         if (!mounted) return;
         if (Array.isArray(data) && data.length > 0) {
-          const mapped = data.map((s: any) => ({ id: s._id, title: s.serviceName || 'Data Plan', price: s.price || 0, bullets: (s.features || []).map((f: any) => (typeof f === 'string' ? f : f.name || '')) }));
+          const broadbandPlans = data.filter((p: any) => p.connection_type_name === 'Broadband');
+          const mapped = broadbandPlans.map((s: any) => ({
+            id: s.value?.toString() || s._id,
+            title: s.custom_name || s.label || 'Data Plan',
+            price: s.price,
+            bullets: s.label ? [s.label.split('UTB:')[0].trim()] : []
+          }));
           setPlans(mapped);
           if (initialSelectedPlan) {
             const found = mapped.find((p: any) => p.title === initialSelectedPlan.name);
@@ -73,7 +79,7 @@ export default function MobileBroadbandSignup1({
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan);
     if (onPlanSelect) {
-      onPlanSelect({ name: plan.title, price: plan.price });
+      onPlanSelect({ id: plan.id, name: plan.title, price: plan.price });
     }
   };
 
@@ -111,17 +117,20 @@ export default function MobileBroadbandSignup1({
           ) : (
             plans.map(plan => {
               const isSelected = selectedPlan?.id === plan.id;
+              const isDisabled = plan.price == null;
               return (
                 <button
                   key={plan.id}
                   type="button"
+                  disabled={isDisabled}
                   onClick={() => handlePlanSelect(plan)}
                   className={[
-                    "text-left rounded-[16px] border bg-white p-6 shadow-[0_24px_60px_rgba(64,27,118,0.10)] transition-all",
-                    isSelected ? "border-2 border-[#4F1C76] bg-[#FBF8FF]" : "border border-[#E7E4EC] hover:border-[#CFC6DC]",
+                    "text-left rounded-[16px] border p-6 transition-all",
+                    isDisabled ? "opacity-50 cursor-not-allowed bg-gray-50 border-gray-200" : "bg-white shadow-[0_24px_60px_rgba(64,27,118,0.10)]",
+                    isSelected && !isDisabled ? "border-2 border-[#4F1C76] bg-[#FBF8FF]" : !isDisabled ? "border border-[#E7E4EC] hover:border-[#CFC6DC]" : "",
                   ].join(" ")}
                 >
-                  {isSelected && (
+                  {isSelected && !isDisabled && (
                     <div className="mb-3 flex items-center justify-end">
                       <div className="grid h-6 w-6 place-items-center rounded-full bg-[#4F1C76] text-white">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -136,8 +145,8 @@ export default function MobileBroadbandSignup1({
                         {plan.title}
                       </div>
                       <div className="mt-2 text-[32px] font-extrabold text-[#4F1C76]">
-                        ${plan.price}
-                        <span className="ml-1 text-[16px] font-semibold">/month</span>
+                        {plan.price != null ? `$${plan.price}` : "N/A"}
+                        {plan.price != null && <span className="ml-1 text-[16px] font-semibold">/month</span>}
                       </div>
                     </div>
                     {!isSelected && (

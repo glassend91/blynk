@@ -29,16 +29,34 @@ export default function MobileBroadBandSignup6({
 
       <SectionPanel>
         <div className="text-center">
-          <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#4F1C76] text-white">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <path d="M20 7 10 17 4 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Thank You!</h2>
-          <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Your order is complete.</p>
-          <p className="mt-4 text-[15px] text-[#6A6486] max-w-md mx-auto">
-            You will receive an email shortly with your new plan details and receipt.
-          </p>
+          {error ? (
+            <>
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-red-100 text-red-600">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                  <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+              <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-red-700">Order Issue</h2>
+              <p className="mt-1 text-[14px] leading-[22px] text-red-600 font-medium">We encountered a problem with your order submission.</p>
+              <p className="mt-4 text-[15px] text-[#6A6486] max-w-md mx-auto">
+                Your payment was processed, but the order could not be completed at this time. Our team has been notified.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#4F1C76] text-white">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 7 10 17 4 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Thank You!</h2>
+              <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Your order is complete.</p>
+              <p className="mt-4 text-[15px] text-[#6A6486] max-w-md mx-auto">
+                You will receive an email shortly with your new plan details and receipt.
+              </p>
+            </>
+          )}
         </div>
 
         <div className="mx-auto mt-8 max-w-[720px] rounded-[16px] border border-[#E7E4EC] bg-[#FBF8FF] p-6">

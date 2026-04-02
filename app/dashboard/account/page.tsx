@@ -18,6 +18,7 @@ interface UserData {
   lastName?: string;
   email?: string;
   phone?: string;
+  mblSelectedNumber?: string;
   serviceAddress?: string;
   addressInformation?: AddressInformation;
   twoFactorAuthentication?: boolean;
@@ -348,7 +349,7 @@ export default function AccountManagement() {
                       : "border-[#E5E2EA] bg-[#F8F8FB] cursor-not-allowed"
                       }`}
                     placeholder={`Enter your ${label.toLowerCase()}`}
-                    value={loading ? "Loading..." : (fieldValue || "")}
+                    value={loading ? "Loading..." : (key === "phone" ? (formData.phone || formData.mblSelectedNumber || "") : (fieldValue || ""))}
                     onChange={(e) => handleInputChange(key, e.target.value)}
                     readOnly={!isFieldEditable || loading}
                     disabled={loading || locked}
@@ -474,17 +475,17 @@ export default function AccountManagement() {
       {/* Change Password Modal */}
       {isPasswordModalOpen && (
         <div
-          // className="fixed z-50 flex items-center justify-center"
-          // style={{
-          //   top: 0,
-          //   left: 0,
-          //   right: 0,
-          //   bottom: 0,
-          //   margin: 0,
-          //   padding: 0,
-          //   width: '100vw',
-          //   height: '100vh'
-          // }}
+        // className="fixed z-50 flex items-center justify-center"
+        // style={{
+        //   top: 0,
+        //   left: 0,
+        //   right: 0,
+        //   bottom: 0,
+        //   margin: 0,
+        //   padding: 0,
+        //   width: '100vw',
+        //   height: '100vh'
+        // }}
         >
           <div
             className="fixed bg-black"

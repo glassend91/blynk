@@ -104,7 +104,7 @@ export default function PaymentMethods() {
 
   const formatCardTitle = (paymentMethod: PaymentMethod) => {
     if (paymentMethod.type === 'card' && paymentMethod.card) {
-      return `Credit Card ending in ${paymentMethod.card.last4}`;
+      return `Card ending in ${paymentMethod.card.last4}`;
     } else if (paymentMethod.type === 'bank_account' && paymentMethod.bankAccount) {
       return `Bank Account ending in ${paymentMethod.bankAccount.last4}`;
     }

@@ -30,7 +30,7 @@ export default function MbbSignupController({
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
 
   // State across steps
-  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number } | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<{ id?: string | number; name: string; price: number } | null>(null);
   const [simType, setSimType] = useState<"eSim" | "physical">("eSim");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -93,8 +93,8 @@ export default function MbbSignupController({
       setLoading(true);
       setError(null);
 
-      // Create user account after payment success
-      await signup({
+      // Create user account
+      const res = await signup({
         type: "MBB",
         firstName,
         lastName,
@@ -111,9 +111,11 @@ export default function MbbSignupController({
         selectedPlan: selectedPlan || undefined,
       });
 
-      setShowSuccess(true);
+      return { success: true, data: res };
     } catch (e: any) {
-      setError(e?.message || "Signup failed");
+      const msg = e?.response?.data?.message || e?.message || "Signup failed";
+      setError(msg);
+      return { success: false, message: msg };
     } finally {
       setLoading(false);
     }
@@ -121,12 +123,12 @@ export default function MbbSignupController({
 
   const goNext = useCallback(() => {
     if (step === 5) {
-      handleComplete();
+      setShowSuccess(true);
       return;
     }
     const idx = order.indexOf(step);
     setStep(order[Math.min(idx + 1, order.length - 1)]);
-  }, [step, handleComplete]);
+  }, [step, order]);
 
   const goBack = useCallback(() => {
     const idx = order.indexOf(step);
@@ -220,6 +222,7 @@ export default function MbbSignupController({
           selectedPlan={selectedPlan}
           onStepClick={handleStepClick}
           maxReached={maxReached}
+          onComplete={handleComplete}
         />
       )}
 

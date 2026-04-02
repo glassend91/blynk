@@ -49,7 +49,7 @@ export default function SignupModal2({
   useEffect(() => {
     if (availablePlans && availablePlans.length > 0) {
       const mapped = availablePlans.map((p: any) => ({
-        id: p.id,
+        id: p.id?.replace("id_", ""),
         name: p.label || 'NBN Plan',
         price: parseFloat(p.fee) || 0,
         features: ["Unlimited Data", "24/7 Support", "No Lock-in Contract"]

@@ -60,6 +60,7 @@ export default function Sidebar({ width = 234 }: { width?: number }) {
           "/admin/staff-members",
           "/admin/role-management",
           "/admin/service-plans",
+          "/admin/wholesaler-plans",
           "/admin/website-content",
           "/admin/testimonials",
           "/admin/technician-network",
@@ -152,6 +153,7 @@ export default function Sidebar({ width = 234 }: { width?: number }) {
 
         <Section title="Content">
           <Item label="Service Plan" href="/admin/service-plans" show={mounted ? (routeAccess["/admin/service-plans"] ?? true) : true} />
+          <Item label="Wholesaler Plans" href="/admin/wholesaler-plans" show={mounted ? (routeAccess["/admin/wholesaler-plans"] ?? true) : true} />
           <Item label="Website Content" href="/admin/website-content" show={mounted ? (routeAccess["/admin/website-content"] ?? true) : true} />
           <Item label="Testimonial" href="/admin/testimonials" show={mounted ? (routeAccess["/admin/testimonials"] ?? true) : true} />
         </Section>

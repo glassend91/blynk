@@ -269,7 +269,7 @@ function ServiceSelection({ onClose, onSuccess }: ServiceSelectionProps) {
                                             <div className="ml-3">
                                                 <p className="font-medium">
                                                     {paymentMethod.type === 'card' && paymentMethod.card
-                                                        ? `Credit Card ending in ${paymentMethod.card.last4}`
+                                                        ? `Card ending in ${paymentMethod.card.last4}`
                                                         : `Bank Account ending in ${paymentMethod.bankAccount?.last4 || '****'}`
                                                     }
                                                 </p>
@@ -345,7 +345,7 @@ function ServiceSelection({ onClose, onSuccess }: ServiceSelectionProps) {
                             {paymentMethods.find(pm => (pm._id || pm.id) === selectedPaymentMethod) && (
                                 <p className="text-sm">
                                     {paymentMethods.find(pm => (pm._id || pm.id) === selectedPaymentMethod)?.type === 'card'
-                                        ? `Credit Card ending in ${paymentMethods.find(pm => (pm._id || pm.id) === selectedPaymentMethod)?.card?.last4}`
+                                        ? `Card ending in ${paymentMethods.find(pm => (pm._id || pm.id) === selectedPaymentMethod)?.card?.last4}`
                                         : `Bank Account ending in ${paymentMethods.find(pm => (pm._id || pm.id) === selectedPaymentMethod)?.bankAccount?.last4}`
                                     }
                                 </p>

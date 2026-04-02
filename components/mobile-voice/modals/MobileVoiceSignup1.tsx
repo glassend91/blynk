@@ -50,25 +50,17 @@ export default function MobileVoiceSignup1({
       setLoading(true);
       setLoadError(null);
       try {
-        const resp = await apiClient.get('/services/wholesaler/rate-plans');
-        const rootData = resp.data && resp.data.data ? resp.data.data : resp.data;
+        const resp = await apiClient.get('/wholesaler-plans');
+        const data = resp.data && resp.data.data ? resp.data.data : resp.data;
 
         if (!mounted) return;
 
-        // Combine dataBankPlans and dataPoolPlans if they exist
-        const allPlans = [
-          ...(rootData.dataBankPlans || []),
-          ...(rootData.dataPoolPlans || [])
-        ];
-
-        // Filter for Broadband
-        const broadbandPlans = allPlans.filter((p: any) => p.connection_type_name === 'Broadband');
-
-        if (broadbandPlans.length > 0) {
-          const mapped = broadbandPlans.map((s: any) => ({
-            id: s.value?.toString(),
-            name: s.label || 'Broadband Plan',
-            price: 0, // Price is missing from the rate-plans API response
+        if (Array.isArray(data) && data.length > 0) {
+          const voicePlans = data.filter((p: any) => p.connection_type_name === 'Voice');
+          const mapped = voicePlans.map((s: any) => ({
+            id: s.value?.toString() || s._id,
+            name: s.custom_name || s.label || 'Voice Plan',
+            price: s.price,
             perks: s.label ? [s.label.split('UTB:')[0].trim()] : []
           }));
           setPlans(mapped);
@@ -137,17 +129,20 @@ export default function MobileVoiceSignup1({
           ) : (
             plans.map((plan) => {
               const isSelected = selectedPlan?.name === plan.name;
+              const isDisabled = plan.price == null;
               return (
                 <button
-                  key={plan.name}
+                  key={plan.id?.toString() || plan.name}
                   type="button"
+                  disabled={isDisabled}
                   onClick={() => handlePlanSelect(plan)}
                   className={[
-                    "text-left rounded-[16px] border bg-white p-6 shadow-[0_40px_60px_rgba(0,0,0,0.06)] transition-all",
-                    isSelected ? "border-2 border-[#5C3B86] bg-[#FBF8FF]" : "border border-[#DFDBE3] hover:border-[#5C3B86]/50",
+                    "text-left rounded-[16px] border p-6 transition-all",
+                    isDisabled ? "opacity-50 cursor-not-allowed bg-gray-50 border-gray-200" : "bg-white shadow-[0_40px_60px_rgba(0,0,0,0.06)]",
+                    isSelected && !isDisabled ? "border-2 border-[#5C3B86] bg-[#FBF8FF]" : !isDisabled ? "border border-[#DFDBE3] hover:border-[#5C3B86]/50" : "",
                   ].join(" ")}
                 >
-                  {isSelected && (
+                  {isSelected && !isDisabled && (
                     <div className="mb-3 flex items-center justify-end">
                       <div className="grid h-6 w-6 place-items-center rounded-full bg-[#5C3B86] text-white">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -161,8 +156,8 @@ export default function MobileVoiceSignup1({
                   </div>
 
                   <div className="mt-3 text-[32px] font-extrabold text-[#2F2151]">
-                    ${plan.price}
-                    <span className="ml-1 text-[16px] font-semibold">/month</span>
+                    {plan.price != null ? `$${plan.price}` : "N/A"}
+                    {plan.price != null && <span className="ml-1 text-[16px] font-semibold">/month</span>}
                   </div>
 
                   <ul className="mt-4 space-y-2 text-[14px] text-[#5D5875]">

@@ -10,6 +10,8 @@ export default function SignupModal3({
   onBack,
   onClose,
   onOpenStaticIp,
+  wantsStaticIp = true,
+  onChangeWantsStaticIp,
   onStepClick,
   maxReached,
 }: {
@@ -17,6 +19,8 @@ export default function SignupModal3({
   onBack: () => void;
   onClose: () => void;
   onOpenStaticIp: () => void;
+  wantsStaticIp?: boolean;
+  onChangeWantsStaticIp?: (v: boolean) => void;
   onStepClick?: (step: number) => void;
   maxReached?: number;
 }) {
@@ -48,7 +52,12 @@ export default function SignupModal3({
 
             {/* green toggle */}
             <label className="relative inline-flex h-7 w-[50px] cursor-pointer items-center">
-              <input type="checkbox" className="peer sr-only" defaultChecked />
+              <input
+                type="checkbox"
+                className="peer sr-only"
+                checked={wantsStaticIp}
+                onChange={(e) => onChangeWantsStaticIp?.(e.target.checked)}
+              />
               <span className="absolute inset-0 rounded-full bg-[#E7F6EA] transition peer-checked:bg-[#3EB164]" />
               <span className="absolute left-1 h-5 w-5 rounded-full bg-white shadow transition peer-checked:translate-x-[22px]" />
             </label>

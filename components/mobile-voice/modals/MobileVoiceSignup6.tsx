@@ -3,8 +3,7 @@
 import { useState } from "react";
 import ModalShell from "@/components/shared/ModalShell";
 import SectionPanel from "@/components/shared/SectionPanel";
-import StripeProvider from "@/components/shared/StripeProvider";
-import StripeCardElement from "@/components/shared/StripeCardElement";
+import StripePaymentElement from "@/components/shared/StripePaymentElement";
 import MVHeaderBanner from "../MVHeaderBanner";
 import MVStepper from "../MVStepper";
 
@@ -22,7 +21,7 @@ export default function MobileVoiceSignup6({
   onBack: () => void;
   onClose: () => void;
   selectedPlan?: { name: string; price: number } | null;
-  onPaymentSuccess?: () => Promise<void>;
+  onPaymentSuccess?: () => Promise<any>;
   loading?: boolean;
   onStepClick?: (step: number) => void;
   maxReached?: number;
@@ -31,6 +30,7 @@ export default function MobileVoiceSignup6({
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [signupDone, setSignupDone] = useState(false);
   const [submitPaymentFn, setSubmitPaymentFn] = useState<(() => void) | null>(null);
 
   // Get payment amount from selected plan, default to 35.00 if no plan selected
@@ -43,24 +43,10 @@ export default function MobileVoiceSignup6({
     setPaymentError(null);
     setIsProcessing(false);
 
-    // Call signup API after payment success
-    if (onPaymentSuccess) {
-      try {
-        await onPaymentSuccess();
-        // After signup succeeds, go to confirmation screen
-        setTimeout(() => {
-          onNext();
-        }, 1000);
-      } catch (error: any) {
-        setPaymentError(error?.message || "Failed to complete signup. Please contact support.");
-        setPaymentSuccess(false);
-      }
-    } else {
-      // Fallback: just go to next step if no callback provided
-      setTimeout(() => {
-        onNext();
-      }, 2000);
-    }
+    // After payment succeeds, go to confirmation screen
+    setTimeout(() => {
+      onNext();
+    }, 1500);
   };
 
   const handlePaymentError = (error: any) => {
@@ -70,10 +56,25 @@ export default function MobileVoiceSignup6({
     setIsProcessing(false);
   };
 
-  const handleProcessPayment = () => {
+  const handleProcessPayment = async () => {
     if (!agreeTerms || !submitPaymentFn) return;
     setIsProcessing(true);
-    submitPaymentFn();
+    setPaymentError(null);
+
+    try {
+      // 1. Hit Signup API first (if not already done)
+      if (!signupDone && onPaymentSuccess) {
+        await onPaymentSuccess();
+        setSignupDone(true);
+      }
+
+      // 2. If signup success (or already done), hit payment API
+      submitPaymentFn();
+    } catch (err: any) {
+      setIsProcessing(false);
+      const msg = err?.response?.data?.message || err?.message || "Order submission failed. Please try again.";
+      setPaymentError(msg);
+    }
   };
 
   return (
@@ -133,102 +134,82 @@ export default function MobileVoiceSignup6({
 
               {/* Payment Form - Right Column */}
               <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-6 shadow-[0_40px_60px_rgba(0,0,0,0.06)]">
-                <StripeProvider>
-                  <div className="space-y-6">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="grid h-8 w-8 place-items-center rounded-full bg-blue-100">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="font-semibold text-blue-800">Secure Payment</p>
-                          <p className="text-sm text-blue-600">Your payment information is encrypted and secure</p>
-                        </div>
-                      </div>
-                    </div>
+                <StripePaymentElement
+                  onPaymentSuccess={handlePaymentSuccess}
+                  onPaymentError={handlePaymentError}
+                  amount={paymentAmount}
+                  currency="aud"
+                  hideButton={true}
+                  onSubmitRef={(fn) => setSubmitPaymentFn(() => fn)}
+                  formId="payment-form-mv"
+                />
 
-                    <StripeCardElement
-                      onPaymentSuccess={handlePaymentSuccess}
-                      onPaymentError={handlePaymentError}
-                      amount={paymentAmount}
-                      currency="aud"
-                      hideButton={true}
-                      onSubmitRef={(fn) => setSubmitPaymentFn(() => fn)}
-                      formId="payment-form-mv"
+                {/* Agreement Checkbox - EXACT TEXT AS REQUIRED */}
+                <div className="rounded-[12px] border border-[#EEE8F6] bg-[#FBF8FF] p-4">
+                  <label className="flex items-start gap-3 text-[14px] text-[#3B3551] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 h-4 w-4 accent-[#401B60] flex-shrink-0"
+                      checked={agreeTerms}
+                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      required
                     />
+                    <span className="leading-relaxed">
+                      I agree to the{" "}
+                      <a
+                        href="/terms-and-conditions"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#401B60] underline hover:text-[#3F205F]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Terms and Conditions
+                      </a>
+                      {" "}and{" "}
+                      <a
+                        href="/privacy-policy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#401B60] underline hover:text-[#3F205F]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Privacy Policy
+                      </a>
+                      , and I confirm I am 18 years of age or older.
+                    </span>
+                  </label>
+                </div>
 
-                    {/* Agreement Checkbox - EXACT TEXT AS REQUIRED */}
-                    <div className="rounded-[12px] border border-[#EEE8F6] bg-[#FBF8FF] p-4">
-                      <label className="flex items-start gap-3 text-[14px] text-[#3B3551] cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="mt-0.5 h-4 w-4 accent-[#401B60] flex-shrink-0"
-                          checked={agreeTerms}
-                          onChange={(e) => setAgreeTerms(e.target.checked)}
-                          required
-                        />
-                        <span className="leading-relaxed">
-                          I agree to the{" "}
-                          <a
-                            href="/terms-and-conditions"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#401B60] underline hover:text-[#3F205F]"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            Terms and Conditions
-                          </a>
-                          {" "}and{" "}
-                          <a
-                            href="/privacy-policy"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#401B60] underline hover:text-[#3F205F]"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            Privacy Policy
-                          </a>
-                          , and I confirm I am 18 years of age or older.
-                        </span>
-                      </label>
-                    </div>
+                {/* Process Payment Button - Disabled by default, enabled only after checkbox */}
+                <button
+                  type="button"
+                  onClick={handleProcessPayment}
+                  disabled={!agreeTerms || isProcessing || paymentSuccess || loading || !submitPaymentFn}
+                  className="w-full rounded-[10px] bg-[#401B60] px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#3F205F] transition-colors"
+                >
+                  {loading ? "Creating Account..." : isProcessing ? "Processing Payment..." : paymentSuccess ? "Payment Successful!" : "Process Payment"}
+                </button>
 
-                    {/* Process Payment Button - Disabled by default, enabled only after checkbox */}
-                    <button
-                      type="button"
-                      onClick={handleProcessPayment}
-                      disabled={!agreeTerms || isProcessing || paymentSuccess || loading || !submitPaymentFn}
-                      className="w-full rounded-[10px] bg-[#401B60] px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#3F205F] transition-colors"
-                    >
-                      {loading ? "Creating Account..." : isProcessing ? "Processing Payment..." : paymentSuccess ? "Payment Successful!" : "Process Payment"}
-                    </button>
-
-                    {paymentError && (
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="grid h-8 w-8 place-items-center rounded-full bg-red-100">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                              <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-red-800">Payment Error</p>
-                            <p className="text-sm text-red-600">{paymentError}</p>
-                          </div>
-                        </div>
+                {paymentError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-8 w-8 place-items-center rounded-full bg-red-100">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
+                        </svg>
                       </div>
-                    )}
+                      <div>
+                        <p className="font-semibold text-red-800">Error</p>
+                        <p className="text-sm text-red-600">{paymentError}</p>
+                      </div>
+                    </div>
                   </div>
-                </StripeProvider>
+                )}
               </div>
             </div>
           )}
         </div>
       </SectionPanel>
-
-      {/* BarActions removed - flow is handled automatically after payment success */}
     </ModalShell>
   );
 }

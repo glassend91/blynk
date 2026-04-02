@@ -123,14 +123,15 @@ export default function MobileBroadbandSignup3({
   const validate = (): boolean => {
     const fnErr = !firstName ? "First name is required" : !isValidName(firstName) ? "Enter a valid first name" : null;
     const lnErr = !lastName ? "Last name is required" : !isValidName(lastName) ? "Enter a valid last name" : null;
-    const phErr = phone && !isValidPhone(phone) ? "Enter a valid phone number" : null;
+    const phErr = !phone ? "Phone number is required" : !isValidPhone(phone) ? "Enter a valid phone number" : null;
     const dbErr = !dateOfBirth ? "Date of birth is required" : !isAdult(dateOfBirth) ? "You must be at least 18 years old" : null;
     const pwErr = !password ? "Password is required" : password.length < 6 ? "Password must be at least 6 characters" : null;
     const baErr = !billingAddress ? "Billing address is required" : null;
     const emErr = !email ? "Email is required" : !isValidEmail(email) ? "Please enter a valid email address" : emailExists ? (emailError || "Email already registered") : null;
 
     const simNumErr = simType === "physical" && (!simNumber || !simNumber.trim()) ? "SIM Card Number (ICCID) is required for physical SIM" : null;
-    const esimEmailErr = simType === "eSim" && (!esimNotificationEmail || !esimNotificationEmail.trim() || !isValidEmail(esimNotificationEmail))
+    const actualEsimEmail = esimNotificationEmail || email;
+    const esimEmailErr = simType === "eSim" && (!actualEsimEmail || !actualEsimEmail.trim() || !isValidEmail(actualEsimEmail))
       ? "eSIM Notification Email is required and must be a valid email address" : null;
 
     setFirstNameError(fnErr);
@@ -211,12 +212,12 @@ export default function MobileBroadbandSignup3({
               )}
             </div>
             <div>
-              <label className="mb-1 block text-sm text-[#6B6478]">Contact Phone Number <span className="text-[#6F6C90] font-normal">(Optional)</span></label>
+              <label className="mb-1 block text-sm text-[#6B6478]">Contact Phone Number <span className="text-red-600">*</span></label>
               <input
                 value={phone}
                 onChange={(e) => onChangePhone(e.target.value)}
                 className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${phoneError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
-                placeholder="Enter your phone number (optional)"
+                placeholder="Enter your phone number"
               />
               {phoneError && <p className="mt-1 text-xs text-red-600">{phoneError}</p>}
             </div>
