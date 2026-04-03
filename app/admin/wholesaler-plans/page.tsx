@@ -202,11 +202,11 @@ export default function WholesalerPlansPage() {
                                             {plan.type === 'nbn' ? (
                                                 plan.isPublish ? (
                                                     <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-700 border border-green-200">
-                                                        Published: Yes
+                                                        Published
                                                     </span>
                                                 ) : (
                                                     <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-[11px] font-medium text-gray-600 border border-gray-200">
-                                                        Published: No
+                                                        CMS only
                                                     </span>
                                                 )
                                             ) : (

@@ -7,6 +7,7 @@ import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
 
 type Plan = {
+  speed: any;
   id?: string;
   name: string;
   price: number;
@@ -16,11 +17,11 @@ type Plan = {
 // We'll fetch plans from the backend `GET /api/services?serviceType=NBN`.
 import apiClient from "@/lib/apiClient";
 
-const fallbackPlans: Plan[] = [
-  { name: "NBN Basic", price: 59.99, features: ["Unlimite d Data", "24/7 Support", "Free Modem"] },
-  { name: "NBN Standard", price: 79.99, features: ["Unlimited Data", "24/7 Support", "Free Modem", "Priority Support"] },
-  { name: "NBN Premium", price: 99.99, features: ["Unlimited Data", "24/7 Support", "Free Modem", "Priority Support", "Static IP Included"] },
-];
+// const fallbackPlans: Plan[] = [
+//   { name: "NBN Basic", price: 59.99, features: ["Unlimite d Data", "24/7 Support", "Free Modem"] },
+//   { name: "NBN Standard", price: 79.99, features: ["Unlimited Data", "24/7 Support", "Free Modem", "Priority Support"] },
+//   { name: "NBN Premium", price: 99.99, features: ["Unlimited Data", "24/7 Support", "Free Modem", "Priority Support", "Static IP Included"] },
+// ];
 
 export default function SignupModal2({
   onNext,
@@ -49,10 +50,11 @@ export default function SignupModal2({
   useEffect(() => {
     if (availablePlans && availablePlans.length > 0) {
       const mapped = availablePlans.map((p: any) => ({
-        id: p.id?.replace("id_", ""),
-        name: p.label || 'NBN Plan',
-        price: parseFloat(p.fee) || 0,
-        features: ["Unlimited Data", "24/7 Support", "No Lock-in Contract"]
+        id: p.id,
+        name: p.label || p.name || 'NBN Plan',
+        price: parseFloat(p.fee) || parseFloat(p.price) || 0,
+        features: p.features || ["Unlimited Data", "24/7 Support", "No Lock-in Contract"],
+        speed: p.speed || ""
       }));
       setPlans(mapped);
 
@@ -129,6 +131,9 @@ export default function SignupModal2({
                     <div className={("text-[20px] font-semibold") + (isSelected ? " text-[#5C3B86]" : " text-[#7C7396]")}>
                       {plan.name}
                     </div>
+                    {plan.speed && (
+                      <div className="mt-1 text-[14px] text-[#6F6C90]">{plan.speed}</div>
+                    )}
                     <div className="mt-3 text-[34px] font-extrabold text-[var(--cl-brand-ink)]">
                       ${plan.price.toFixed(2)}<span className="text-[18px] font-semibold">/month</span>
                     </div>

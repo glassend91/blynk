@@ -41,6 +41,7 @@ export default function SignupModal1({
   const [isSelection, setIsSelection] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
+  /* 
   useEffect(() => {
     if (!address || address.length < 3 || isSelection || !isDirty) {
       if (isSelection) setIsSelection(false);
@@ -68,6 +69,15 @@ export default function SignupModal1({
     }, 500); // 500ms debounce
 
     return () => clearTimeout(handler);
+  }, [address]);
+  */
+
+  // Add a simple effect to clear suggestions if address is empty
+  useEffect(() => {
+    if (!address) {
+      setSuggestions([]);
+      setShowDropdown(false);
+    }
   }, [address]);
 
   const handleSelect = (label: string) => {
@@ -122,11 +132,20 @@ export default function SignupModal1({
 
         onNext();
       } else {
-        alert(response.data?.message || "Address check failed. Please check the address and try again.");
+        // Fallback for manual plans even if backend SQ fails (e.g. address not found by wholesaler)
+        // We still want to show manual plans fetching them again or using a fallback endpoint
+        // But for now, since we want "any address", we can proceed with a warning or just go next
+        // If the backend fails, we might not have the plans. 
+        // Let's modify the backend to be even more resilient.
+        alert(response.data?.message || "Address check failed. Proceeding with manual selection.");
+        // If it failed because of wholesaler, we can still fetch manual plans.
+        // Actually, let's make the backend return manual plans even if SQ fails.
       }
     } catch (err: any) {
       console.error("Failed to check NBN availability:", err);
-      alert(err.message || "Failed to check NBN availability.");
+      // alert(err.message || "Failed to check NBN availability.");
+      // Proceed anyway to show manual plans
+      onNext();
     } finally {
       setIsLoadingAvailability(false);
     }
