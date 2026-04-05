@@ -1,0 +1,215 @@
+"use client";
+
+import { useState } from "react";
+import ModalShell from "@/components/shared/ModalShell";
+import SectionPanel from "@/components/shared/SectionPanel";
+import StripePaymentElement from "@/components/shared/StripePaymentElement";
+import MVHeaderBanner from "../MVHeaderBanner";
+import MVStepper from "../MVStepper";
+
+export default function MobileVoiceSignup6({
+  onNext,
+  onBack,
+  onClose,
+  selectedPlan,
+  onPaymentSuccess,
+  loading,
+  onStepClick,
+  maxReached,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  onClose: () => void;
+  selectedPlan?: { name: string; price: number } | null;
+  onPaymentSuccess?: () => Promise<any>;
+  loading?: boolean;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
+}) {
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [signupDone, setSignupDone] = useState(false);
+  const [submitPaymentFn, setSubmitPaymentFn] = useState<(() => void) | null>(null);
+
+  // Get payment amount from selected plan, default to 35.00 if no plan selected
+  const paymentAmount = selectedPlan?.price || 35.00;
+  const planName = selectedPlan?.name || "Mobile Standard";
+
+  const handlePaymentSuccess = async (paymentIntent: any) => {
+    console.log('Payment succeeded:', paymentIntent);
+    setPaymentSuccess(true);
+    setPaymentError(null);
+    setIsProcessing(false);
+
+    // After payment succeeds, go to confirmation screen
+    setTimeout(() => {
+      onNext();
+    }, 1500);
+  };
+
+  const handlePaymentError = (error: any) => {
+    console.error('Payment failed:', error);
+    setPaymentError(error.message || 'Payment failed');
+    setPaymentSuccess(false);
+    setIsProcessing(false);
+  };
+
+  const handleProcessPayment = async () => {
+    if (!agreeTerms || !submitPaymentFn) return;
+    setIsProcessing(true);
+    setPaymentError(null);
+
+    try {
+      // 1. Hit Signup API first (if not already done)
+      if (!signupDone && onPaymentSuccess) {
+        await onPaymentSuccess();
+        setSignupDone(true);
+      }
+
+      // 2. If signup success (or already done), hit payment API
+      submitPaymentFn();
+    } catch (err: any) {
+      setIsProcessing(false);
+      const msg = err?.response?.data?.message || err?.message || "Order submission failed. Please try again.";
+      setPaymentError(msg);
+    }
+  };
+
+  return (
+    <ModalShell onClose={onClose} size="wide">
+      <MVHeaderBanner />
+      <div className="mt-6"><MVStepper active={7} onStepClick={onStepClick} maxReached={maxReached} /></div>
+
+      <SectionPanel>
+        <div className="text-center">
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#2F2151] text-white">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <rect x="3" y="6" width="18" height="12" rx="2" stroke="white" strokeWidth="1.5" />
+              <path d="M3 10h18" stroke="white" strokeWidth="1.5" />
+            </svg>
+          </div>
+          <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Payment & Agreement</h2>
+          <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Review your order and complete payment</p>
+        </div>
+
+        <div className="mx-auto mt-8 max-w-[880px]">
+          {paymentSuccess ? (
+            <div className="text-center py-8 rounded-[14px] border border-[#DFDBE3] bg-white p-6 shadow-[0_40px_60px_rgba(0,0,0,0.06)]">
+              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-green-100 text-green-600 mb-4">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-green-800 mb-2">Payment Successful!</h3>
+              <p className="text-green-600">Your mobile voice plan payment has been processed successfully.</p>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Order Summary - Left Column */}
+              <div className="rounded-[14px] border border-[#DFDBE3] bg-[#FBF8FF] p-6 shadow-[0_40px_60px_rgba(0,0,0,0.06)]">
+                <div className="text-[18px] font-semibold text-[#2F2A3A] mb-4">Order Summary</div>
+                <div className="space-y-3 text-[14px]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#8A84A3]">Selected Plan:</span>
+                    <span className="font-semibold text-[#2E2745]">{planName}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#8A84A3]">Monthly Cost:</span>
+                    <span className="font-semibold text-[#2E2745]">${paymentAmount.toFixed(2)}/month</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#8A84A3]">SIM Type:</span>
+                    <span className="font-semibold text-[#2E2745]">eSIM (Free)</span>
+                  </div>
+                  <div className="pt-3 border-t border-[#E7E4EC]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[16px] font-semibold text-[#2E2745]">Total:</span>
+                      <span className="text-[18px] font-bold text-[#401B60]">${paymentAmount.toFixed(2)} AUD</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Form - Right Column */}
+              <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-6 shadow-[0_40px_60px_rgba(0,0,0,0.06)]">
+                <StripePaymentElement
+                  onPaymentSuccess={handlePaymentSuccess}
+                  onPaymentError={handlePaymentError}
+                  amount={paymentAmount}
+                  currency="aud"
+                  hideButton={true}
+                  onSubmitRef={(fn) => setSubmitPaymentFn(() => fn)}
+                  formId="payment-form-mv"
+                />
+
+                {/* Agreement Checkbox - EXACT TEXT AS REQUIRED */}
+                <div className="rounded-[12px] border border-[#EEE8F6] bg-[#FBF8FF] p-4">
+                  <label className="flex items-start gap-3 text-[14px] text-[#3B3551] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 h-4 w-4 accent-[#401B60] flex-shrink-0"
+                      checked={agreeTerms}
+                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      required
+                    />
+                    <span className="leading-relaxed">
+                      I agree to the{" "}
+                      <a
+                        href="/terms-and-conditions"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#401B60] underline hover:text-[#3F205F]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Terms and Conditions
+                      </a>
+                      {" "}and{" "}
+                      <a
+                        href="/privacy-policy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#401B60] underline hover:text-[#3F205F]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Privacy Policy
+                      </a>
+                      , and I confirm I am 18 years of age or older.
+                    </span>
+                  </label>
+                </div>
+
+                {/* Process Payment Button - Disabled by default, enabled only after checkbox */}
+                <button
+                  type="button"
+                  onClick={handleProcessPayment}
+                  disabled={!agreeTerms || isProcessing || paymentSuccess || loading || !submitPaymentFn}
+                  className="w-full rounded-[10px] bg-[#401B60] px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#3F205F] transition-colors"
+                >
+                  {loading ? "Creating Account..." : isProcessing ? "Processing Payment..." : paymentSuccess ? "Payment Successful!" : "Process Payment"}
+                </button>
+
+                {paymentError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-8 w-8 place-items-center rounded-full bg-red-100">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-red-800">Error</p>
+                        <p className="text-sm text-red-600">{paymentError}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </SectionPanel>
+    </ModalShell>
+  );
+}

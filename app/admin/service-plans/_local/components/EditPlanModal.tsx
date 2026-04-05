@@ -1,0 +1,621 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import type { PlanRow, PlanType, PlanStatus } from "../types";
+import apiClient from "@/lib/apiClient";
+import { hasPermission } from "@/lib/permissions";
+
+type Props = {
+  open: boolean;
+  plan: PlanRow | null;
+  onClose: () => void;
+  onUpdate: (plan: PlanRow) => void;
+};
+
+const planTypeOptions: PlanType[] = ["NBN", "Business NBN", "Mobile", "Data Only", "Voice Only"];
+const statusOptions: PlanStatus[] = ["Published", "Draft", "Staff-Only", "Hidden"];
+const billingCycleOptions = [
+  { value: "monthly", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+  { value: "yearly", label: "Yearly" },
+];
+const currencyOptions = ["AUD", "USD", "EUR", "GBP"];
+
+const fieldClass =
+  "w-full rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none placeholder-[#6F6C90]";
+
+export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) {
+  const [name, setName] = useState("");
+  const [type, setType] = useState<PlanType>("NBN");
+  const [price, setPrice] = useState("69.95");
+  const [currency, setCurrency] = useState("AUD");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "quarterly" | "yearly">("monthly");
+  const [speed, setSpeed] = useState("");
+  const [features, setFeatures] = useState("");
+  const [desc, setDesc] = useState("");
+  const [status, setStatus] = useState<PlanStatus>("Published");
+  const [staticIP, setStaticIP] = useState(false);
+  const [slaDetails, setSlaDetails] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [wholesalerOptions, setWholesalerOptions] = useState<any[]>([]);
+  const [wholesalerPlanLink, setWholesalerPlanLink] = useState("");
+
+  // Load plan data when modal opens
+  useEffect(() => {
+    if (open && plan && plan.serviceId) {
+      setLoadingDetails(true);
+      // Fetch full service details
+      apiClient.get<{ success: boolean; service: any }>(`/services/admin/${plan.serviceId}`)
+        .then((response) => {
+          if (response.data?.success && response.data.service) {
+            const service = response.data.service;
+            setName(service.serviceName || plan.name || "");
+            setType(service.serviceType || plan.type || "NBN");
+            setPrice(String(service.price || 69.95));
+            setCurrency(service.currency || "AUD");
+            setBillingCycle(service.billingCycle || "monthly");
+            setWholesalerPlanLink(service.wholesalerPlanId || "");
+
+            // Determine speedOrData from specifications
+            const specs = service.specifications || {};
+            if ((service.serviceType === 'NBN' || service.serviceType === 'Business NBN') && specs.downloadSpeed && specs.uploadSpeed) {
+              setSpeed(`${specs.downloadSpeed}/${specs.uploadSpeed} Mbps`);
+            } else if ((service.serviceType === 'NBN' || service.serviceType === 'Business NBN') && specs.downloadSpeed) {
+              setSpeed(`${specs.downloadSpeed} Mbps`);
+            } else if (service.serviceType === 'Mobile' || service.serviceType === 'Data Only') {
+              setSpeed(specs.dataAllowance || plan.speedOrData || "");
+            } else if (service.serviceType === 'Voice Only') {
+              setSpeed(specs.voiceMinutes || plan.speedOrData || "");
+            } else {
+              setSpeed(plan.speedOrData || "");
+            }
+
+            // Load business-specific fields
+            if (service.serviceType === 'Business NBN') {
+              setStaticIP(specs.staticIP || false);
+              setSlaDetails(specs.slaDetails || "");
+            } else {
+              setStaticIP(false);
+              setSlaDetails("");
+            }
+
+            // Format features
+            if (typeof service.features === 'string') {
+              setFeatures(service.features);
+            } else if (Array.isArray(service.features)) {
+              setFeatures(service.features.map((f: any) => f.name || f).join('\n'));
+            } else {
+              setFeatures("");
+            }
+
+            setDesc(service.description || plan.details || "");
+            // Map visibilityStatus to status
+            if (service.visibilityStatus === 'internal') {
+              setStatus("Staff-Only");
+            } else if (service.visibilityStatus === 'hidden') {
+              setStatus("Hidden");
+            } else {
+              setStatus(service.isActive ? "Published" : "Draft");
+            }
+          } else {
+            // Fallback to plan data if API fails
+            setName(plan.name || "");
+            setType(plan.type || "NBN");
+            const priceMatch = plan.price?.match(/(\d+\.?\d*)/);
+            setPrice(priceMatch ? priceMatch[1] : "69.95");
+            setCurrency("AUD");
+            setBillingCycle("monthly");
+            setSpeed(plan.speedOrData || "");
+            setFeatures("");
+            setDesc(plan.details || "");
+            // Use plan.status which should already include Staff-Only or Hidden if applicable
+            setStatus((plan.status as PlanStatus) || "Published");
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load service details", err);
+          // Fallback to plan data
+          setName(plan.name || "");
+          setType(plan.type || "NBN");
+          const priceMatch = plan.price?.match(/(\d+\.?\d*)/);
+          setPrice(priceMatch ? priceMatch[1] : "69.95");
+          setCurrency("AUD");
+          setBillingCycle("monthly");
+          setSpeed(plan.speedOrData || "");
+          setFeatures("");
+          setDesc(plan.details || "");
+          setStatus(plan.status || "Published");
+        })
+        .finally(() => {
+          setLoadingDetails(false);
+          setError(null);
+        });
+    }
+  }, [open, plan]);
+
+  useEffect(() => {
+    if (open) {
+      const fetchWholesalerPlans = async () => {
+        try {
+          const { data } = await apiClient.get("/wholesaler-plans");
+          if (data?.success) {
+            setWholesalerOptions(data.data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch wholesaler plans", err);
+        }
+      };
+      fetchWholesalerPlans();
+    }
+  }, [open]);
+
+  const filteredWholesalePlans = useMemo(() => {
+    const isNbn = type === "NBN" || type === "Business NBN";
+    return wholesalerOptions.filter((p: any) => {
+      if (isNbn) return p.type === "nbn";
+      return p.type === "dataBankPlans" || p.type === "dataPoolPlans";
+    });
+  }, [wholesalerOptions, type]);
+
+  useEffect(() => {
+    if (!open) {
+      setError(null);
+      setSubmitting(false);
+    }
+  }, [open]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        // Restore scroll position
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [open]);
+
+  const featurePreview = useMemo(() => {
+    return features
+      .split(/[\n,]/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }, [features]);
+
+  if (!open || !plan || !plan.serviceId) return null;
+
+  const handleSubmit = async (publish: boolean = true) => {
+    // Check permission before submitting
+    if (!hasPermission("plans.create")) {
+      setError("You do not have permission to edit plans.");
+      return;
+    }
+
+    if (!name.trim()) {
+      setError("Plan name is required.");
+      return;
+    }
+
+    const numericPrice = Number(price);
+    if (Number.isNaN(numericPrice) || numericPrice < 0) {
+      setError("Enter a valid monthly price.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+      const payload = {
+        serviceName: name.trim(),
+        serviceType: type,
+        price: numericPrice,
+        currency,
+        billingCycle,
+        status,
+        description: desc.trim(),
+        speedOrData: speed.trim(),
+        features: featurePreview,
+        wholesalerPlanId: wholesalerPlanLink || undefined,
+        visibilityStatus: publish ? "public" : "internal",
+        isActive: true,
+        ...(type === "Business NBN" && {
+          staticIP,
+          slaDetails: slaDetails.trim(),
+        }),
+      };
+
+      const { data } = await apiClient.put<{ success: boolean; service: PlanRow }>(
+        `/services/admin/${plan.serviceId}`,
+        payload
+      );
+      if (data?.success && data.service) {
+        onUpdate(data.service);
+        onClose();
+        return;
+      }
+      setError("Failed to update plan. Please try again.");
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.message || "Failed to update plan. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed z-[90]"
+      style={{
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh',
+        overflow: 'auto'
+      }}
+    >
+      <div
+        className="fixed bg-black/70"
+        onClick={onClose}
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 90
+        }}
+      />
+      <div
+        className="fixed left-1/2 top-1/2 max-h-[90vh] w-[960px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white p-6 shadow-2xl"
+        style={{ zIndex: 91 }}
+      >
+        <div className="mb-1 flex items-center justify-between">
+          <div>
+            <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">Plan Builder</p>
+            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">Edit Service Plan</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="grid h-8 w-8 place-items-center rounded-full bg-[#F3E8FF] text-[#5B2DEE]"
+            aria-label="Close modal"
+          >
+            ×
+          </button>
+        </div>
+
+        <p className="text-[14px] text-[#6F6C90]">
+          Update plan details. Changes will be reflected immediately for new customers.
+        </p>
+
+        {loadingDetails && (
+          <div className="mt-4 rounded-[10px] border border-[#DFDBE3] bg-[#F8F8F8] px-4 py-3 text-[13px] text-[#6F6C90]">
+            Loading plan details...
+          </div>
+        )}
+
+        <div className="mt-6 space-y-5">
+          <SectionCard title="General details" description="Core information customers use to compare plans.">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Plan name" required>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g., NBN Premium 100"
+                  className={fieldClass}
+                />
+              </Field>
+
+              <Field label="Plan status">
+                <div className="relative">
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as PlanStatus)}
+                    className={`${fieldClass} appearance-none pr-9`}
+                  >
+                    {statusOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <Caret />
+                </div>
+              </Field>
+
+              <Field label="Plan type">
+                <div className="relative">
+                  <select
+                    value={type}
+                    onChange={(e) => {
+                      const newType = e.target.value as PlanType;
+                      setType(newType);
+                      // Reset business-specific fields if switching away from Business NBN
+                      if (newType !== "Business NBN") {
+                        setStaticIP(false);
+                        setSlaDetails("");
+                      }
+                    }}
+                    className={`${fieldClass} appearance-none pr-9`}
+                  >
+                    {planTypeOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <Caret />
+                </div>
+              </Field>
+
+              <Field label="Monthly price" hint="Customers will see currency + billing cadence.">
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="69.95"
+                    className={fieldClass}
+                  />
+                  <div className="relative">
+                    <select
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                      className={`${fieldClass} appearance-none pr-9`}
+                    >
+                      {currencyOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                    <Caret />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <div className="relative">
+                    <select
+                      value={billingCycle}
+                      onChange={(e) => setBillingCycle(e.target.value as "monthly" | "quarterly" | "yearly")}
+                      className={`${fieldClass} appearance-none pr-9`}
+                    >
+                      {billingCycleOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <Caret />
+                  </div>
+                </div>
+              </Field>
+
+              <Field label="Backend Wholesale Reference" hint="Update link to the wholesale library for ordering system.">
+                <div className="relative">
+                  <select
+                    value={wholesalerPlanLink}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setWholesalerPlanLink(selectedId);
+
+                      // Auto-fill defaults
+                      const selectedPlan = filteredWholesalePlans.find(p => p._id === selectedId);
+                      if (selectedPlan) {
+                        if (selectedPlan.custom_name && !name) setName(selectedPlan.custom_name);
+                        if (selectedPlan.price && (!price || price === "69.95")) setPrice(selectedPlan.price.toString());
+                        if (selectedPlan.speed && !speed) setSpeed(selectedPlan.speed);
+                        if (selectedPlan.features && selectedPlan.features.length > 0 && !features) {
+                          setFeatures(selectedPlan.features.join('\n'));
+                        }
+                      }
+                    }}
+                    className={`${fieldClass} appearance-none pr-9`}
+                  >
+                    <option value="">-- No Wholesale Link --</option>
+                    {filteredWholesalePlans.map((option) => (
+                      <option key={option._id} value={option._id}>
+                        {option.label} {option.speed ? `(${option.speed})` : ""} [{option.type === 'nbn' ? option.bandwidth_id : option.value}]
+                      </option>
+                    ))}
+                  </select>
+                  <Caret />
+                </div>
+              </Field>
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Plan experience" description="Highlight the performance headline and key callouts.">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field
+                label={type === "NBN" || type === "Business NBN" ? "Speed headline" : type === "Voice Only" ? "Voice minutes headline" : "Data headline"}
+                hint={
+                  type === "NBN" || type === "Business NBN"
+                    ? "Examples: 100/20 Mbps, 50 Mbps"
+                    : type === "Voice Only"
+                      ? "Examples: Unlimited mins + SMS"
+                      : "Examples: 40GB 5G data"
+                }
+              >
+                <input
+                  value={speed}
+                  onChange={(e) => setSpeed(e.target.value)}
+                  placeholder={type === "NBN" || type === "Business NBN" ? "100/20 Mbps" : type === "Voice Only" ? "Unlimited mins" : "50GB + 5G"}
+                  className={fieldClass}
+                />
+              </Field>
+
+              <Field label="Key Benefits" hint="Customer facing highlights. Separate by comma or new line.">
+                <textarea
+                  value={features}
+                  onChange={(e) => setFeatures(e.target.value)}
+                  placeholder="Unlimited data, No lock-in contract, Free modem"
+                  rows={3}
+                  className={fieldClass}
+                />
+                {featurePreview.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {featurePreview.map((feature) => (
+                      <span
+                        key={feature}
+                        className="rounded-full bg-[#F3E8FF] px-3 py-1 text-[12px] font-semibold text-[#5B2DEE]"
+                      >
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </Field>
+            </div>
+
+            <Field label="Plan description" hint="What makes this plan perfect for your customers?">
+              <textarea
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                rows={4}
+                placeholder="e.g., Optimised for households that stream, work, and game simultaneously."
+                className={fieldClass}
+              />
+            </Field>
+          </SectionCard>
+
+          {type === "Business NBN" && (
+            <SectionCard title="Business-specific options" description="Configure business features for this NBN plan.">
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Static IP Address">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="staticIP-edit"
+                      checked={staticIP}
+                      onChange={(e) => setStaticIP(e.target.checked)}
+                      className="h-4 w-4 accent-[#401B60]"
+                    />
+                    <label htmlFor="staticIP-edit" className="text-[14px] text-[#0A0A0A] cursor-pointer">
+                      Include static IP address
+                    </label>
+                  </div>
+                  <p className="mt-1 text-[12px] text-[#8E8CA2]">
+                    Business plans often require a static IP for hosting services or VPN access
+                  </p>
+                </Field>
+
+                <Field label="SLA Details" hint="Service Level Agreement details (e.g., 99.9% uptime, 4-hour response time)">
+                  <input
+                    value={slaDetails}
+                    onChange={(e) => setSlaDetails(e.target.value)}
+                    placeholder="e.g., 99.9% uptime guarantee, 4-hour response time"
+                    className={fieldClass}
+                  />
+                </Field>
+              </div>
+            </SectionCard>
+          )}
+        </div>
+
+        {error && (
+          <div className="mt-4 rounded-[10px] border border-[#FCD1D2] bg-[#FFF5F5] px-4 py-3 text-[13px] text-[#C53030]">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center">
+          <button
+            onClick={onClose}
+            className="h-[46px] flex-1 rounded-[10px] border border-[#DFDBE3] bg-[#F8F8F8] text-[14px] font-semibold text-[#6F6C90] hover:bg-[#F1EEF8]"
+            disabled={submitting}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => handleSubmit(false)}
+            disabled={submitting}
+            className="h-[46px] flex-1 rounded-[10px] border border-[#401B60] text-[14px] font-semibold text-[#401B60] hover:bg-[#401B60]/5 disabled:opacity-60"
+          >
+            {submitting ? "Saving..." : "Update (CMS Only)"}
+          </button>
+          <button
+            onClick={() => handleSubmit(true)}
+            disabled={submitting}
+            className="h-[46px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitting ? "Updating..." : "Update and Publish"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionCard({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-[16px] border border-[#E7E4EC] bg-[#FBFBFD] p-4">
+      <div className="mb-4">
+        <h3 className="text-[16px] font-semibold text-[#0A0A0A]">{title}</h3>
+        <p className="text-[13px] text-[#6F6C90]">{description}</p>
+      </div>
+      <div className="space-y-4">{children}</div>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  children,
+  required,
+  hint,
+}: {
+  label: string;
+  children: React.ReactNode;
+  required?: boolean;
+  hint?: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <label className="flex items-center gap-2 text-[13px] font-semibold text-[#0A0A0A]">
+        {label}
+        {required && <span className="text-[#E0342F]">*</span>}
+      </label>
+      {children}
+      {hint && <p className="text-[12px] text-[#8E8CA2]">{hint}</p>}
+    </div>
+  );
+}
+
+function Caret() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6F6C90]"
+    >
+      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
