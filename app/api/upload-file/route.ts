@@ -11,12 +11,12 @@ export async function POST(req: NextRequest) {
     if (!file) {
       return NextResponse.json(
         { success: false, error: "No file received." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const buffer = new Uint8Array(await file.arrayBuffer());
-    
+
     // Set up the public/uploads path
     const uploadDir = path.join(process.cwd(), "public", "uploads");
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
       { success: false, error: "Upload failed: " + error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

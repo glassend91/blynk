@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import OrdersTable from '@/components/admin/sim-orders/OrdersTable';
+import OrdersTable from "@/components/admin/sim-orders/OrdersTable";
 
 export default function SimOrdersPage() {
   return (

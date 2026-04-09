@@ -76,7 +76,10 @@ export default function TechnicianNetworkPage() {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await apiClient.get<{ success: boolean; data: StoreRow[] }>("/stores");
+      const { data } = await apiClient.get<{
+        success: boolean;
+        data: StoreRow[];
+      }>("/stores");
 
       if (data?.success && data.data) {
         setRows(data.data);
@@ -91,7 +94,9 @@ export default function TechnicianNetworkPage() {
 
   const fetchStatistics = async () => {
     try {
-      const { data } = await apiClient.get<{ success: boolean; data: any }>("/stores/statistics");
+      const { data } = await apiClient.get<{ success: boolean; data: any }>(
+        "/stores/statistics",
+      );
 
       if (data?.success && data.data) {
         setStats({
@@ -115,7 +120,7 @@ export default function TechnicianNetworkPage() {
         (r) =>
           r.name.toLowerCase().includes(q) ||
           r.address.toLowerCase().includes(q) ||
-          r.phone.toLowerCase().includes(q)
+          r.phone.toLowerCase().includes(q),
       );
     }
 
@@ -136,7 +141,7 @@ export default function TechnicianNetworkPage() {
 
   const handleUpdate = (updatedStore: StoreRow) => {
     setRows((prev) =>
-      prev.map((s) => (s.id === updatedStore.id ? updatedStore : s))
+      prev.map((s) => (s.id === updatedStore.id ? updatedStore : s)),
     );
     setEditingStore(null);
     setOpen(false);
@@ -154,7 +159,9 @@ export default function TechnicianNetworkPage() {
     }
 
     try {
-      const { data } = await apiClient.delete<{ success: boolean }>(`/stores/${id}`);
+      const { data } = await apiClient.delete<{ success: boolean }>(
+        `/stores/${id}`,
+      );
 
       if (data?.success) {
         setRows((prev) => prev.filter((r) => r.id !== id));
@@ -200,7 +207,9 @@ export default function TechnicianNetworkPage() {
       {/* Page title + CTA */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-[26px] font-bold text-[#0A0A0A]">Technician Network</h1>
+          <h1 className="text-[26px] font-bold text-[#0A0A0A]">
+            Technician Network
+          </h1>
           <p className="mt-1 text-[14px] text-[#6F6C90]">
             Manage partner stores and technician profiles
           </p>
@@ -227,7 +236,13 @@ export default function TechnicianNetworkPage() {
           sub="All Technician"
           rightIcon={
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="7.5" r="3.5" stroke="#7F5DA9" strokeWidth="1.5" />
+              <circle
+                cx="12"
+                cy="7.5"
+                r="3.5"
+                stroke="#7F5DA9"
+                strokeWidth="1.5"
+              />
               <path
                 d="M4 20c2-4.5 6-6 8-6s6 1.5 8 6"
                 stroke="#7F5DA9"
@@ -243,8 +258,21 @@ export default function TechnicianNetworkPage() {
           sub="From last month"
           rightIcon={
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-              <rect x="4" y="4" width="16" height="16" rx="4" stroke="#7F5DA9" strokeWidth="1.5" />
-              <path d="M9 13l2 2 4-4" stroke="#7F5DA9" strokeWidth="1.5" strokeLinecap="round" />
+              <rect
+                x="4"
+                y="4"
+                width="16"
+                height="16"
+                rx="4"
+                stroke="#7F5DA9"
+                strokeWidth="1.5"
+              />
+              <path
+                d="M9 13l2 2 4-4"
+                stroke="#7F5DA9"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
           }
         />
@@ -254,7 +282,15 @@ export default function TechnicianNetworkPage() {
           sub="From last month"
           rightIcon={
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-              <rect x="4" y="4" width="16" height="16" rx="4" stroke="#7F5DA9" strokeWidth="1.5" />
+              <rect
+                x="4"
+                y="4"
+                width="16"
+                height="16"
+                rx="4"
+                stroke="#7F5DA9"
+                strokeWidth="1.5"
+              />
               <path d="M9 9l6 6M15 9l-6 6" stroke="#7F5DA9" strokeWidth="1.5" />
             </svg>
           }
@@ -267,8 +303,19 @@ export default function TechnicianNetworkPage() {
           <div className="relative">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#8E8AA3]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M20 20l-3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="7"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M20 20l-3-3"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </svg>
             </span>
             <input
@@ -299,24 +346,50 @@ export default function TechnicianNetworkPage() {
           <table className="w-full text-left text-[14px]">
             <thead>
               <tr className="text-[#6F6C90]">
-                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">#</th>
-                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">Local Store Name</th>
-                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">Address</th>
-                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">Open Hours</th>
-                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">Phone</th>
-                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">Technician</th>
-                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">Status</th>
-                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">ACTION</th>
+                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">
+                  #
+                </th>
+                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">
+                  Local Store Name
+                </th>
+                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">
+                  Address
+                </th>
+                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">
+                  Open Hours
+                </th>
+                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">
+                  Phone
+                </th>
+                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">
+                  Technician
+                </th>
+                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">
+                  Status
+                </th>
+                <th className="border-b border-[#EEEAF4] px-4 py-3 font-semibold">
+                  ACTION
+                </th>
               </tr>
             </thead>
             <tbody className="text-[#0A0A0A]">
               {filtered.map((r, index) => (
                 <tr key={r.id} className="hover:bg-[#FAF9FC]">
-                  <td className="border-b border-[#F0EDF5] px-4 py-3">{index + 1}</td>
-                  <td className="border-b border-[#F0EDF5] px-4 py-3">{r.name}</td>
-                  <td className="border-b border-[#F0EDF5] px-4 py-3">{r.address}</td>
-                  <td className="border-b border-[#F0EDF5] px-4 py-3">{r.hours}</td>
-                  <td className="border-b border-[#F0EDF5] px-4 py-3">{r.phone}</td>
+                  <td className="border-b border-[#F0EDF5] px-4 py-3">
+                    {index + 1}
+                  </td>
+                  <td className="border-b border-[#F0EDF5] px-4 py-3">
+                    {r.name}
+                  </td>
+                  <td className="border-b border-[#F0EDF5] px-4 py-3">
+                    {r.address}
+                  </td>
+                  <td className="border-b border-[#F0EDF5] px-4 py-3">
+                    {r.hours}
+                  </td>
+                  <td className="border-b border-[#F0EDF5] px-4 py-3">
+                    {r.phone}
+                  </td>
                   <td className="border-b border-[#F0EDF5] px-4 py-3 text-[#401B60] underline-offset-2 hover:underline">
                     {formatTechnicians(r.technicians)}
                   </td>
@@ -334,8 +407,17 @@ export default function TechnicianNetworkPage() {
                         title="Edit"
                         className="hover:text-[#3F205F]"
                       >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                          <path d="M4 15.5V20h4.5L20 8.5 15.5 4 4 15.5Z" stroke="currentColor" strokeWidth="1.5" />
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <path
+                            d="M4 15.5V20h4.5L20 8.5 15.5 4 4 15.5Z"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          />
                         </svg>
                       </button>
                       <button
@@ -343,8 +425,17 @@ export default function TechnicianNetworkPage() {
                         title="Delete"
                         className="text-[#E05252] hover:text-[#B82723]"
                       >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                          <path d="M6 7h12M9 7V5h6v2M8 7v12h8V7" stroke="currentColor" strokeWidth="1.5" />
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <path
+                            d="M6 7h12M9 7V5h6v2M8 7v12h8V7"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -353,8 +444,13 @@ export default function TechnicianNetworkPage() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="border-b border-[#F0EDF5] px-4 py-8 text-center text-[#6F6C90]">
-                    {query || statusFilter !== "All Type" ? "No stores found matching your filters." : "No stores yet. Add your first store!"}
+                  <td
+                    colSpan={8}
+                    className="border-b border-[#F0EDF5] px-4 py-8 text-center text-[#6F6C90]"
+                  >
+                    {query || statusFilter !== "All Type"
+                      ? "No stores found matching your filters."
+                      : "No stores yet. Add your first store!"}
                   </td>
                 </tr>
               )}

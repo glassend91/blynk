@@ -16,7 +16,9 @@ export default function StoreCard({
     <article className="rounded-[12px] border border-[#E7E4EC] bg-white p-6 shadow-[0_10px_24px_rgba(17,24,39,0.06)]">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
-          <h3 className="text-[16px] font-semibold text-[#0A0A0A]">{store.name}</h3>
+          <h3 className="text-[16px] font-semibold text-[#0A0A0A]">
+            {store.name}
+          </h3>
 
           <div className="mt-2 space-y-1 text-[14px]">
             <p>
@@ -36,14 +38,19 @@ export default function StoreCard({
 
         <div className="w-full md:w-auto">
           <div className="flex items-center gap-2">
-            <span className="text-[14px] font-semibold text-[#0A0A0A]">Rating:</span>
+            <span className="text-[14px] font-semibold text-[#0A0A0A]">
+              Rating:
+            </span>
             <Star />
             <span className="text-[14px] text-[#0A0A0A]">{store.rating}/5</span>
           </div>
 
           <div className="mt-2 text-[14px]">
             <span className="font-semibold">Reviews:</span>{" "}
-            <button onClick={onView} className="text-[#401B60] underline underline-offset-2">
+            <button
+              onClick={onView}
+              className="text-[#401B60] underline underline-offset-2"
+            >
               View Google Reviews
             </button>
           </div>

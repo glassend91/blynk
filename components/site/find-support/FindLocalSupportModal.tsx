@@ -79,7 +79,7 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
     return MOCK_LOCATIONS.filter(
       (l) =>
         l.name.toLowerCase().includes(query.toLowerCase()) ||
-        l.address.toLowerCase().includes(query.toLowerCase())
+        l.address.toLowerCase().includes(query.toLowerCase()),
     );
   }, [query]);
 
@@ -87,15 +87,15 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -113,12 +113,12 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
       <div
@@ -129,17 +129,17 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 100
+          width: "100vw",
+          height: "100vh",
+          zIndex: 100,
         }}
       />
       <div
         className="fixed z-[101] mx-3 w-full max-w-[1120px] rounded-2xl bg-white shadow-xl h-[80vh] overflow-auto noscrollbar"
         style={{
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)'
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
         }}
       >
         {/* Header */}
@@ -177,17 +177,19 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
             {/* Suggestions */}
             {query && (
               <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-[#EEEAF4] bg-white shadow-lg">
-                {["82 Oxford St, Darlinghurst NSW 2010", "45 Oxford St…", "55 Oxford St…"].map(
-                  (s, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setQuery(s)}
-                      className="block w-full px-3 py-2 text-left text-[14px] hover:bg-[#FBFAFD]"
-                    >
-                      {s}
-                    </button>
-                  )
-                )}
+                {[
+                  "82 Oxford St, Darlinghurst NSW 2010",
+                  "45 Oxford St…",
+                  "55 Oxford St…",
+                ].map((s, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setQuery(s)}
+                    className="block w-full px-3 py-2 text-left text-[14px] hover:bg-[#FBFAFD]"
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -201,7 +203,9 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
         <div className="grid gap-6 px-6 pb-6 md:grid-cols-[360px,1fr] ">
           {/* Nearby list */}
           <div className="rounded-xl border border-[#EEEAF4] bg-[#FBFAFD] p-4">
-            <div className="mb-3 text-[14px] font-semibold">Nearby Technicians</div>
+            <div className="mb-3 text-[14px] font-semibold">
+              Nearby Technicians
+            </div>
             <div className="space-y-3">
               {filtered.map((l) => (
                 <button
@@ -209,10 +213,11 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                   onClick={() => setFocused(l)}
                   onMouseEnter={() => setHoverId(l.id)}
                   onMouseLeave={() => setHoverId(null)}
-                  className={`flex w-full gap-3 rounded-xl border px-3 py-3 text-left transition ${focused?.id === l.id || hoverId === l.id
-                    ? "border-[#D7CCE8] bg-white shadow-sm"
-                    : "border-transparent bg-white"
-                    }`}
+                  className={`flex w-full gap-3 rounded-xl border px-3 py-3 text-left transition ${
+                    focused?.id === l.id || hoverId === l.id
+                      ? "border-[#D7CCE8] bg-white shadow-sm"
+                      : "border-transparent bg-white"
+                  }`}
                 >
                   <img
                     src={l.photo}
@@ -220,8 +225,12 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                     alt=""
                   />
                   <div className="min-w-0">
-                    <div className="truncate text-[14px] font-semibold">{l.name}</div>
-                    <div className="truncate text-[12px] text-[#6F6C90]">{l.address}</div>
+                    <div className="truncate text-[14px] font-semibold">
+                      {l.name}
+                    </div>
+                    <div className="truncate text-[12px] text-[#6F6C90]">
+                      {l.address}
+                    </div>
                     <div className="flex items-center gap-2 text-[12px] text-[#6F6C90]">
                       ⭐ {l.rating}/5 • {l.phone}
                     </div>
@@ -249,8 +258,11 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                   top: `${l.pinY * 100}%`,
                 }}
                 onClick={() => setFocused(l)}
-                className={`absolute -translate-x-1/2 -translate-y-full rounded-full border-2 px-2 py-1 text-white transition ${focused?.id === l.id ? "scale-110 border-white bg-[#2D0F4D]" : "bg-[#5E2B86]"
-                  }`}
+                className={`absolute -translate-x-1/2 -translate-y-full rounded-full border-2 px-2 py-1 text-white transition ${
+                  focused?.id === l.id
+                    ? "scale-110 border-white bg-[#2D0F4D]"
+                    : "bg-[#5E2B86]"
+                }`}
                 onMouseEnter={() => setHoverId(l.id)}
                 onMouseLeave={() => setHoverId(null)}
                 aria-label={`Marker for ${l.name}`}
@@ -262,12 +274,23 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
             {/* Focused card overlay (like the callout on map) */}
             {focused && (
               <div className="pointer-events-auto absolute left-1/2 top-6 w-[360px] -translate-x-1/2 overflow-hidden rounded-xl border border-[#EEEAF4] bg-white shadow-xl">
-                <img src={focused.photo} className="h-[140px] w-full object-cover" alt="" />
+                <img
+                  src={focused.photo}
+                  className="h-[140px] w-full object-cover"
+                  alt=""
+                />
                 <div className="space-y-1 p-3">
-                  <div className="text-[14px] font-semibold">{focused.name}</div>
-                  <div className="text-[12px] text-[#6F6C90]">{focused.address}</div>
+                  <div className="text-[14px] font-semibold">
+                    {focused.name}
+                  </div>
                   <div className="text-[12px] text-[#6F6C90]">
-                    ⭐ {focused.rating}/5 <span className="text-[#8E8AA3]">({focused.ratingCount} reviews)</span>
+                    {focused.address}
+                  </div>
+                  <div className="text-[12px] text-[#6F6C90]">
+                    ⭐ {focused.rating}/5{" "}
+                    <span className="text-[#8E8AA3]">
+                      ({focused.ratingCount} reviews)
+                    </span>
                   </div>
                 </div>
               </div>
@@ -275,8 +298,12 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
 
             {/* Zoom & my-location UI dummies */}
             <div className="absolute bottom-4 right-4 grid gap-2">
-              <button className="grid h-9 w-9 place-items-center rounded-full bg-white shadow">＋</button>
-              <button className="grid h-9 w-9 place-items-center rounded-full bg-white shadow">－</button>
+              <button className="grid h-9 w-9 place-items-center rounded-full bg-white shadow">
+                ＋
+              </button>
+              <button className="grid h-9 w-9 place-items-center rounded-full bg-white shadow">
+                －
+              </button>
               <button className="grid h-9 w-9 place-items-center rounded-full bg-[#3F205F] text-white shadow">
                 ⊙
               </button>
@@ -294,15 +321,24 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                   Contact
                 </button>
               </div>
-              <div className="text-[13px] text-[#6F6C90]">{focused.address}</div>
+              <div className="text-[13px] text-[#6F6C90]">
+                {focused.address}
+              </div>
               <div className="mt-3 grid gap-4 md:grid-cols-[1.3fr,1fr]">
-                <img src={focused.photo} className="h-[220px] w-full rounded-lg object-cover" alt="" />
+                <img
+                  src={focused.photo}
+                  className="h-[220px] w-full rounded-lg object-cover"
+                  alt=""
+                />
                 <div className="space-y-3">
                   <div>
-                    <div className="text-[12px] font-semibold text-[#6F6C90]">Store Details</div>
+                    <div className="text-[12px] font-semibold text-[#6F6C90]">
+                      Store Details
+                    </div>
                     <p className="text-[13px] text-[#0A0A0A]">
-                      Expert technicians specialising in Blynk IoT solutions with 10+ years of
-                      experience. We provide comprehensive support for smart-home & industrial IoT needs.
+                      Expert technicians specialising in Blynk IoT solutions
+                      with 10+ years of experience. We provide comprehensive
+                      support for smart-home & industrial IoT needs.
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -318,30 +354,39 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
 
               {/* Approved technicians (sample) */}
               <div className="mt-5">
-                <div className="mb-3 text-[14px] font-semibold">Meet Your Blynk Approved Technicians</div>
+                <div className="mb-3 text-[14px] font-semibold">
+                  Meet Your Blynk Approved Technicians
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {["Catherine Deck", "Alex Marcus", "Lia Vance"].map((n, i) => (
-                    <div key={i} className="rounded-xl border border-[#EEEAF4] p-3">
-                      <div className="mb-2 flex items-center gap-3">
-                        <div className="grid h-10 w-10 place-items-center rounded-full bg-[#F1EAF8] text-[#3F205F]">
-                          👩‍🔧
-                        </div>
-                        <div>
-                          <div className="text-[14px] font-semibold">{n}</div>
-                          <div className="text-[12px] text-[#6F6C90]">
-                            5+ years • phone & data recovery
+                  {["Catherine Deck", "Alex Marcus", "Lia Vance"].map(
+                    (n, i) => (
+                      <div
+                        key={i}
+                        className="rounded-xl border border-[#EEEAF4] p-3"
+                      >
+                        <div className="mb-2 flex items-center gap-3">
+                          <div className="grid h-10 w-10 place-items-center rounded-full bg-[#F1EAF8] text-[#3F205F]">
+                            👩‍🔧
+                          </div>
+                          <div>
+                            <div className="text-[14px] font-semibold">{n}</div>
+                            <div className="text-[12px] text-[#6F6C90]">
+                              5+ years • phone & data recovery
+                            </div>
                           </div>
                         </div>
+                        <div className="h-28 rounded-lg bg-[url('https://images.unsplash.com/photo-1587614382346-4ec70e388b28?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center"></div>
                       </div>
-                      <div className="h-28 rounded-lg bg-[url('https://images.unsplash.com/photo-1587614382346-4ec70e388b28?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center"></div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               </div>
 
               {/* Photo gallery */}
               <div className="mt-5">
-                <div className="mb-3 text-[14px] font-semibold">Photo Gallery</div>
+                <div className="mb-3 text-[14px] font-semibold">
+                  Photo Gallery
+                </div>
                 <div className="grid grid-cols-3 gap-3 md:grid-cols-6">
                   {Array.from({ length: 9 }).map((_, i) => (
                     <div
@@ -356,6 +401,6 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
         )}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

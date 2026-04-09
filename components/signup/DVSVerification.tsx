@@ -3,7 +3,13 @@
 import { useMemo, useState } from "react";
 import { verifyDocument, type DocumentData } from "@/lib/services/dvs";
 
-type IdType = "DRIVERS_LICENCE" | "MEDICARE_CARD" | "PASSPORT" | "VISA" | "IMMICARD" | "BIRTH_CERTIFICATE";
+type IdType =
+  | "DRIVERS_LICENCE"
+  | "MEDICARE_CARD"
+  | "PASSPORT"
+  | "VISA"
+  | "IMMICARD"
+  | "BIRTH_CERTIFICATE";
 
 type CommonFields = {
   firstName: string;
@@ -20,7 +26,7 @@ type DriversFields = CommonFields & {
 
 type MedicareFields = CommonFields & {
   medicareNumber: string;
-  irn: string;    // Individual Reference Number
+  irn: string; // Individual Reference Number
   expiry: string; // YYYY-MM
 };
 
@@ -71,7 +77,9 @@ export default function DVSVerification({
   const [idType, setIdType] = useState<IdType>(defaultIdType);
   const [consent, setConsent] = useState(false);
   const [verifying, setVerifying] = useState(false);
-  const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [verificationError, setVerificationError] = useState<string | null>(
+    null,
+  );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -84,28 +92,46 @@ export default function DVSVerification({
   const [consentError, setConsentError] = useState<string | null>(null);
 
   // Driver's Licence errors
-  const [licenceNumberError, setLicenceNumberError] = useState<string | null>(null);
-  const [stateOfIssueError, setStateOfIssueError] = useState<string | null>(null);
+  const [licenceNumberError, setLicenceNumberError] = useState<string | null>(
+    null,
+  );
+  const [stateOfIssueError, setStateOfIssueError] = useState<string | null>(
+    null,
+  );
   const [cardNumberError, setCardNumberError] = useState<string | null>(null);
 
   // Medicare errors
-  const [medicareNumberError, setMedicareNumberError] = useState<string | null>(null);
+  const [medicareNumberError, setMedicareNumberError] = useState<string | null>(
+    null,
+  );
   const [irnError, setIrnError] = useState<string | null>(null);
   const [expiryError, setExpiryError] = useState<string | null>(null);
 
   // Passport errors
-  const [passportNumberError, setPassportNumberError] = useState<string | null>(null);
-  const [countryOfIssueError, setCountryOfIssueError] = useState<string | null>(null);
+  const [passportNumberError, setPassportNumberError] = useState<string | null>(
+    null,
+  );
+  const [countryOfIssueError, setCountryOfIssueError] = useState<string | null>(
+    null,
+  );
 
   // Visa errors
-  const [visaGrantNumberError, setVisaGrantNumberError] = useState<string | null>(null);
+  const [visaGrantNumberError, setVisaGrantNumberError] = useState<
+    string | null
+  >(null);
 
   // ImmiCard errors
-  const [immiCardNumberError, setImmiCardNumberError] = useState<string | null>(null);
+  const [immiCardNumberError, setImmiCardNumberError] = useState<string | null>(
+    null,
+  );
 
   // Birth Certificate errors
-  const [registrationNumberError, setRegistrationNumberError] = useState<string | null>(null);
-  const [birthStateOfIssueError, setBirthStateOfIssueError] = useState<string | null>(null);
+  const [registrationNumberError, setRegistrationNumberError] = useState<
+    string | null
+  >(null);
+  const [birthStateOfIssueError, setBirthStateOfIssueError] = useState<
+    string | null
+  >(null);
 
   // Common fields
   const [firstName, setFirstName] = useState("");
@@ -138,11 +164,15 @@ export default function DVSVerification({
 
   // Check if card number is required for driver's licence based on state
   const requiresCardNumber = useMemo(() => {
-    return idType === "DRIVERS_LICENCE" && STATES_REQUIRING_CARD_NUMBER.includes(stateOfIssue);
+    return (
+      idType === "DRIVERS_LICENCE" &&
+      STATES_REQUIRING_CARD_NUMBER.includes(stateOfIssue)
+    );
   }, [idType, stateOfIssue]);
 
   // Validation helper functions
-  const isValidName = (value: string) => /^[a-zA-Z\s'-]{2,}$/.test(value.trim());
+  const isValidName = (value: string) =>
+    /^[a-zA-Z\s'-]{2,}$/.test(value.trim());
 
   const getAge = (isoDate: string) => {
     if (!isoDate) return 0;
@@ -158,9 +188,21 @@ export default function DVSVerification({
 
   // Validate function - runs on submit
   const validate = (): boolean => {
-    const fnErr = !firstName ? "First name is required" : !isValidName(firstName) ? "Enter a valid first name" : null;
-    const lnErr = !lastName ? "Last name is required" : !isValidName(lastName) ? "Enter a valid last name" : null;
-    const dbErr = !dob ? "Date of birth is required" : !isAdult(dob) ? "You must be at least 18 years old" : null;
+    const fnErr = !firstName
+      ? "First name is required"
+      : !isValidName(firstName)
+        ? "Enter a valid first name"
+        : null;
+    const lnErr = !lastName
+      ? "Last name is required"
+      : !isValidName(lastName)
+        ? "Enter a valid last name"
+        : null;
+    const dbErr = !dob
+      ? "Date of birth is required"
+      : !isAdult(dob)
+        ? "You must be at least 18 years old"
+        : null;
     const fileErr = !selectedFile ? "Document image is required" : null;
     const consentErr = !consent ? "You must consent to proceed" : null;
 
@@ -176,7 +218,10 @@ export default function DVSVerification({
     if (idType === "DRIVERS_LICENCE") {
       const licErr = !licenceNumber ? "Licence number is required" : null;
       const stateErr = !stateOfIssue ? "State of issue is required" : null;
-      const cardErr = requiresCardNumber && !cardNumber ? "Card number is required for this state" : null;
+      const cardErr =
+        requiresCardNumber && !cardNumber
+          ? "Card number is required for this state"
+          : null;
 
       setLicenceNumberError(licErr);
       setStateOfIssueError(stateErr);
@@ -184,7 +229,9 @@ export default function DVSVerification({
 
       idTypeValid = !licErr && !stateErr && !cardErr;
     } else if (idType === "MEDICARE_CARD") {
-      const medErr = !medicareNumber ? "Medicare card number is required" : null;
+      const medErr = !medicareNumber
+        ? "Medicare card number is required"
+        : null;
       const irnErr = !irn ? "IRN is required" : null;
       const expErr = !expiry ? "Expiry date is required" : null;
 
@@ -195,7 +242,9 @@ export default function DVSVerification({
       idTypeValid = !medErr && !irnErr && !expErr;
     } else if (idType === "PASSPORT") {
       const passErr = !passportNumber ? "Passport number is required" : null;
-      const countryErr = !countryOfIssue ? "Country of issue is required" : null;
+      const countryErr = !countryOfIssue
+        ? "Country of issue is required"
+        : null;
 
       setPassportNumberError(passErr);
       setCountryOfIssueError(countryErr);
@@ -203,7 +252,9 @@ export default function DVSVerification({
       idTypeValid = !passErr && !countryErr;
     } else if (idType === "VISA") {
       const passErr = !passportNumber ? "Passport number is required" : null;
-      const countryErr = !countryOfIssue ? "Country of issue is required" : null;
+      const countryErr = !countryOfIssue
+        ? "Country of issue is required"
+        : null;
       const visaErr = !visaGrantNumber ? "Visa grant number is required" : null;
 
       setPassportNumberError(passErr);
@@ -218,8 +269,12 @@ export default function DVSVerification({
 
       idTypeValid = !immiErr;
     } else if (idType === "BIRTH_CERTIFICATE") {
-      const regErr = !registrationNumber ? "Registration number is required" : null;
-      const birthStateErr = !birthStateOfIssue ? "State of issue is required" : null;
+      const regErr = !registrationNumber
+        ? "Registration number is required"
+        : null;
+      const birthStateErr = !birthStateOfIssue
+        ? "State of issue is required"
+        : null;
 
       setRegistrationNumberError(regErr);
       setBirthStateOfIssueError(birthStateErr);
@@ -257,27 +312,43 @@ export default function DVSVerification({
   };
 
   const canSubmit = useMemo(() => {
-    if (!consent || !firstName || !lastName || !dob || !selectedFile) return false;
+    if (!consent || !firstName || !lastName || !dob || !selectedFile)
+      return false;
 
     if (idType === "DRIVERS_LICENCE") {
       const baseValid = !!licenceNumber && !!stateOfIssue;
       return requiresCardNumber ? baseValid && !!cardNumber : baseValid;
     }
-    if (idType === "MEDICARE_CARD") return !!medicareNumber && !!irn && !!expiry;
+    if (idType === "MEDICARE_CARD")
+      return !!medicareNumber && !!irn && !!expiry;
     if (idType === "PASSPORT") return !!passportNumber && !!countryOfIssue;
-    if (idType === "VISA") return !!passportNumber && !!countryOfIssue && !!visaGrantNumber;
+    if (idType === "VISA")
+      return !!passportNumber && !!countryOfIssue && !!visaGrantNumber;
     if (idType === "IMMICARD") return !!immiCardNumber;
-    if (idType === "BIRTH_CERTIFICATE") return !!registrationNumber && !!birthStateOfIssue;
+    if (idType === "BIRTH_CERTIFICATE")
+      return !!registrationNumber && !!birthStateOfIssue;
 
     return false;
   }, [
-    consent, firstName, lastName, dob, selectedFile,
-    idType, licenceNumber, stateOfIssue, cardNumber, requiresCardNumber,
-    medicareNumber, irn, expiry,
-    passportNumber, countryOfIssue,
+    consent,
+    firstName,
+    lastName,
+    dob,
+    selectedFile,
+    idType,
+    licenceNumber,
+    stateOfIssue,
+    cardNumber,
+    requiresCardNumber,
+    medicareNumber,
+    irn,
+    expiry,
+    passportNumber,
+    countryOfIssue,
     visaGrantNumber,
     immiCardNumber,
-    registrationNumber, birthStateOfIssue
+    registrationNumber,
+    birthStateOfIssue,
   ]);
 
   async function submit(e: React.FormEvent) {
@@ -295,8 +366,8 @@ export default function DVSVerification({
       const formatDateForAPI = (dateString: string) => {
         if (!dateString) return "";
         const date = new Date(dateString);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, "0");
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
       };
@@ -304,12 +375,12 @@ export default function DVSVerification({
       // Map ID type to API format
       const mapIdTypeToAPI = (type: IdType): string => {
         const mapping: Record<IdType, string> = {
-          "DRIVERS_LICENCE": "Driver Licence",
-          "MEDICARE_CARD": "Medicare Card",
-          "PASSPORT": "Passport",
-          "VISA": "Visa",
-          "IMMICARD": "ImmiCard",
-          "BIRTH_CERTIFICATE": "Birth Certificate"
+          DRIVERS_LICENCE: "Driver Licence",
+          MEDICARE_CARD: "Medicare Card",
+          PASSPORT: "Passport",
+          VISA: "Visa",
+          IMMICARD: "ImmiCard",
+          BIRTH_CERTIFICATE: "Birth Certificate",
         };
         return mapping[type] || type;
       };
@@ -320,18 +391,30 @@ export default function DVSVerification({
         firstName: firstName,
         lastName: lastName,
         dateOfBirth: formatDateForAPI(dob),
-        documentNumber: idType === "DRIVERS_LICENCE" ? licenceNumber :
-          idType === "PASSPORT" || idType === "VISA" ? passportNumber :
-            idType === "MEDICARE_CARD" ? medicareNumber :
-              idType === "IMMICARD" ? immiCardNumber :
-                registrationNumber,
-        countryOfIssue: (idType === "PASSPORT" || idType === "VISA") ? countryOfIssue : undefined,
-        stateOfIssue: (idType === "DRIVERS_LICENCE" || idType === "BIRTH_CERTIFICATE")
-          ? (idType === "DRIVERS_LICENCE" ? stateOfIssue : birthStateOfIssue)
-          : undefined,
-        cardNumber: idType === "DRIVERS_LICENCE" && cardNumber ? cardNumber : undefined,
+        documentNumber:
+          idType === "DRIVERS_LICENCE"
+            ? licenceNumber
+            : idType === "PASSPORT" || idType === "VISA"
+              ? passportNumber
+              : idType === "MEDICARE_CARD"
+                ? medicareNumber
+                : idType === "IMMICARD"
+                  ? immiCardNumber
+                  : registrationNumber,
+        countryOfIssue:
+          idType === "PASSPORT" || idType === "VISA"
+            ? countryOfIssue
+            : undefined,
+        stateOfIssue:
+          idType === "DRIVERS_LICENCE" || idType === "BIRTH_CERTIFICATE"
+            ? idType === "DRIVERS_LICENCE"
+              ? stateOfIssue
+              : birthStateOfIssue
+            : undefined,
+        cardNumber:
+          idType === "DRIVERS_LICENCE" && cardNumber ? cardNumber : undefined,
         visaGrantNumber: idType === "VISA" ? visaGrantNumber : undefined,
-        documentImage: selectedFile
+        documentImage: selectedFile,
       };
 
       // Call DVS API
@@ -342,17 +425,38 @@ export default function DVSVerification({
         const base: CommonFields = { firstName, lastName, dob, consent };
 
         if (idType === "DRIVERS_LICENCE") {
-          onVerify({ idType, data: { ...base, licenceNumber, stateOfIssue, cardNumber: cardNumber || undefined } });
+          onVerify({
+            idType,
+            data: {
+              ...base,
+              licenceNumber,
+              stateOfIssue,
+              cardNumber: cardNumber || undefined,
+            },
+          });
         } else if (idType === "MEDICARE_CARD") {
           onVerify({ idType, data: { ...base, medicareNumber, irn, expiry } });
         } else if (idType === "PASSPORT") {
-          onVerify({ idType, data: { ...base, passportNumber, countryOfIssue } });
+          onVerify({
+            idType,
+            data: { ...base, passportNumber, countryOfIssue },
+          });
         } else if (idType === "VISA") {
-          onVerify({ idType, data: { ...base, passportNumber, countryOfIssue, visaGrantNumber } });
+          onVerify({
+            idType,
+            data: { ...base, passportNumber, countryOfIssue, visaGrantNumber },
+          });
         } else if (idType === "IMMICARD") {
           onVerify({ idType, data: { ...base, immiCardNumber } });
         } else if (idType === "BIRTH_CERTIFICATE") {
-          onVerify({ idType, data: { ...base, registrationNumber, stateOfIssue: birthStateOfIssue } });
+          onVerify({
+            idType,
+            data: {
+              ...base,
+              registrationNumber,
+              stateOfIssue: birthStateOfIssue,
+            },
+          });
         }
       } else {
         setVerificationError(result.error || "Verification failed");
@@ -368,14 +472,15 @@ export default function DVSVerification({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB limit
       setFileError("File size must be less than 5MB");
       setVerificationError("File size must be less than 5MB");
       return;
     }
 
     // Check file type
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith("image/")) {
       setFileError("Please select an image file");
       setVerificationError("Please select an image file");
       return;
@@ -405,7 +510,9 @@ export default function DVSVerification({
     <form onSubmit={submit} className="space-y-4">
       {/* ID Type */}
       <div>
-        <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">ID Type</label>
+        <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+          ID Type
+        </label>
         <select
           value={idType}
           onChange={(e) => {
@@ -442,7 +549,9 @@ export default function DVSVerification({
       {/* Common fields */}
       <div className="grid gap-4 md:grid-cols-3">
         <div>
-          <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">First name</label>
+          <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+            First name
+          </label>
           <input
             value={firstName}
             onChange={(e) => {
@@ -451,10 +560,14 @@ export default function DVSVerification({
             }}
             className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${firstNameError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
           />
-          {firstNameError && <p className="mt-1 text-xs text-red-600">{firstNameError}</p>}
+          {firstNameError && (
+            <p className="mt-1 text-xs text-red-600">{firstNameError}</p>
+          )}
         </div>
         <div>
-          <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">Last name</label>
+          <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+            Last name
+          </label>
           <input
             value={lastName}
             onChange={(e) => {
@@ -463,10 +576,14 @@ export default function DVSVerification({
             }}
             className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${lastNameError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
           />
-          {lastNameError && <p className="mt-1 text-xs text-red-600">{lastNameError}</p>}
+          {lastNameError && (
+            <p className="mt-1 text-xs text-red-600">{lastNameError}</p>
+          )}
         </div>
         <div>
-          <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">Date of birth</label>
+          <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+            Date of birth
+          </label>
           <input
             type="date"
             value={dob}
@@ -474,7 +591,7 @@ export default function DVSVerification({
               setDob(e.target.value);
               if (submitted) setDobError(null);
             }}
-            max={new Date().toISOString().split('T')[0]}
+            max={new Date().toISOString().split("T")[0]}
             className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${dobError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
           />
           {dobError && <p className="mt-1 text-xs text-red-600">{dobError}</p>}
@@ -485,7 +602,9 @@ export default function DVSVerification({
       {idType === "DRIVERS_LICENCE" && (
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">Licence number</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              Licence number
+            </label>
             <input
               value={licenceNumber}
               onChange={(e) => {
@@ -495,10 +614,14 @@ export default function DVSVerification({
               className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${licenceNumberError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
               placeholder="Enter licence number"
             />
-            {licenceNumberError && <p className="mt-1 text-xs text-red-600">{licenceNumberError}</p>}
+            {licenceNumberError && (
+              <p className="mt-1 text-xs text-red-600">{licenceNumberError}</p>
+            )}
           </div>
           <div>
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">State of issue</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              State of issue
+            </label>
             <select
               value={stateOfIssue}
               onChange={(e) => {
@@ -509,11 +632,17 @@ export default function DVSVerification({
               className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${stateOfIssueError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
             >
               <option value="">Select state…</option>
-              {["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"].map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
+              {["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"].map(
+                (s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ),
+              )}
             </select>
-            {stateOfIssueError && <p className="mt-1 text-xs text-red-600">{stateOfIssueError}</p>}
+            {stateOfIssueError && (
+              <p className="mt-1 text-xs text-red-600">{stateOfIssueError}</p>
+            )}
           </div>
           {requiresCardNumber && (
             <div className="md:col-span-2">
@@ -533,7 +662,8 @@ export default function DVSVerification({
                 <p className="mt-1 text-xs text-red-600">{cardNumberError}</p>
               ) : (
                 <p className="mt-1 text-[11px] text-[#6F6C90]">
-                  Card number is required for {stateOfIssue} driver&apos;s licences
+                  Card number is required for {stateOfIssue} driver&apos;s
+                  licences
                 </p>
               )}
             </div>
@@ -545,7 +675,9 @@ export default function DVSVerification({
       {idType === "MEDICARE_CARD" && (
         <div className="grid gap-4 md:grid-cols-3">
           <div className="md:col-span-2">
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">Medicare card number</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              Medicare card number
+            </label>
             <input
               value={medicareNumber}
               onChange={(e) => {
@@ -555,10 +687,14 @@ export default function DVSVerification({
               className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${medicareNumberError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
               placeholder="e.g., 1234 56789 1"
             />
-            {medicareNumberError && <p className="mt-1 text-xs text-red-600">{medicareNumberError}</p>}
+            {medicareNumberError && (
+              <p className="mt-1 text-xs text-red-600">{medicareNumberError}</p>
+            )}
           </div>
           <div>
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">IRN</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              IRN
+            </label>
             <input
               value={irn}
               onChange={(e) => {
@@ -569,10 +705,14 @@ export default function DVSVerification({
               placeholder="1–5"
               maxLength={1}
             />
-            {irnError && <p className="mt-1 text-xs text-red-600">{irnError}</p>}
+            {irnError && (
+              <p className="mt-1 text-xs text-red-600">{irnError}</p>
+            )}
           </div>
           <div>
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">Expiry (MM/YYYY)</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              Expiry (MM/YYYY)
+            </label>
             <input
               type="month"
               value={expiry}
@@ -582,7 +722,9 @@ export default function DVSVerification({
               }}
               className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${expiryError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
             />
-            {expiryError && <p className="mt-1 text-xs text-red-600">{expiryError}</p>}
+            {expiryError && (
+              <p className="mt-1 text-xs text-red-600">{expiryError}</p>
+            )}
           </div>
         </div>
       )}
@@ -591,7 +733,9 @@ export default function DVSVerification({
       {idType === "PASSPORT" && (
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">Passport number</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              Passport number
+            </label>
             <input
               value={passportNumber}
               onChange={(e) => {
@@ -601,10 +745,14 @@ export default function DVSVerification({
               className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${passportNumberError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
               placeholder="Enter passport number"
             />
-            {passportNumberError && <p className="mt-1 text-xs text-red-600">{passportNumberError}</p>}
+            {passportNumberError && (
+              <p className="mt-1 text-xs text-red-600">{passportNumberError}</p>
+            )}
           </div>
           <div>
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">Country of issue</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              Country of issue
+            </label>
             <input
               value={countryOfIssue}
               onChange={(e) => {
@@ -614,7 +762,9 @@ export default function DVSVerification({
               className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${countryOfIssueError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
               placeholder="e.g., Australia"
             />
-            {countryOfIssueError && <p className="mt-1 text-xs text-red-600">{countryOfIssueError}</p>}
+            {countryOfIssueError && (
+              <p className="mt-1 text-xs text-red-600">{countryOfIssueError}</p>
+            )}
           </div>
         </div>
       )}
@@ -623,7 +773,9 @@ export default function DVSVerification({
       {idType === "VISA" && (
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">Passport number</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              Passport number
+            </label>
             <input
               value={passportNumber}
               onChange={(e) => {
@@ -633,10 +785,14 @@ export default function DVSVerification({
               className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${passportNumberError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
               placeholder="Enter passport number"
             />
-            {passportNumberError && <p className="mt-1 text-xs text-red-600">{passportNumberError}</p>}
+            {passportNumberError && (
+              <p className="mt-1 text-xs text-red-600">{passportNumberError}</p>
+            )}
           </div>
           <div>
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">Country of issue</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              Country of issue
+            </label>
             <input
               value={countryOfIssue}
               onChange={(e) => {
@@ -646,10 +802,14 @@ export default function DVSVerification({
               className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${countryOfIssueError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
               placeholder="e.g., Australia"
             />
-            {countryOfIssueError && <p className="mt-1 text-xs text-red-600">{countryOfIssueError}</p>}
+            {countryOfIssueError && (
+              <p className="mt-1 text-xs text-red-600">{countryOfIssueError}</p>
+            )}
           </div>
           <div className="md:col-span-2">
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">Visa grant number</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              Visa grant number
+            </label>
             <input
               value={visaGrantNumber}
               onChange={(e) => {
@@ -659,7 +819,11 @@ export default function DVSVerification({
               className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${visaGrantNumberError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
               placeholder="Enter visa grant number"
             />
-            {visaGrantNumberError && <p className="mt-1 text-xs text-red-600">{visaGrantNumberError}</p>}
+            {visaGrantNumberError && (
+              <p className="mt-1 text-xs text-red-600">
+                {visaGrantNumberError}
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -667,7 +831,9 @@ export default function DVSVerification({
       {/* ImmiCard fields */}
       {idType === "IMMICARD" && (
         <div>
-          <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">ImmiCard number</label>
+          <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+            ImmiCard number
+          </label>
           <input
             value={immiCardNumber}
             onChange={(e) => {
@@ -677,7 +843,9 @@ export default function DVSVerification({
             className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${immiCardNumberError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
             placeholder="Enter ImmiCard number"
           />
-          {immiCardNumberError && <p className="mt-1 text-xs text-red-600">{immiCardNumberError}</p>}
+          {immiCardNumberError && (
+            <p className="mt-1 text-xs text-red-600">{immiCardNumberError}</p>
+          )}
         </div>
       )}
 
@@ -685,7 +853,9 @@ export default function DVSVerification({
       {idType === "BIRTH_CERTIFICATE" && (
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">Registration number</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              Registration number
+            </label>
             <input
               value={registrationNumber}
               onChange={(e) => {
@@ -695,10 +865,16 @@ export default function DVSVerification({
               className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${registrationNumberError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
               placeholder="Enter registration number"
             />
-            {registrationNumberError && <p className="mt-1 text-xs text-red-600">{registrationNumberError}</p>}
+            {registrationNumberError && (
+              <p className="mt-1 text-xs text-red-600">
+                {registrationNumberError}
+              </p>
+            )}
           </div>
           <div>
-            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">State of issue</label>
+            <label className="mb-2 block text-[12px] font-semibold text-[#3B3551]">
+              State of issue
+            </label>
             <select
               value={birthStateOfIssue}
               onChange={(e) => {
@@ -708,11 +884,19 @@ export default function DVSVerification({
               className={`w-full rounded-[10px] border px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-[#401B60]/20 ${birthStateOfIssueError ? "border-red-300 bg-red-50" : "border-[#DFDBE3]"}`}
             >
               <option value="">Select state…</option>
-              {["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"].map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
+              {["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"].map(
+                (s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ),
+              )}
             </select>
-            {birthStateOfIssueError && <p className="mt-1 text-xs text-red-600">{birthStateOfIssueError}</p>}
+            {birthStateOfIssueError && (
+              <p className="mt-1 text-xs text-red-600">
+                {birthStateOfIssueError}
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -724,7 +908,9 @@ export default function DVSVerification({
         </label>
 
         {!selectedFile ? (
-          <div className={`border-2 border-dashed rounded-[10px] p-6 text-center transition-colors ${fileError ? "border-red-300 bg-red-50" : "border-[#DFDBE3] hover:border-[#401B60]"}`}>
+          <div
+            className={`border-2 border-dashed rounded-[10px] p-6 text-center transition-colors ${fileError ? "border-red-300 bg-red-50" : "border-[#DFDBE3] hover:border-[#401B60]"}`}
+          >
             <input
               type="file"
               accept="image/*"
@@ -738,15 +924,43 @@ export default function DVSVerification({
             >
               <div className="w-12 h-12 bg-[#F4F3F7] rounded-full flex items-center justify-center">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#401B60" strokeWidth="2" />
-                  <polyline points="14,2 14,8 20,8" stroke="#401B60" strokeWidth="2" />
-                  <line x1="16" y1="13" x2="8" y2="13" stroke="#401B60" strokeWidth="2" />
-                  <line x1="16" y1="17" x2="8" y2="17" stroke="#401B60" strokeWidth="2" />
-                  <polyline points="10,9 9,9 8,9" stroke="#401B60" strokeWidth="2" />
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                    stroke="#401B60"
+                    strokeWidth="2"
+                  />
+                  <polyline
+                    points="14,2 14,8 20,8"
+                    stroke="#401B60"
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="16"
+                    y1="13"
+                    x2="8"
+                    y2="13"
+                    stroke="#401B60"
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="16"
+                    y1="17"
+                    x2="8"
+                    y2="17"
+                    stroke="#401B60"
+                    strokeWidth="2"
+                  />
+                  <polyline
+                    points="10,9 9,9 8,9"
+                    stroke="#401B60"
+                    strokeWidth="2"
+                  />
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-[#401B60]">Click to upload document image</p>
+                <p className="text-sm font-medium text-[#401B60]">
+                  Click to upload document image
+                </p>
                 <p className="text-xs text-[#8A84A3]">JPG, PNG - max 5MB</p>
               </div>
             </label>
@@ -764,7 +978,9 @@ export default function DVSVerification({
                 </div>
               )}
               <div className="flex-1">
-                <p className="text-sm font-medium text-[#3B3551]">{selectedFile.name}</p>
+                <p className="text-sm font-medium text-[#3B3551]">
+                  {selectedFile.name}
+                </p>
                 <p className="text-xs text-[#8A84A3]">
                   {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                 </p>
@@ -775,8 +991,22 @@ export default function DVSVerification({
                 className="text-red-500 hover:text-red-700 p-1"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" />
-                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2" />
+                  <line
+                    x1="18"
+                    y1="6"
+                    x2="6"
+                    y2="18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="6"
+                    y1="6"
+                    x2="18"
+                    y2="18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
                 </svg>
               </button>
             </div>
@@ -799,10 +1029,14 @@ export default function DVSVerification({
             required
           />
           <span className="leading-relaxed">
-            I am authorised to provide these details, I consent to them being checked against official records by a secure verification service, and I confirm that I am 18 years of age or older.
+            I am authorised to provide these details, I consent to them being
+            checked against official records by a secure verification service,
+            and I confirm that I am 18 years of age or older.
           </span>
         </label>
-        {consentError && <p className="mt-1 text-xs text-red-600">{consentError}</p>}
+        {consentError && (
+          <p className="mt-1 text-xs text-red-600">{consentError}</p>
+        )}
       </div>
 
       {(apiError || verificationError) && (

@@ -1,20 +1,20 @@
 type Props = {
-  status: 'Pending ICCID' | 'Awaiting Provisioning' | 'Provisioned';
+  status: "Pending ICCID" | "Awaiting Provisioning" | "Provisioned";
 };
 
 export default function StatusBadge({ status }: Props) {
   const map = {
-    'Pending ICCID': {
-      dot: '#F59E0B',
-      text: '#F59E0B',
+    "Pending ICCID": {
+      dot: "#F59E0B",
+      text: "#F59E0B",
     },
-    'Awaiting Provisioning': {
-      dot: '#F59E0B',
-      text: '#F59E0B',
+    "Awaiting Provisioning": {
+      dot: "#F59E0B",
+      text: "#F59E0B",
     },
     Provisioned: {
-      dot: '#16A34A',
-      text: '#16A34A',
+      dot: "#16A34A",
+      text: "#16A34A",
     },
   } as const;
 

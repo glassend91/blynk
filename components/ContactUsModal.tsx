@@ -33,8 +33,9 @@ export default function ContactUsModal({
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           #contact-modal::-webkit-scrollbar {
             display: none;
             width: 0;
@@ -53,8 +54,9 @@ export default function ContactUsModal({
             -ms-overflow-style: none;
             scrollbar-width: none;
           }
-        `
-      }} />
+        `,
+        }}
+      />
       <div
         id="contact-modal"
         className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/90 backdrop-blur-[4px] p-3 overflow-y-auto overflow-x-hidden sm:items-center sm:p-4"

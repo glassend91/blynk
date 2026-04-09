@@ -30,15 +30,15 @@ export default function CreateRoleModal({
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -46,7 +46,7 @@ export default function CreateRoleModal({
 
   const allKeys = useMemo(
     () => groups.flatMap((g) => g.items.map((i) => i.key)),
-    [groups]
+    [groups],
   );
 
   if (!open) return null;
@@ -72,9 +72,9 @@ export default function CreateRoleModal({
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
       }}
     >
       <div
@@ -85,9 +85,9 @@ export default function CreateRoleModal({
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 90
+          width: "100vw",
+          height: "100vh",
+          zIndex: 90,
         }}
       />
       <div
@@ -95,7 +95,9 @@ export default function CreateRoleModal({
         style={{ zIndex: 91 }}
       >
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">Create New Role</h2>
+          <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">
+            Create New Role
+          </h2>
           <button
             onClick={onClose}
             className="grid h-7 w-7 place-items-center rounded-full bg-[#FFF0F0] text-[#E0342F]"
@@ -111,7 +113,9 @@ export default function CreateRoleModal({
         {/* Basic fields */}
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">Role Name</label>
+            <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
+              Role Name
+            </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -120,7 +124,9 @@ export default function CreateRoleModal({
             />
           </div>
           <div>
-            <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">Description</label>
+            <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
+              Description
+            </label>
             <input
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
@@ -132,12 +138,19 @@ export default function CreateRoleModal({
 
         {/* Permissions */}
         <div className="mt-5 space-y-4">
-          <div className="text-[14px] font-semibold text-[#0A0A0A]">Permissions</div>
+          <div className="text-[14px] font-semibold text-[#0A0A0A]">
+            Permissions
+          </div>
 
           {groups.map((g) => (
-            <div key={g.key} className="rounded-[12.75px] border border-[#DFDBE3] bg-[#FBFBFD]">
+            <div
+              key={g.key}
+              className="rounded-[12.75px] border border-[#DFDBE3] bg-[#FBFBFD]"
+            >
               <div className="flex items-center justify-between border-b border-[#E7E4EC] px-4 py-3">
-                <div className="text-[14px] font-semibold text-[#0A0A0A]">{g.title}</div>
+                <div className="text-[14px] font-semibold text-[#0A0A0A]">
+                  {g.title}
+                </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => selectGroup(g.key, true)}
@@ -163,8 +176,14 @@ export default function CreateRoleModal({
                       className="flex cursor-pointer items-start justify-between rounded-[10px] border border-[#E7E4EC] bg-white px-4 py-3"
                     >
                       <div className="mr-3">
-                        <div className="text-[14px] text-[#0A0A0A]">{it.title}</div>
-                        {it.hint && <div className="text-[12px] text-[#6F6C90]">{it.hint}</div>}
+                        <div className="text-[14px] text-[#0A0A0A]">
+                          {it.title}
+                        </div>
+                        {it.hint && (
+                          <div className="text-[12px] text-[#6F6C90]">
+                            {it.hint}
+                          </div>
+                        )}
                       </div>
                       <input
                         type="checkbox"
@@ -194,7 +213,7 @@ export default function CreateRoleModal({
                 description: desc || "Custom role",
                 usersCount: 0,
                 permissions: Object.fromEntries(
-                  allKeys.map((k) => [k, !!checked[k]])
+                  allKeys.map((k) => [k, !!checked[k]]),
                 ),
               })
             }

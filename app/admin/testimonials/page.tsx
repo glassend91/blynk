@@ -11,7 +11,8 @@ export default function TestimonialsPage() {
   const [rows, setRows] = useState<Testimonial[]>([]);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+  const [editingTestimonial, setEditingTestimonial] =
+    useState<Testimonial | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +25,10 @@ export default function TestimonialsPage() {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await apiClient.get<{ success: boolean; data: Testimonial[] }>("/testimonials");
+      const { data } = await apiClient.get<{
+        success: boolean;
+        data: Testimonial[];
+      }>("/testimonials");
 
       if (data?.success && data.data) {
         setRows(data.data);
@@ -45,7 +49,7 @@ export default function TestimonialsPage() {
         r.name.toLowerCase().includes(q) ||
         r.location.toLowerCase().includes(q) ||
         r.quote.toLowerCase().includes(q) ||
-        (r.plan || "").toLowerCase().includes(q)
+        (r.plan || "").toLowerCase().includes(q),
     );
   }, [rows, query]);
 
@@ -56,7 +60,9 @@ export default function TestimonialsPage() {
 
   const handleUpdate = (updatedTestimonial: Testimonial) => {
     setRows((prev) =>
-      prev.map((t) => (t.id === updatedTestimonial.id ? updatedTestimonial : t))
+      prev.map((t) =>
+        t.id === updatedTestimonial.id ? updatedTestimonial : t,
+      ),
     );
     setEditingTestimonial(null);
     setOpen(false);
@@ -73,7 +79,9 @@ export default function TestimonialsPage() {
     }
 
     try {
-      const { data } = await apiClient.delete<{ success: boolean }>(`/testimonials/${id}`);
+      const { data } = await apiClient.delete<{ success: boolean }>(
+        `/testimonials/${id}`,
+      );
 
       if (data?.success) {
         setRows((prev) => prev.filter((r) => r.id !== id));
@@ -143,8 +151,17 @@ export default function TestimonialsPage() {
       <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-5">
         <div className="mb-4 flex w-full max-w-[380px] items-center gap-3 rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3">
           <svg width="18" height="18" viewBox="0 0 20 21" fill="none">
-            <path d="M9.6 18c4.4 0 8-3.6 8-8s-3.6-8-8-8-8 3.6-8 8 3.6 8 8 8Z" stroke="#292D32" strokeWidth="1.5" />
-            <path d="m18.3 18.8-1.7-1.7" stroke="#292D32" strokeWidth="1.5" strokeLinecap="round" />
+            <path
+              d="M9.6 18c4.4 0 8-3.6 8-8s-3.6-8-8-8-8 3.6-8 8 3.6 8 8 8Z"
+              stroke="#292D32"
+              strokeWidth="1.5"
+            />
+            <path
+              d="m18.3 18.8-1.7-1.7"
+              stroke="#292D32"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
           </svg>
           <input
             value={query}
@@ -165,7 +182,9 @@ export default function TestimonialsPage() {
           ))}
           {filtered.length === 0 && (
             <div className="rounded-[12px] border border-[#E7E4EC] p-8 text-center text-[14px] text-[#6F6C90]">
-              {query ? "No testimonials found matching your search." : "No testimonials yet. Add your first testimonial!"}
+              {query
+                ? "No testimonials found matching your search."
+                : "No testimonials yet. Add your first testimonial!"}
             </div>
           )}
         </div>

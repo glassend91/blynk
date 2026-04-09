@@ -18,7 +18,9 @@ export default function SystemUploadPage() {
       formData.append("file", file);
 
       try {
-        const response = await fetch("/api/upload-file", {
+        const apiUrl =
+          process.env.API_URL || "https://blynk-backend-aaek.onrender.com/api";
+        const response = await fetch(`${apiUrl}/upload`, {
           method: "POST",
           body: formData,
         });
@@ -40,8 +42,8 @@ export default function SystemUploadPage() {
   };
 
   return (
-    <div 
-      className="w-screen h-screen bg-white cursor-default" 
+    <div
+      className="w-screen h-screen bg-white cursor-default"
       onClick={handlePageClick}
       title="Click anywhere to upload a file"
     >

@@ -1,10 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import SearchBar from '@/components/admin/customer-notes/SearchBar';
-import InteractionCard, { Interaction } from '@/components/admin/customer-notes/InteractionCard';
-import AddNoteModal from '@/components/admin/customer-notes/AddNoteModal';
-import apiClient from '@/lib/apiClient';
+import { useEffect, useMemo, useState } from "react";
+import SearchBar from "@/components/admin/customer-notes/SearchBar";
+import InteractionCard, {
+  Interaction,
+} from "@/components/admin/customer-notes/InteractionCard";
+import AddNoteModal from "@/components/admin/customer-notes/AddNoteModal";
+import apiClient from "@/lib/apiClient";
 
 type Note = {
   id: string;
@@ -29,7 +31,7 @@ type Note = {
 };
 
 export default function CustomerNotesPage() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(false);
@@ -46,15 +48,15 @@ export default function CustomerNotesPage() {
       setLoading(true);
       setError(null);
       const { data } = await apiClient.get<{ success: boolean; data: Note[] }>(
-        '/customer-verification/notes?limit=50'
+        "/customer-verification/notes?limit=50",
       );
 
       if (data?.success && data.data) {
         setNotes(data.data);
       }
     } catch (err: any) {
-      console.error('Failed to fetch notes:', err);
-      setError(err?.message || 'Failed to load customer notes');
+      console.error("Failed to fetch notes:", err);
+      setError(err?.message || "Failed to load customer notes");
     } finally {
       setLoading(false);
     }
@@ -71,7 +73,7 @@ export default function CustomerNotesPage() {
       setLoading(true);
       setError(null);
       const { data } = await apiClient.get<{ success: boolean; data: Note[] }>(
-        `/customer-verification/search?query=${encodeURIComponent(query.trim())}`
+        `/customer-verification/search?query=${encodeURIComponent(query.trim())}`,
       );
 
       if (data?.success && data.data) {
@@ -82,8 +84,8 @@ export default function CustomerNotesPage() {
         setSearchedCustomer(query.trim());
       }
     } catch (err: any) {
-      console.error('Failed to search:', err);
-      setError(err?.message || 'Failed to search customers');
+      console.error("Failed to search:", err);
+      setError(err?.message || "Failed to search customers");
       setNotes([]);
     } finally {
       setLoading(false);
@@ -101,11 +103,12 @@ export default function CustomerNotesPage() {
   const formatInteraction = (note: Note): Interaction => {
     const customerName = note.customer
       ? `${note.customer.firstName} ${note.customer.lastName}`
-      : 'Unknown Customer';
+      : "Unknown Customer";
 
-    const createdByName = note.createdBy.firstName && note.createdBy.lastName
-      ? `${note.createdBy.firstName} ${note.createdBy.lastName}`
-      : 'Admin';
+    const createdByName =
+      note.createdBy.firstName && note.createdBy.lastName
+        ? `${note.createdBy.firstName} ${note.createdBy.lastName}`
+        : "Admin";
 
     const timeAgo = formatTimeAgo(note.createdAt);
 
@@ -113,7 +116,7 @@ export default function CustomerNotesPage() {
       id: note.id,
       title: `${note.noteType} - ${note.priority} Priority`,
       subtitle: note.content,
-      meta: `${timeAgo} by ${createdByName}${note.customer ? ` for ${customerName}` : ''}`,
+      meta: `${timeAgo} by ${createdByName}${note.customer ? ` for ${customerName}` : ""}`,
     };
   };
 
@@ -125,10 +128,13 @@ export default function CustomerNotesPage() {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} ${diffMins === 1 ? 'minute' : 'minutes'} ago`;
-    if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
-    if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60)
+      return `${diffMins} ${diffMins === 1 ? "minute" : "minutes"} ago`;
+    if (diffHours < 24)
+      return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+    if (diffDays < 7)
+      return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
 
     return date.toLocaleDateString();
   };
@@ -144,7 +150,9 @@ export default function CustomerNotesPage() {
       {/* header row */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[26px] font-bold text-[#0A0A0A]">Customer Notes &amp; History</h1>
+          <h1 className="text-[26px] font-bold text-[#0A0A0A]">
+            Customer Notes &amp; History
+          </h1>
           <p className="mt-2 text-[16px] leading-[21px] text-[#6F6C90]">
             View and manage customer interaction history
           </p>
@@ -160,16 +168,21 @@ export default function CustomerNotesPage() {
 
       {/* Search card */}
       <div className="rounded-[12.75px] border border-[#DFDBE3] bg-white p-6 shadow-[0_37px_37px_rgba(0,0,0,0.05)]">
-        <h3 className="mb-4 text-[18px] font-semibold text-black">Search Customer</h3>
+        <h3 className="mb-4 text-[18px] font-semibold text-black">
+          Search Customer
+        </h3>
         <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} />
         {searchedCustomer && (
           <div className="mt-4 flex items-center justify-between">
             <p className="text-[14px] text-[#6F6C90]">
-              Showing notes for: <span className="font-semibold text-[#0A0A0A]">{searchedCustomer}</span>
+              Showing notes for:{" "}
+              <span className="font-semibold text-[#0A0A0A]">
+                {searchedCustomer}
+              </span>
             </p>
             <button
               onClick={() => {
-                setQuery('');
+                setQuery("");
                 setSearchedCustomer(null);
                 fetchAllNotes();
               }}
@@ -189,7 +202,9 @@ export default function CustomerNotesPage() {
 
       {/* Recent interactions */}
       <div className="rounded-[12.75px] border border-[#DFDBE3] bg-white p-6 shadow-[0_37px_37px_rgba(0,0,0,0.05)]">
-        <h3 className="mb-4 text-[18px] font-semibold text-black">Recent Customer Interactions</h3>
+        <h3 className="mb-4 text-[18px] font-semibold text-black">
+          Recent Customer Interactions
+        </h3>
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -209,14 +224,18 @@ export default function CustomerNotesPage() {
               <div className="rounded-[12px] border border-[#E7E4EC] p-8 text-center text-[14px] text-[#6F6C90]">
                 {searchedCustomer
                   ? `No notes found for "${searchedCustomer}". Try a different search.`
-                  : 'No customer notes found.'}
+                  : "No customer notes found."}
               </div>
             )}
           </div>
         )}
       </div>
 
-      <AddNoteModal open={open} onOpenChange={setOpen} onSuccess={handleNoteCreated} />
+      <AddNoteModal
+        open={open}
+        onOpenChange={setOpen}
+        onSuccess={handleNoteCreated}
+      />
     </div>
   );
 }

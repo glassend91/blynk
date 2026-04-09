@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { OTPForm } from '../../customer-verification/_local/OTPForm';
-import { ManualVerification } from '../../customer-verification/_local/ManualVerification';
-import { StatCard } from '../../customer-verification/_local/StatCard';
-import { AddNoteDialog } from '../../customer-verification/_local/AddNoteDialog';
-import apiClient from '@/lib/apiClient';
+import { useEffect, useState } from "react";
+import { OTPForm } from "../../customer-verification/_local/OTPForm";
+import { ManualVerification } from "../../customer-verification/_local/ManualVerification";
+import { StatCard } from "../../customer-verification/_local/StatCard";
+import { AddNoteDialog } from "../../customer-verification/_local/AddNoteDialog";
+import apiClient from "@/lib/apiClient";
 
 export default function CustomerVerificationTab() {
   const [openNote, setOpenNote] = useState(false);
@@ -25,7 +25,7 @@ export default function CustomerVerificationTab() {
     try {
       setLoading(true);
       const { data } = await apiClient.get<{ success: boolean; data: any }>(
-        '/customer-verification/statistics'
+        "/customer-verification/statistics",
       );
 
       if (data?.success && data.data) {
@@ -37,7 +37,7 @@ export default function CustomerVerificationTab() {
         });
       }
     } catch (err: any) {
-      console.error('Failed to fetch statistics:', err);
+      console.error("Failed to fetch statistics:", err);
     } finally {
       setLoading(false);
     }
@@ -48,10 +48,26 @@ export default function CustomerVerificationTab() {
   };
 
   const statCards = [
-    { label: 'Pending Verification', value: stats.pendingVerification, icon: 'clock' as const },
-    { label: 'Verified Today', value: stats.verifiedToday, icon: 'check' as const },
-    { label: 'Failed Verifications', value: stats.failedVerifications, icon: 'warning' as const },
-    { label: 'OTPs Sent Today', value: stats.otpsSentToday, icon: 'send' as const },
+    {
+      label: "Pending Verification",
+      value: stats.pendingVerification,
+      icon: "clock" as const,
+    },
+    {
+      label: "Verified Today",
+      value: stats.verifiedToday,
+      icon: "check" as const,
+    },
+    {
+      label: "Failed Verifications",
+      value: stats.failedVerifications,
+      icon: "warning" as const,
+    },
+    {
+      label: "OTPs Sent Today",
+      value: stats.otpsSentToday,
+      icon: "send" as const,
+    },
   ];
 
   return (
@@ -79,8 +95,11 @@ export default function CustomerVerificationTab() {
         </button>
       </div>
 
-      <AddNoteDialog open={openNote} onOpenChange={setOpenNote} onSuccess={handleSuccess} />
+      <AddNoteDialog
+        open={openNote}
+        onOpenChange={setOpenNote}
+        onSuccess={handleSuccess}
+      />
     </div>
   );
 }
-

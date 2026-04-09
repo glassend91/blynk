@@ -60,7 +60,10 @@ export default function BusinessServicesPage({
 
             {/* Call-to-Action Text */}
             <p className="mx-auto mt-6 max-w-[720px] text-[16px] leading-[26px] text-[#6F6C90] md:text-[18px] md:leading-[28px]">
-              Focus on running your business, not your IT. Our local tech partners provide the hands-on, expert support you need to stay connected. Call us to speak with a Business Specialist and build a solution that works for you.
+              Focus on running your business, not your IT. Our local tech
+              partners provide the hands-on, expert support you need to stay
+              connected. Call us to speak with a Business Specialist and build a
+              solution that works for you.
             </p>
 
             {/* Phone Number - Prominently Displayed */}
@@ -210,4 +213,3 @@ export default function BusinessServicesPage({
     </div>
   );
 }
-

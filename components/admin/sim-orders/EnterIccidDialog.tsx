@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import apiClient from '@/lib/apiClient';
+import { useState, useEffect } from "react";
+import apiClient from "@/lib/apiClient";
 
 type Props = {
   open: boolean;
@@ -10,13 +10,18 @@ type Props = {
   onSuccess?: (order: any) => void;
 };
 
-export default function EnterIccidDialog({ open, onClose, order, onSuccess }: Props) {
-  const [iccid, setIccid] = useState('');
+export default function EnterIccidDialog({
+  open,
+  onClose,
+  order,
+  onSuccess,
+}: Props) {
+  const [iccid, setIccid] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const handleClose = () => {
-    setIccid('');
+    setIccid("");
     setError(null);
     setSubmitting(false);
     onClose();
@@ -24,14 +29,14 @@ export default function EnterIccidDialog({ open, onClose, order, onSuccess }: Pr
 
   const handleSubmit = async () => {
     if (!iccid.trim()) {
-      setError('ICCID is required');
+      setError("ICCID is required");
       return;
     }
 
     // Basic ICCID validation (should be numeric, typically 19-20 digits)
-    const cleanedIccid = iccid.replace(/\s/g, '');
+    const cleanedIccid = iccid.replace(/\s/g, "");
     if (!/^\d{19,20}$/.test(cleanedIccid)) {
-      setError('ICCID must be 19-20 digits');
+      setError("ICCID must be 19-20 digits");
       return;
     }
 
@@ -41,17 +46,17 @@ export default function EnterIccidDialog({ open, onClose, order, onSuccess }: Pr
 
       const { data } = await apiClient.post<{ success: boolean; data: any }>(
         `/sim-orders/${order.id}/enter-iccid`,
-        { iccid: cleanedIccid }
+        { iccid: cleanedIccid },
       );
 
       if (data?.success && data.data) {
         onSuccess?.(data.data);
         handleClose();
       } else {
-        setError('Failed to enter ICCID. Please try again.');
+        setError("Failed to enter ICCID. Please try again.");
       }
     } catch (err: any) {
-      setError(err?.message || 'Failed to enter ICCID. Please try again.');
+      setError(err?.message || "Failed to enter ICCID. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -61,15 +66,15 @@ export default function EnterIccidDialog({ open, onClose, order, onSuccess }: Pr
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -87,8 +92,8 @@ export default function EnterIccidDialog({ open, onClose, order, onSuccess }: Pr
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh'
+        width: "100vw",
+        height: "100vh",
       }}
     >
       <div
@@ -99,26 +104,24 @@ export default function EnterIccidDialog({ open, onClose, order, onSuccess }: Pr
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 50
+          width: "100vw",
+          height: "100vh",
+          zIndex: 50,
         }}
       />
       <div
         className="fixed w-full max-w-[640px] rounded-2xl bg-white p-6 shadow-xl"
         style={{
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 51
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 51,
         }}
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-[22px] font-bold text-[#0A0A0A]">
-            Enter ICCID
-          </h3>
+          <h3 className="text-[22px] font-bold text-[#0A0A0A]">Enter ICCID</h3>
           <button
             onClick={handleClose}
             className="grid h-8 w-8 place-items-center rounded-full bg-[#F8F8F8] hover:bg-[#F0F0F0]"
@@ -130,7 +133,7 @@ export default function EnterIccidDialog({ open, onClose, order, onSuccess }: Pr
         </div>
 
         <p className="mb-5 text-[14px] text-[#6F6C90]">
-          Add the SIM card ICCID to proceed with order{' '}
+          Add the SIM card ICCID to proceed with order{" "}
           <span className="font-semibold text-[#401B60]">
             {order.orderNumber}
           </span>
@@ -175,11 +178,10 @@ export default function EnterIccidDialog({ open, onClose, order, onSuccess }: Pr
             disabled={submitting}
             className="rounded-md bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Saving...' : 'Save'}
+            {submitting ? "Saving..." : "Save"}
           </button>
         </div>
       </div>
     </div>
   );
 }
-

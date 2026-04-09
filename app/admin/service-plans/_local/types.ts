@@ -1,4 +1,9 @@
-export type PlanType = "NBN" | "Business NBN" | "Mobile" | "Data Only" | "Voice Only";
+export type PlanType =
+  | "NBN"
+  | "Business NBN"
+  | "Mobile"
+  | "Data Only"
+  | "Voice Only";
 export type PlanStatus = "Published" | "Draft" | "Staff-Only" | "Hidden";
 
 export type PlanRow = {
@@ -7,8 +12,8 @@ export type PlanRow = {
   name: string;
   details: string;
   type: PlanType;
-  speedOrData: string;   // "100/20 Mbps" or "4G/5G"
-  price: string;         // "$69.95/Month"
+  speedOrData: string; // "100/20 Mbps" or "4G/5G"
+  price: string; // "$69.95/Month"
   status: PlanStatus;
   customers: number;
 };

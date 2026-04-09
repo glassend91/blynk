@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import EnterIccidDialog from './EnterIccidDialog';
-import ProvisionDialog from './ProvisionDialog';
+import { useState } from "react";
+import EnterIccidDialog from "./EnterIccidDialog";
+import ProvisionDialog from "./ProvisionDialog";
 
 type Row = {
   id: string;
@@ -10,22 +10,22 @@ type Row = {
   customer: string;
   email: string;
   plan: string;
-  status: 'Pending ICCID' | 'Awaiting Provisioning' | 'Provisioned';
+  status: "Pending ICCID" | "Awaiting Provisioning" | "Provisioned";
   orderDate: string;
 };
 
-export default function ActionButtons({ 
-  row, 
-  onUpdate 
-}: { 
-  row: Row; 
+export default function ActionButtons({
+  row,
+  onUpdate,
+}: {
+  row: Row;
   onUpdate: (order: Row) => void;
 }) {
   const [openIccid, setOpenIccid] = useState(false);
   const [openProvision, setOpenProvision] = useState(false);
 
-  const canEnterIccid = row.status === 'Pending ICCID';
-  const canProvision = row.status === 'Awaiting Provisioning';
+  const canEnterIccid = row.status === "Pending ICCID";
+  const canProvision = row.status === "Awaiting Provisioning";
 
   return (
     <div className="flex items-center gap-3">
@@ -49,7 +49,7 @@ export default function ActionButtons({
         </button>
       )}
 
-      {row.status === 'Provisioned' && (
+      {row.status === "Provisioned" && (
         <span className="text-[14px] text-[#6F6C90]">Completed</span>
       )}
 

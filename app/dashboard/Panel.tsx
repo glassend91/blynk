@@ -4,7 +4,11 @@ export default function Panel({
   children,
   className = "",
   as = "div",
-}: { children: ReactNode; className?: string; as?: keyof JSX.IntrinsicElements }) {
+}: {
+  children: ReactNode;
+  className?: string;
+  as?: keyof JSX.IntrinsicElements;
+}) {
   const Tag = as as any;
   return (
     <Tag

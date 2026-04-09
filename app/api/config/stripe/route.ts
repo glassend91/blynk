@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function GET() {
   const publishableKey = process.env.STRIPE_PUBLISHABLE_KEY;
 
   if (!publishableKey) {
     return NextResponse.json(
-      { error: 'Stripe publishable key is not configured' },
-      { status: 500 }
+      { error: "Stripe publishable key is not configured" },
+      { status: 500 },
     );
   }
 

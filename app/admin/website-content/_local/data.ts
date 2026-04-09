@@ -26,7 +26,8 @@ export const seed: Record<CmsPageKey, CmsPageData> = {
     pageTitle: "",
     seo: {
       metaTitle: "Why Choose Our Services?",
-      metaDescription: "Page description for search engines (max 160 characters)",
+      metaDescription:
+        "Page description for search engines (max 160 characters)",
       keywords: "",
     },
   },
@@ -80,7 +81,8 @@ export const seed: Record<CmsPageKey, CmsPageData> = {
     pageTitle: "",
     seo: {
       metaTitle: "SEO Settings",
-      metaDescription: "Page description for search engines (max 160 characters)",
+      metaDescription:
+        "Page description for search engines (max 160 characters)",
       keywords: "",
     },
   },

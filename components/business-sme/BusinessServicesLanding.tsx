@@ -50,7 +50,10 @@ export default function BusinessServicesLanding() {
 
           {/* Call-to-Action Text */}
           <p className="mx-auto mt-6 max-w-[800px] text-[18px] leading-[28px] text-[#6F6C90] md:text-[20px] md:leading-[30px]">
-            Focus on running your business, not your IT. Our local tech partners provide the hands-on, expert support you need to stay connected. Call us to speak with a Business Specialist and build a solution that works for you.
+            Focus on running your business, not your IT. Our local tech partners
+            provide the hands-on, expert support you need to stay connected.
+            Call us to speak with a Business Specialist and build a solution
+            that works for you.
           </p>
 
           {/* Phone Number - Prominently Displayed */}
@@ -198,7 +201,8 @@ export default function BusinessServicesLanding() {
               Ready to Get Started?
             </h3>
             <p className="mb-6 text-[16px] leading-[26px] text-white/90 md:text-[18px]">
-              Speak with our Business Specialists today to find the perfect solution for your business needs.
+              Speak with our Business Specialists today to find the perfect
+              solution for your business needs.
             </p>
             <a
               href={`tel:${businessSupportPhone.replace(/[^0-9+]/g, "")}`}
@@ -227,4 +231,3 @@ export default function BusinessServicesLanding() {
     </div>
   );
 }
-

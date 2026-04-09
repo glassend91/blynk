@@ -6,7 +6,13 @@ import PriorityBadge from "./PriorityBadge";
 import StatusBadge from "./StatusBadge";
 import ViewTicketModal from "./ViewTicketModal";
 
-export default function TicketRow({ row, index }: { row: Ticket; index: number }) {
+export default function TicketRow({
+  row,
+  index,
+}: {
+  row: Ticket;
+  index: number;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,8 +29,12 @@ export default function TicketRow({ row, index }: { row: Ticket; index: number }
         </td>
         <td className="text-[14px] text-[#6F6C90]">{row.customer}</td>
         <td className="text-[14px] text-[#6F6C90]">{row.subject}</td>
-        <td><PriorityBadge level={row.priority} /></td>
-        <td><StatusBadge status={row.status} /></td>
+        <td>
+          <PriorityBadge level={row.priority} />
+        </td>
+        <td>
+          <StatusBadge status={row.status} />
+        </td>
         <td className="text-[14px] text-[#6F6C90]">{row.assignee}</td>
         <td className="text-[14px] text-[#6F6C90]">{row.createdAgo}</td>
         <td className="text-right">
@@ -37,7 +47,11 @@ export default function TicketRow({ row, index }: { row: Ticket; index: number }
         </td>
       </tr>
 
-      <ViewTicketModal open={open} onClose={() => setOpen(false)} ticket={row} />
+      <ViewTicketModal
+        open={open}
+        onClose={() => setOpen(false)}
+        ticket={row}
+      />
     </>
   );
 }

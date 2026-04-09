@@ -24,47 +24,94 @@ export default function MobileVoiceSignup7({
   maxReached?: number;
 }) {
   const planName = selectedPlan?.name || "Mobile Voice Plan";
-  const planPrice = selectedPlan?.price || 35.00;
+  const planPrice = selectedPlan?.price || 35.0;
 
   return (
     <ModalShell onClose={onClose} size="wide">
       <MVHeaderBanner />
-      <div className="mt-6"><MVStepper active={8} onStepClick={onStepClick} maxReached={maxReached} /></div>
+      <div className="mt-6">
+        <MVStepper
+          active={8}
+          onStepClick={onStepClick}
+          maxReached={maxReached}
+        />
+      </div>
 
       <SectionPanel>
         <div className="text-center">
           {error ? (
             <>
               <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-red-100 text-red-600">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                  <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M12 8v4M12 16h.01"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </div>
-              <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-red-700">Order Issue</h2>
-              <p className="mt-1 text-[14px] leading-[22px] text-red-600 font-medium">We encountered a problem with your order submission.</p>
+              <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-red-700">
+                Order Issue
+              </h2>
+              <p className="mt-1 text-[14px] leading-[22px] text-red-600 font-medium">
+                We encountered a problem with your order submission.
+              </p>
               <p className="mt-4 text-[15px] text-[#6A6486] max-w-md mx-auto">
-                Your payment was processed, but the order could not be completed at this time. Our team has been notified.
+                Your payment was processed, but the order could not be completed
+                at this time. Our team has been notified.
               </p>
             </>
           ) : (
             <>
               <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#2F2151] text-white">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <path d="M20 7 10 17 4 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden
+                >
+                  <path
+                    d="M20 7 10 17 4 11"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
-              <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Thank You!</h2>
-              <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Your order is complete.</p>
+              <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">
+                Thank You!
+              </h2>
+              <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">
+                Your order is complete.
+              </p>
               <p className="mt-4 text-[15px] text-[#6A6486] max-w-md mx-auto">
-                You will receive an email shortly with your new plan details and receipt.
+                You will receive an email shortly with your new plan details and
+                receipt.
               </p>
             </>
           )}
         </div>
 
         <div className="mx-auto mt-8 max-w-[560px] rounded-[12px] border border-[#EEE8F6] bg-white p-5 shadow-[0_40px_60px_rgba(0,0,0,0.06)]">
-          <div className="text-[15px] font-semibold text-[#2E2745] mb-4">Order Summary</div>
+          <div className="text-[15px] font-semibold text-[#2E2745] mb-4">
+            Order Summary
+          </div>
 
           <div className="mt-4 space-y-2 text-[14px]">
             <div className="flex items-center justify-between">
@@ -73,7 +120,9 @@ export default function MobileVoiceSignup7({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[#8A84A3]">Monthly Cost:</span>
-              <span className="text-[#2E2745] font-medium">${planPrice.toFixed(2)}/month</span>
+              <span className="text-[#2E2745] font-medium">
+                ${planPrice.toFixed(2)}/month
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[#8A84A3]">SIM Type:</span>

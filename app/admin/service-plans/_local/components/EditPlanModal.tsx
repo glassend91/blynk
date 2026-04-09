@@ -12,8 +12,19 @@ type Props = {
   onUpdate: (plan: PlanRow) => void;
 };
 
-const planTypeOptions: PlanType[] = ["NBN", "Business NBN", "Mobile", "Data Only", "Voice Only"];
-const statusOptions: PlanStatus[] = ["Published", "Draft", "Staff-Only", "Hidden"];
+const planTypeOptions: PlanType[] = [
+  "NBN",
+  "Business NBN",
+  "Mobile",
+  "Data Only",
+  "Voice Only",
+];
+const statusOptions: PlanStatus[] = [
+  "Published",
+  "Draft",
+  "Staff-Only",
+  "Hidden",
+];
 const billingCycleOptions = [
   { value: "monthly", label: "Monthly" },
   { value: "quarterly", label: "Quarterly" },
@@ -24,12 +35,19 @@ const currencyOptions = ["AUD", "USD", "EUR", "GBP"];
 const fieldClass =
   "w-full rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none placeholder-[#6F6C90]";
 
-export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) {
+export default function EditPlanModal({
+  open,
+  plan,
+  onClose,
+  onUpdate,
+}: Props) {
   const [name, setName] = useState("");
   const [type, setType] = useState<PlanType>("NBN");
   const [price, setPrice] = useState("69.95");
   const [currency, setCurrency] = useState("AUD");
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "quarterly" | "yearly">("monthly");
+  const [billingCycle, setBillingCycle] = useState<
+    "monthly" | "quarterly" | "yearly"
+  >("monthly");
   const [speed, setSpeed] = useState("");
   const [features, setFeatures] = useState("");
   const [desc, setDesc] = useState("");
@@ -47,7 +65,10 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
     if (open && plan && plan.serviceId) {
       setLoadingDetails(true);
       // Fetch full service details
-      apiClient.get<{ success: boolean; service: any }>(`/services/admin/${plan.serviceId}`)
+      apiClient
+        .get<{ success: boolean; service: any }>(
+          `/services/admin/${plan.serviceId}`,
+        )
         .then((response) => {
           if (response.data?.success && response.data.service) {
             const service = response.data.service;
@@ -60,20 +81,32 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
 
             // Determine speedOrData from specifications
             const specs = service.specifications || {};
-            if ((service.serviceType === 'NBN' || service.serviceType === 'Business NBN') && specs.downloadSpeed && specs.uploadSpeed) {
+            if (
+              (service.serviceType === "NBN" ||
+                service.serviceType === "Business NBN") &&
+              specs.downloadSpeed &&
+              specs.uploadSpeed
+            ) {
               setSpeed(`${specs.downloadSpeed}/${specs.uploadSpeed} Mbps`);
-            } else if ((service.serviceType === 'NBN' || service.serviceType === 'Business NBN') && specs.downloadSpeed) {
+            } else if (
+              (service.serviceType === "NBN" ||
+                service.serviceType === "Business NBN") &&
+              specs.downloadSpeed
+            ) {
               setSpeed(`${specs.downloadSpeed} Mbps`);
-            } else if (service.serviceType === 'Mobile' || service.serviceType === 'Data Only') {
+            } else if (
+              service.serviceType === "Mobile" ||
+              service.serviceType === "Data Only"
+            ) {
               setSpeed(specs.dataAllowance || plan.speedOrData || "");
-            } else if (service.serviceType === 'Voice Only') {
+            } else if (service.serviceType === "Voice Only") {
               setSpeed(specs.voiceMinutes || plan.speedOrData || "");
             } else {
               setSpeed(plan.speedOrData || "");
             }
 
             // Load business-specific fields
-            if (service.serviceType === 'Business NBN') {
+            if (service.serviceType === "Business NBN") {
               setStaticIP(specs.staticIP || false);
               setSlaDetails(specs.slaDetails || "");
             } else {
@@ -82,19 +115,21 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
             }
 
             // Format features
-            if (typeof service.features === 'string') {
+            if (typeof service.features === "string") {
               setFeatures(service.features);
             } else if (Array.isArray(service.features)) {
-              setFeatures(service.features.map((f: any) => f.name || f).join('\n'));
+              setFeatures(
+                service.features.map((f: any) => f.name || f).join("\n"),
+              );
             } else {
               setFeatures("");
             }
 
             setDesc(service.description || plan.details || "");
             // Map visibilityStatus to status
-            if (service.visibilityStatus === 'internal') {
+            if (service.visibilityStatus === "internal") {
               setStatus("Staff-Only");
-            } else if (service.visibilityStatus === 'hidden') {
+            } else if (service.visibilityStatus === "hidden") {
               setStatus("Hidden");
             } else {
               setStatus(service.isActive ? "Published" : "Draft");
@@ -171,17 +206,17 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
     if (open) {
       // Save current scroll position
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
 
       return () => {
         // Restore scroll position
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -236,10 +271,10 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
         }),
       };
 
-      const { data } = await apiClient.put<{ success: boolean; service: PlanRow }>(
-        `/services/admin/${plan.serviceId}`,
-        payload
-      );
+      const { data } = await apiClient.put<{
+        success: boolean;
+        service: PlanRow;
+      }>(`/services/admin/${plan.serviceId}`, payload);
       if (data?.success && data.service) {
         onUpdate(data.service);
         onClose();
@@ -247,7 +282,11 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
       }
       setError("Failed to update plan. Please try again.");
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || "Failed to update plan. Please try again.");
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to update plan. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -263,9 +302,9 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
       }}
     >
       <div
@@ -276,9 +315,9 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 90
+          width: "100vw",
+          height: "100vh",
+          zIndex: 90,
         }}
       />
       <div
@@ -287,8 +326,12 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
       >
         <div className="mb-1 flex items-center justify-between">
           <div>
-            <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">Plan Builder</p>
-            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">Edit Service Plan</h2>
+            <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">
+              Plan Builder
+            </p>
+            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">
+              Edit Service Plan
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -300,7 +343,8 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
         </div>
 
         <p className="text-[14px] text-[#6F6C90]">
-          Update plan details. Changes will be reflected immediately for new customers.
+          Update plan details. Changes will be reflected immediately for new
+          customers.
         </p>
 
         {loadingDetails && (
@@ -310,7 +354,10 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
         )}
 
         <div className="mt-6 space-y-5">
-          <SectionCard title="General details" description="Core information customers use to compare plans.">
+          <SectionCard
+            title="General details"
+            description="Core information customers use to compare plans."
+          >
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Plan name" required>
                 <input
@@ -363,7 +410,10 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
                 </div>
               </Field>
 
-              <Field label="Monthly price" hint="Customers will see currency + billing cadence.">
+              <Field
+                label="Monthly price"
+                hint="Customers will see currency + billing cadence."
+              >
                 <div className="grid grid-cols-2 gap-3">
                   <input
                     type="number"
@@ -393,7 +443,11 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
                   <div className="relative">
                     <select
                       value={billingCycle}
-                      onChange={(e) => setBillingCycle(e.target.value as "monthly" | "quarterly" | "yearly")}
+                      onChange={(e) =>
+                        setBillingCycle(
+                          e.target.value as "monthly" | "quarterly" | "yearly",
+                        )
+                      }
                       className={`${fieldClass} appearance-none pr-9`}
                     >
                       {billingCycleOptions.map((option) => (
@@ -407,7 +461,10 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
                 </div>
               </Field>
 
-              <Field label="Backend Wholesale Reference" hint="Update link to the wholesale library for ordering system.">
+              <Field
+                label="Backend Wholesale Reference"
+                hint="Update link to the wholesale library for ordering system."
+              >
                 <div className="relative">
                   <select
                     value={wholesalerPlanLink}
@@ -416,13 +473,22 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
                       setWholesalerPlanLink(selectedId);
 
                       // Auto-fill defaults
-                      const selectedPlan = filteredWholesalePlans.find(p => p._id === selectedId);
+                      const selectedPlan = filteredWholesalePlans.find(
+                        (p) => p._id === selectedId,
+                      );
                       if (selectedPlan) {
-                        if (selectedPlan.custom_name && !name) setName(selectedPlan.custom_name);
-                        if (selectedPlan.price && (!price || price === "69.95")) setPrice(selectedPlan.price.toString());
-                        if (selectedPlan.speed && !speed) setSpeed(selectedPlan.speed);
-                        if (selectedPlan.features && selectedPlan.features.length > 0 && !features) {
-                          setFeatures(selectedPlan.features.join('\n'));
+                        if (selectedPlan.custom_name && !name)
+                          setName(selectedPlan.custom_name);
+                        if (selectedPlan.price && (!price || price === "69.95"))
+                          setPrice(selectedPlan.price.toString());
+                        if (selectedPlan.speed && !speed)
+                          setSpeed(selectedPlan.speed);
+                        if (
+                          selectedPlan.features &&
+                          selectedPlan.features.length > 0 &&
+                          !features
+                        ) {
+                          setFeatures(selectedPlan.features.join("\n"));
                         }
                       }
                     }}
@@ -431,7 +497,12 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
                     <option value="">-- No Wholesale Link --</option>
                     {filteredWholesalePlans.map((option) => (
                       <option key={option._id} value={option._id}>
-                        {option.label} {option.speed ? `(${option.speed})` : ""} [{option.type === 'nbn' ? option.bandwidth_id : option.value}]
+                        {option.label} {option.speed ? `(${option.speed})` : ""}{" "}
+                        [
+                        {option.type === "nbn"
+                          ? option.bandwidth_id
+                          : option.value}
+                        ]
                       </option>
                     ))}
                   </select>
@@ -441,10 +512,19 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
             </div>
           </SectionCard>
 
-          <SectionCard title="Plan experience" description="Highlight the performance headline and key callouts.">
+          <SectionCard
+            title="Plan experience"
+            description="Highlight the performance headline and key callouts."
+          >
             <div className="grid gap-4 md:grid-cols-2">
               <Field
-                label={type === "NBN" || type === "Business NBN" ? "Speed headline" : type === "Voice Only" ? "Voice minutes headline" : "Data headline"}
+                label={
+                  type === "NBN" || type === "Business NBN"
+                    ? "Speed headline"
+                    : type === "Voice Only"
+                      ? "Voice minutes headline"
+                      : "Data headline"
+                }
                 hint={
                   type === "NBN" || type === "Business NBN"
                     ? "Examples: 100/20 Mbps, 50 Mbps"
@@ -456,12 +536,21 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
                 <input
                   value={speed}
                   onChange={(e) => setSpeed(e.target.value)}
-                  placeholder={type === "NBN" || type === "Business NBN" ? "100/20 Mbps" : type === "Voice Only" ? "Unlimited mins" : "50GB + 5G"}
+                  placeholder={
+                    type === "NBN" || type === "Business NBN"
+                      ? "100/20 Mbps"
+                      : type === "Voice Only"
+                        ? "Unlimited mins"
+                        : "50GB + 5G"
+                  }
                   className={fieldClass}
                 />
               </Field>
 
-              <Field label="Key Benefits" hint="Customer facing highlights. Separate by comma or new line.">
+              <Field
+                label="Key Benefits"
+                hint="Customer facing highlights. Separate by comma or new line."
+              >
                 <textarea
                   value={features}
                   onChange={(e) => setFeatures(e.target.value)}
@@ -484,7 +573,10 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
               </Field>
             </div>
 
-            <Field label="Plan description" hint="What makes this plan perfect for your customers?">
+            <Field
+              label="Plan description"
+              hint="What makes this plan perfect for your customers?"
+            >
               <textarea
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
@@ -496,7 +588,10 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
           </SectionCard>
 
           {type === "Business NBN" && (
-            <SectionCard title="Business-specific options" description="Configure business features for this NBN plan.">
+            <SectionCard
+              title="Business-specific options"
+              description="Configure business features for this NBN plan."
+            >
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Static IP Address">
                   <div className="flex items-center gap-3">
@@ -507,16 +602,23 @@ export default function EditPlanModal({ open, plan, onClose, onUpdate }: Props) 
                       onChange={(e) => setStaticIP(e.target.checked)}
                       className="h-4 w-4 accent-[#401B60]"
                     />
-                    <label htmlFor="staticIP-edit" className="text-[14px] text-[#0A0A0A] cursor-pointer">
+                    <label
+                      htmlFor="staticIP-edit"
+                      className="text-[14px] text-[#0A0A0A] cursor-pointer"
+                    >
                       Include static IP address
                     </label>
                   </div>
                   <p className="mt-1 text-[12px] text-[#8E8CA2]">
-                    Business plans often require a static IP for hosting services or VPN access
+                    Business plans often require a static IP for hosting
+                    services or VPN access
                   </p>
                 </Field>
 
-                <Field label="SLA Details" hint="Service Level Agreement details (e.g., 99.9% uptime, 4-hour response time)">
+                <Field
+                  label="SLA Details"
+                  hint="Service Level Agreement details (e.g., 99.9% uptime, 4-hour response time)"
+                >
                   <input
                     value={slaDetails}
                     onChange={(e) => setSlaDetails(e.target.value)}
@@ -615,7 +717,12 @@ function Caret() {
       fill="none"
       className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6F6C90]"
     >
-      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M6 9l6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

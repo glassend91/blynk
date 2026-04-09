@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import apiClient from '@/lib/apiClient';
+import { useState } from "react";
+import apiClient from "@/lib/apiClient";
 
 export function OTPForm({ onSuccess }: { onSuccess?: () => void }) {
-  const [emailOrPhone, setEmailOrPhone] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [channel, setChannel] = useState<'email' | 'sms' | null>(null);
+  const [emailOrPhone, setEmailOrPhone] = useState("");
+  const [purpose, setPurpose] = useState("");
+  const [channel, setChannel] = useState<"email" | "sms" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSend = async (sendChannel: 'email' | 'sms') => {
+  const handleSend = async (sendChannel: "email" | "sms") => {
     if (!emailOrPhone.trim()) {
-      setError('Email or phone number is required');
+      setError("Email or phone number is required");
       return;
     }
 
@@ -23,28 +23,29 @@ export function OTPForm({ onSuccess }: { onSuccess?: () => void }) {
       setSuccess(null);
       setChannel(sendChannel);
 
-      const { data } = await apiClient.post<{ success: boolean; message: string; data?: any }>(
-        '/customer-verification/send-otp',
-        {
-          emailOrPhone: emailOrPhone.trim(),
-          channel: sendChannel,
-          purpose: purpose.trim() || undefined,
-        }
-      );
+      const { data } = await apiClient.post<{
+        success: boolean;
+        message: string;
+        data?: any;
+      }>("/customer-verification/send-otp", {
+        emailOrPhone: emailOrPhone.trim(),
+        channel: sendChannel,
+        purpose: purpose.trim() || undefined,
+      });
 
       if (data?.success) {
         setSuccess(data.message || `OTP sent successfully via ${sendChannel}`);
-        setEmailOrPhone('');
-        setPurpose('');
+        setEmailOrPhone("");
+        setPurpose("");
         onSuccess?.();
 
         // Clear success message after 3 seconds
         setTimeout(() => setSuccess(null), 3000);
       } else {
-        setError('Failed to send OTP. Please try again.');
+        setError("Failed to send OTP. Please try again.");
       }
     } catch (err: any) {
-      setError(err?.message || 'Failed to send OTP. Please try again.');
+      setError(err?.message || "Failed to send OTP. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -52,7 +53,9 @@ export function OTPForm({ onSuccess }: { onSuccess?: () => void }) {
 
   return (
     <div className="rounded-xl border border-[#EEEAF4] bg-white p-6 shadow-[0_1px_0_#EEEAF4,0_8px_24px_rgba(24,8,56,0.06)]">
-      <h3 className="mb-4 text-[16px] font-semibold text-[#0A0A0A]">Send Verification OTP</h3>
+      <h3 className="mb-4 text-[16px] font-semibold text-[#0A0A0A]">
+        Send Verification OTP
+      </h3>
 
       <label className="mb-2 block text-[13px] font-semibold text-[#6F6C90]">
         Customer Email or Phone
@@ -91,17 +94,17 @@ export function OTPForm({ onSuccess }: { onSuccess?: () => void }) {
       <div className="flex gap-3">
         <button
           className="rounded-md bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={() => handleSend('sms')}
+          onClick={() => handleSend("sms")}
           disabled={submitting}
         >
-          {submitting && channel === 'sms' ? 'Sending...' : 'Send SMS'}
+          {submitting && channel === "sms" ? "Sending..." : "Send SMS"}
         </button>
         <button
           className="rounded-md bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={() => handleSend('email')}
+          onClick={() => handleSend("email")}
           disabled={submitting}
         >
-          {submitting && channel === 'email' ? 'Sending...' : 'Send Email'}
+          {submitting && channel === "email" ? "Sending..." : "Send Email"}
         </button>
         <button
           className="rounded-md border border-dashed border-red-300 bg-red-50 px-4 py-2 text-[13px] font-semibold text-red-600 hover:bg-red-100"

@@ -21,15 +21,15 @@ export default function ViewTicketModal({ open, onClose, ticket }: Props) {
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -47,12 +47,12 @@ export default function ViewTicketModal({ open, onClose, ticket }: Props) {
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
       {/* backdrop */}
@@ -64,22 +64,24 @@ export default function ViewTicketModal({ open, onClose, ticket }: Props) {
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 90
+          width: "100vw",
+          height: "100vh",
+          zIndex: 90,
         }}
       />
       {/* dialog */}
       <div
         className="fixed z-[91] w-[720px] max-w-[92vw] rounded-2xl bg-white p-6 shadow-xl"
         style={{
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)'
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
         }}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-[20px] font-bold text-[#0A0A0A]">Ticket Details</h3>
+          <h3 className="text-[20px] font-bold text-[#0A0A0A]">
+            Ticket Details
+          </h3>
           <button
             onClick={onClose}
             className="grid h-8 w-8 place-items-center rounded-full bg-[#F8F8F8] text-[#E5484D]"

@@ -15,7 +15,10 @@ export default function PriorityBadge({ level }: { level: Priority }) {
       className="inline-flex items-center gap-2 rounded-[8px] px-3 py-1 text-[14px] font-semibold"
       style={{ color: p.text, backgroundColor: p.bg }}
     >
-      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: p.dot }} />
+      <span
+        className="h-2 w-2 rounded-full"
+        style={{ backgroundColor: p.dot }}
+      />
       {level}
     </span>
   );

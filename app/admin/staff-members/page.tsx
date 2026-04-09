@@ -5,7 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import TableHeader from "../user-management/_local/components/TableHeader";
 import UsersTable from "../user-management/_local/components/UsersTable";
 import InviteUserModal from "../user-management/_local/components/InviteUserModal";
-import { allStatuses, Role, Status, UserRow } from "../user-management/_local/data";
+import {
+  allStatuses,
+  Role,
+  Status,
+  UserRow,
+} from "../user-management/_local/data";
 import apiClient from "@/lib/apiClient";
 import { usePermission } from "@/lib/permissions";
 import { getRoles } from "@/lib/services/roles";
@@ -37,7 +42,10 @@ export default function StaffMembersPage() {
           getRoles().catch(() => []),
         ]);
 
-        if (usersResponse.data?.success && Array.isArray(usersResponse.data.users)) {
+        if (
+          usersResponse.data?.success &&
+          Array.isArray(usersResponse.data.users)
+        ) {
           setRows(usersResponse.data.users);
         }
 
@@ -59,15 +67,15 @@ export default function StaffMembersPage() {
     const isModalOpen = viewUser || editUser || deleteUser;
     if (isModalOpen) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -95,9 +103,12 @@ export default function StaffMembersPage() {
     <section className="space-y-6">
       {/* Page heading matches layout */}
       <header className="space-y-1">
-        <h1 className="text-[26px] font-bold leading-[28px] text-[#0A0A0A]">Staff Members</h1>
+        <h1 className="text-[26px] font-bold leading-[28px] text-[#0A0A0A]">
+          Staff Members
+        </h1>
         <p className="text-[16px] leading-[21px] text-[#6F6C90]">
-          Manage staff access and permissions for your telecommunications platform.
+          Manage staff access and permissions for your telecommunications
+          platform.
         </p>
       </header>
 
@@ -123,14 +134,22 @@ export default function StaffMembersPage() {
         <UsersTable
           rows={filtered}
           onView={(u) => setViewUser(u)}
-          onEdit={canEdit ? (u) => {
-            setEditUser(u);
-            setEditName(u.name);
-            setEditStatus(u.status);
-          } : undefined}
-          onDelete={canDelete ? (u) => {
-            setDeleteUser(u);
-          } : undefined}
+          onEdit={
+            canEdit
+              ? (u) => {
+                  setEditUser(u);
+                  setEditName(u.name);
+                  setEditStatus(u.status);
+                }
+              : undefined
+          }
+          onDelete={
+            canDelete
+              ? (u) => {
+                  setDeleteUser(u);
+                }
+              : undefined
+          }
         />
       )}
 
@@ -161,8 +180,8 @@ export default function StaffMembersPage() {
             bottom: 0,
             margin: 0,
             padding: 0,
-            width: '100vw',
-            height: '100vh'
+            width: "100vw",
+            height: "100vh",
           }}
         >
           <div
@@ -172,25 +191,27 @@ export default function StaffMembersPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              width: '100vw',
-              height: '100vh',
-              zIndex: 40
+              width: "100vw",
+              height: "100vh",
+              zIndex: 40,
             }}
             onClick={() => setViewUser(null)}
           />
           <div
             className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 41
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 41,
             }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">Staff Member Details</h2>
+              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">
+                Staff Member Details
+              </h2>
               <button
                 type="button"
                 onClick={() => setViewUser(null)}
@@ -201,30 +222,42 @@ export default function StaffMembersPage() {
             </div>
             <div className="space-y-3 text-[14px] text-[#0A0A0A]">
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Name</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Name
+                </div>
                 <div>{viewUser.name}</div>
               </div>
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Email</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Email
+                </div>
                 <div>{viewUser.email}</div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Role</div>
+                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                    Role
+                  </div>
                   <div>{viewUser.role}</div>
                 </div>
                 <div>
-                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Status</div>
+                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                    Status
+                  </div>
                   <div>{viewUser.status}</div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Last Login</div>
+                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                    Last Login
+                  </div>
                   <div>{viewUser.lastLogin}</div>
                 </div>
                 <div>
-                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Created</div>
+                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                    Created
+                  </div>
                   <div>{viewUser.created}</div>
                 </div>
               </div>
@@ -253,8 +286,8 @@ export default function StaffMembersPage() {
             bottom: 0,
             margin: 0,
             padding: 0,
-            width: '100vw',
-            height: '100vh'
+            width: "100vw",
+            height: "100vh",
           }}
         >
           <div
@@ -265,24 +298,26 @@ export default function StaffMembersPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              width: '100vw',
-              height: '100vh',
-              zIndex: 40
+              width: "100vw",
+              height: "100vh",
+              zIndex: 40,
             }}
           />
           <div
             className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 41
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 41,
             }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">Edit Staff Member</h2>
+              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">
+                Edit Staff Member
+              </h2>
               <button
                 type="button"
                 onClick={() => setEditUser(null)}
@@ -315,7 +350,9 @@ export default function StaffMembersPage() {
                     const updated = data.user;
                     setRows((prev) =>
                       prev.map((r) =>
-                        r.userId && updated.userId && r.userId === updated.userId
+                        r.userId &&
+                        updated.userId &&
+                        r.userId === updated.userId
                           ? { ...updated, id: r.id }
                           : r,
                       ),
@@ -330,7 +367,9 @@ export default function StaffMembersPage() {
               }}
             >
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Name</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Name
+                </div>
                 <input
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
@@ -338,7 +377,9 @@ export default function StaffMembersPage() {
                 />
               </div>
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Email</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Email
+                </div>
                 <input
                   value={editUser.email}
                   disabled
@@ -346,7 +387,9 @@ export default function StaffMembersPage() {
                 />
               </div>
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Role</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Role
+                </div>
                 <input
                   value={editUser.role}
                   disabled
@@ -354,7 +397,9 @@ export default function StaffMembersPage() {
                 />
               </div>
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Status</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Status
+                </div>
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value as Status)}
@@ -402,8 +447,8 @@ export default function StaffMembersPage() {
             bottom: 0,
             margin: 0,
             padding: 0,
-            width: '100vw',
-            height: '100vh'
+            width: "100vw",
+            height: "100vh",
           }}
         >
           <div
@@ -413,25 +458,27 @@ export default function StaffMembersPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              width: '100vw',
-              height: '100vh',
-              zIndex: 40
+              width: "100vw",
+              height: "100vh",
+              zIndex: 40,
             }}
             onClick={() => setDeleteUser(null)}
           />
           <div
             className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 41
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 41,
             }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">Delete Staff Member</h2>
+              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">
+                Delete Staff Member
+              </h2>
               <button
                 type="button"
                 onClick={() => setDeleteUser(null)}
@@ -442,8 +489,11 @@ export default function StaffMembersPage() {
             </div>
             <p className="text-[14px] text-[#6F6C90]">
               Are you sure you want to delete{" "}
-              <span className="font-semibold text-[#0A0A0A]">{deleteUser.name}</span>? This is a soft
-              delete and the user will no longer appear in this list.
+              <span className="font-semibold text-[#0A0A0A]">
+                {deleteUser.name}
+              </span>
+              ? This is a soft delete and the user will no longer appear in this
+              list.
             </p>
             <div className="mt-6 flex justify-end gap-2">
               <button
@@ -464,7 +514,9 @@ export default function StaffMembersPage() {
                   try {
                     setDeleteLoading(true);
                     await apiClient.delete(`/auth/users/${deleteUser.userId}`);
-                    setRows((prev) => prev.filter((r) => r.userId !== deleteUser.userId));
+                    setRows((prev) =>
+                      prev.filter((r) => r.userId !== deleteUser.userId),
+                    );
                   } catch (err) {
                     console.error("Failed to delete user", err);
                   } finally {

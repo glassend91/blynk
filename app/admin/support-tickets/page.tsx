@@ -7,7 +7,9 @@ export default function Page(): ReactNode {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[26px] font-bold text-[#0A0A0A]">Support Tickets</h1>
+          <h1 className="text-[26px] font-bold text-[#0A0A0A]">
+            Support Tickets
+          </h1>
           <p className="mt-1 text-[16px] leading-[21px] text-[#6F6C90]">
             Manage customer support requests and issues
           </p>

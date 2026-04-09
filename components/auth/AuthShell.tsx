@@ -32,7 +32,12 @@ export default function AuthShell({
           className="absolute right-5 top-5 grid h-[28px] w-[28px] place-items-center rounded-full bg-[#FF4D4F]"
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M2 2l8 8M10 2L2 10" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+            <path
+              d="M2 2l8 8M10 2L2 10"
+              stroke="white"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
 

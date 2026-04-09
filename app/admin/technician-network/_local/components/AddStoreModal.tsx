@@ -102,28 +102,28 @@ export default function AddStoreWizard({
         setProfiles(
           editingStore.technicians && editingStore.technicians.length > 0
             ? editingStore.technicians.map((t) => ({
-              id: t.id || crypto.randomUUID(),
-              fullName: t.fullName || "",
-              roleTitle: t.roleTitle || "",
-              years: t.years || "",
-              specialties: t.specialties || "",
-              videoUrl: t.videoUrl || "",
-              bio: t.bio || "",
-              photoUrl: t.photoUrl || "",
-              photoFile: null,
-            }))
-            : [
-              {
-                id: crypto.randomUUID(),
-                fullName: "",
-                roleTitle: "",
-                years: "",
-                specialties: "",
-                videoUrl: "",
-                bio: "",
+                id: t.id || crypto.randomUUID(),
+                fullName: t.fullName || "",
+                roleTitle: t.roleTitle || "",
+                years: t.years || "",
+                specialties: t.specialties || "",
+                videoUrl: t.videoUrl || "",
+                bio: t.bio || "",
+                photoUrl: t.photoUrl || "",
                 photoFile: null,
-              },
-            ]
+              }))
+            : [
+                {
+                  id: crypto.randomUUID(),
+                  fullName: "",
+                  roleTitle: "",
+                  years: "",
+                  specialties: "",
+                  videoUrl: "",
+                  bio: "",
+                  photoFile: null,
+                },
+              ],
         );
       } else {
         resetAll();
@@ -217,10 +217,10 @@ export default function AddStoreWizard({
       };
 
       if (isEditMode && editingStore) {
-        const { data } = await apiClient.put<{ success: boolean; data: StoreRow }>(
-          `/stores/${editingStore.id}`,
-          payload
-        );
+        const { data } = await apiClient.put<{
+          success: boolean;
+          data: StoreRow;
+        }>(`/stores/${editingStore.id}`, payload);
 
         if (data?.success && data.data) {
           onUpdate?.(data.data);
@@ -229,10 +229,10 @@ export default function AddStoreWizard({
         }
         setError("Failed to update store. Please try again.");
       } else {
-        const { data } = await apiClient.post<{ success: boolean; data: StoreRow }>(
-          "/stores",
-          payload
-        );
+        const { data } = await apiClient.post<{
+          success: boolean;
+          data: StoreRow;
+        }>("/stores", payload);
 
         if (data?.success && data.data) {
           onCreate?.(data.data);
@@ -260,8 +260,8 @@ export default function AddStoreWizard({
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh'
+        width: "100vw",
+        height: "100vh",
       }}
     >
       <div
@@ -272,17 +272,17 @@ export default function AddStoreWizard({
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 100
+          width: "100vw",
+          height: "100vh",
+          zIndex: 100,
         }}
       />
       <div
         className="fixed z-[101] w-full max-w-[820px] max-h-[95vh] sm:max-h-[90vh] rounded-[10px] sm:rounded-[14px] bg-white shadow-2xl flex flex-col"
         style={{
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)'
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
         }}
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
@@ -308,7 +308,9 @@ export default function AddStoreWizard({
             disabled={submitting}
             className={[
               "w-full rounded-[8px] px-2 sm:px-3 py-2 text-[12px] sm:text-[13px] md:text-[14px] font-semibold transition-colors",
-              step === 1 ? "bg-[#F4F1F9] text-[#3F205F]" : "bg-[#F7F7FA] text-[#6F6C90]",
+              step === 1
+                ? "bg-[#F4F1F9] text-[#3F205F]"
+                : "bg-[#F7F7FA] text-[#6F6C90]",
               submitting ? "opacity-50 cursor-not-allowed" : "",
             ].join(" ")}
           >
@@ -320,7 +322,9 @@ export default function AddStoreWizard({
             disabled={submitting}
             className={[
               "w-full rounded-[8px] px-2 sm:px-3 py-2 text-[12px] sm:text-[13px] md:text-[14px] font-semibold transition-colors",
-              step === 2 ? "bg-[#F4F1F9] text-[#3F205F]" : "bg-[#F7F7FA] text-[#6F6C90]",
+              step === 2
+                ? "bg-[#F4F1F9] text-[#3F205F]"
+                : "bg-[#F7F7FA] text-[#6F6C90]",
               submitting ? "opacity-50 cursor-not-allowed" : "",
             ].join(" ")}
           >
@@ -332,9 +336,17 @@ export default function AddStoreWizard({
         {/* Body */}
         <div className="max-h-[calc(95vh-200px)] sm:max-h-[calc(90vh-200px)] md:max-h-[72vh] overflow-y-auto px-3 sm:px-4 md:px-6 py-4 sm:py-5 flex-1 min-h-0">
           {step === 1 ? (
-            <StoreDetails store={store} setStore={setStore} submitting={submitting} />
+            <StoreDetails
+              store={store}
+              setStore={setStore}
+              submitting={submitting}
+            />
           ) : (
-            <TechnicianDetails profiles={profiles} setProfiles={setProfiles} submitting={submitting} />
+            <TechnicianDetails
+              profiles={profiles}
+              setProfiles={setProfiles}
+              submitting={submitting}
+            />
           )}
         </div>
 
@@ -369,7 +381,13 @@ export default function AddStoreWizard({
               disabled={submitting}
               className="w-full sm:w-auto rounded-[10px] bg-[#3F205F] px-4 sm:px-5 py-2.5 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation"
             >
-              {submitting ? (isEditMode ? "Updating..." : "Creating...") : isEditMode ? "Update Store" : "Add Store"}
+              {submitting
+                ? isEditMode
+                  ? "Updating..."
+                  : "Creating..."
+                : isEditMode
+                  ? "Update Store"
+                  : "Add Store"}
             </button>
           )}
         </div>
@@ -461,7 +479,12 @@ function StoreDetails({
         <div className="relative">
           <select
             value={store.status}
-            onChange={(e) => setStore({ ...store, status: e.target.value as "Active" | "Inactive" })}
+            onChange={(e) =>
+              setStore({
+                ...store,
+                status: e.target.value as "Active" | "Inactive",
+              })
+            }
             className="w-full appearance-none rounded-[10px] border border-[#EEEAF4] bg-white px-3 py-2.5 text-[14px] text-[#0A0A0A] outline-none touch-manipulation"
             disabled={submitting}
           >
@@ -504,17 +527,20 @@ function TechnicianDetails({
     ]);
 
   const remove = (id: string) =>
-    setProfiles(profiles.length > 1 ? profiles.filter((p) => p.id !== id) : profiles);
+    setProfiles(
+      profiles.length > 1 ? profiles.filter((p) => p.id !== id) : profiles,
+    );
 
   const update = (id: string, patch: Partial<Technician>) =>
-    setProfiles(
-      profiles.map((p) => (p.id === id ? { ...p, ...patch } : p)),
-    );
+    setProfiles(profiles.map((p) => (p.id === id ? { ...p, ...patch } : p)));
 
   return (
     <div className="space-y-4 sm:space-y-6">
       {profiles.map((p, idx) => (
-        <div key={p.id} className="rounded-[10px] sm:rounded-[12px] border border-[#EEEAF4] p-3 sm:p-4">
+        <div
+          key={p.id}
+          className="rounded-[10px] sm:rounded-[12px] border border-[#EEEAF4] p-3 sm:p-4"
+        >
           <div className="mb-3 flex items-center justify-between">
             <div className="text-[13px] sm:text-[14px] font-semibold text-[#0A0A0A]">
               Technician Profile {idx + 1}
@@ -622,9 +648,7 @@ function Field({
   );
 }
 
-function Input(
-  props: React.InputHTMLAttributes<HTMLInputElement>,
-) {
+function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
@@ -639,9 +663,7 @@ function Input(
   );
 }
 
-function TextArea(
-  props: React.TextareaHTMLAttributes<HTMLTextAreaElement>,
-) {
+function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
       {...props}

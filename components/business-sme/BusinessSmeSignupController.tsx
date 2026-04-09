@@ -17,10 +17,7 @@ import BusinessSmeSignup6 from "./modals/BusinessSmeSignup6";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
-export default function BusinessSmeSignupController({
-  open,
-  onClose,
-}: any) {
+export default function BusinessSmeSignupController({ open, onClose }: any) {
   const order: Step[] = [1, 2, 3, 4, 5, 6];
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
@@ -90,11 +87,14 @@ export default function BusinessSmeSignupController({
     setStep(order[Math.max(idx - 1, 0)]);
   }, [step]);
 
-  const handleStepClick = useCallback((s: number) => {
-    if (s <= maxReached && s !== step) {
-      setStep(s as Step);
-    }
-  }, [maxReached, step]);
+  const handleStepClick = useCallback(
+    (s: number) => {
+      if (s <= maxReached && s !== step) {
+        setStep(s as Step);
+      }
+    },
+    [maxReached, step],
+  );
 
   if (!open) return null;
 
@@ -105,7 +105,11 @@ export default function BusinessSmeSignupController({
           <div className="px-8 pt-8">
             <BsmHeaderBanner />
             <div className="pt-6">
-              <BsmStepper active={step} onStepClick={handleStepClick} maxReached={maxReached} />
+              <BsmStepper
+                active={step}
+                onStepClick={handleStepClick}
+                maxReached={maxReached}
+              />
             </div>
           </div>
 
@@ -119,16 +123,10 @@ export default function BusinessSmeSignupController({
               />
             )}
             {step === 2 && (
-              <BusinessSmeSignup2
-                onNext={goNext}
-                onBack={goBack}
-              />
+              <BusinessSmeSignup2 onNext={goNext} onBack={goBack} />
             )}
             {step === 3 && (
-              <BusinessSmeSignup3
-                onNext={goNext}
-                onBack={goBack}
-              />
+              <BusinessSmeSignup3 onNext={goNext} onBack={goBack} />
             )}
             {step === 4 && (
               <BusinessSmeSignup4
@@ -155,10 +153,7 @@ export default function BusinessSmeSignupController({
               />
             )}
             {step === 5 && (
-              <BusinessSmeSignup5
-                onNext={goNext}
-                onBack={goBack}
-              />
+              <BusinessSmeSignup5 onNext={goNext} onBack={goBack} />
             )}
             {step === 6 && (
               <BusinessSmeSignup6
@@ -186,8 +181,8 @@ export default function BusinessSmeSignupController({
                           lastName: primaryLastName,
                           phone: primaryPhone,
                           email: primaryEmail,
-                        }
-                      }
+                        },
+                      },
                     });
                     setShowSuccess(true);
                   } catch (e: any) {
@@ -207,13 +202,35 @@ export default function BusinessSmeSignupController({
               <SectionPanel>
                 <div className="text-center">
                   <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#4F1C76] text-white">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                      <path d="M20 7 10 17 4 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden
+                    >
+                      <path
+                        d="M20 7 10 17 4 11"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </div>
-                  <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Signup complete</h2>
-                  <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Thanks! We’ve received your business details.</p>
-                  <button type="button" onClick={closeAll} className="btn-primary mt-6">Close</button>
+                  <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">
+                    Signup complete
+                  </h2>
+                  <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">
+                    Thanks! We’ve received your business details.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={closeAll}
+                    className="btn-primary mt-6"
+                  >
+                    Close
+                  </button>
                 </div>
               </SectionPanel>
             </ModalShell>

@@ -46,8 +46,9 @@ export default function ContactUsForm({
 
         {/* Heading */}
         <h2
-          className={`text-center text-[24px] font-bold sm:text-[28px] md:text-[32px] ${dark ? "text-white" : "text-black"
-            }`}
+          className={`text-center text-[24px] font-bold sm:text-[28px] md:text-[32px] ${
+            dark ? "text-white" : "text-black"
+          }`}
         >
           Get in Touch
         </h2>
@@ -92,7 +93,9 @@ export default function ContactUsForm({
 
         {/* Message */}
         <div className="mt-4 sm:mt-6">
-          <label className="text-[14px] font-semibold text-black">Message</label>
+          <label className="text-[14px] font-semibold text-black">
+            Message
+          </label>
           <textarea
             required
             placeholder="Write your message..."
@@ -125,7 +128,10 @@ export default function ContactUsForm({
             </label>
 
             <label className="inline-flex cursor-pointer items-center gap-[5px]">
-              <span className="h-[13px] w-[13px] rounded-full border-[0.5px] border-[#6F6C90]" aria-hidden />
+              <span
+                className="h-[13px] w-[13px] rounded-full border-[0.5px] border-[#6F6C90]"
+                aria-hidden
+              />
               <input
                 type="radio"
                 name="contactMethod"

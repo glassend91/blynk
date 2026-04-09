@@ -43,9 +43,13 @@ export type UpdateRoleResponse = {
   data: Role;
 };
 
-export async function updateRole(id: string, payload: UpdateRolePayload): Promise<Role> {
-  const { data } = await apiClient.put<UpdateRoleResponse>(`/roles/${id}`, payload);
+export async function updateRole(
+  id: string,
+  payload: UpdateRolePayload,
+): Promise<Role> {
+  const { data } = await apiClient.put<UpdateRoleResponse>(
+    `/roles/${id}`,
+    payload,
+  );
   return data.data;
 }
-
-

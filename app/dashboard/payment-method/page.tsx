@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import Panel from "../Panel";
 import { Pill } from "../Pill";
 import AddPaymentMethodModal from "../../../components/AddPaymentMethodModal";
@@ -11,7 +11,7 @@ import {
   getAutoPaySettings,
   updateAutoPaySettings,
   type PaymentMethod,
-  type AutoPaySettings
+  type AutoPaySettings,
 } from "../../../lib/services/paymentMethods";
 
 export default function PaymentMethods() {
@@ -19,7 +19,7 @@ export default function PaymentMethods() {
   const [autoPaySettings, setAutoPaySettings] = useState<AutoPaySettings>({
     autoPayEnabled: false,
     emailNotifications: true,
-    billingNotifications: true
+    billingNotifications: true,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,15 +37,15 @@ export default function PaymentMethods() {
 
       const [paymentMethodsData, autoPayData] = await Promise.all([
         getPaymentMethods(),
-        getAutoPaySettings()
+        getAutoPaySettings(),
       ]);
 
-      console.log('Loaded payment methods:', paymentMethodsData.paymentMethods);
+      console.log("Loaded payment methods:", paymentMethodsData.paymentMethods);
       setPaymentMethods(paymentMethodsData.paymentMethods);
       setAutoPaySettings(autoPayData);
     } catch (err) {
-      console.error('Error loading data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load data');
+      console.error("Error loading data:", err);
+      setError(err instanceof Error ? err.message : "Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -62,20 +62,24 @@ export default function PaymentMethods() {
 
   const handleSetDefault = async (paymentMethodId: string) => {
     try {
-      console.log('Setting default payment method with ID:', paymentMethodId);
+      console.log("Setting default payment method with ID:", paymentMethodId);
       setActionLoading(paymentMethodId);
       await setDefaultPaymentMethod(paymentMethodId);
       await loadData(); // Refresh the data
     } catch (err) {
-      console.error('Error setting default payment method:', err);
-      setError(err instanceof Error ? err.message : 'Failed to set default payment method');
+      console.error("Error setting default payment method:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to set default payment method",
+      );
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleDeletePaymentMethod = async (paymentMethodId: string) => {
-    if (!confirm('Are you sure you want to delete this payment method?')) {
+    if (!confirm("Are you sure you want to delete this payment method?")) {
       return;
     }
 
@@ -84,40 +88,51 @@ export default function PaymentMethods() {
       await deletePaymentMethod(paymentMethodId);
       await loadData(); // Refresh the data
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete payment method');
+      setError(
+        err instanceof Error ? err.message : "Failed to delete payment method",
+      );
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleUpdateAutoPaySetting = async (setting: keyof AutoPaySettings, value: boolean) => {
+  const handleUpdateAutoPaySetting = async (
+    setting: keyof AutoPaySettings,
+    value: boolean,
+  ) => {
     try {
       setActionLoading(setting);
       await updateAutoPaySettings({ [setting]: value });
-      setAutoPaySettings(prev => ({ ...prev, [setting]: value }));
+      setAutoPaySettings((prev) => ({ ...prev, [setting]: value }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update setting');
+      setError(err instanceof Error ? err.message : "Failed to update setting");
     } finally {
       setActionLoading(null);
     }
   };
 
   const formatCardTitle = (paymentMethod: PaymentMethod) => {
-    if (paymentMethod.type === 'card' && paymentMethod.card) {
+    if (paymentMethod.type === "card" && paymentMethod.card) {
       return `Card ending in ${paymentMethod.card.last4}`;
-    } else if (paymentMethod.type === 'bank_account' && paymentMethod.bankAccount) {
+    } else if (
+      paymentMethod.type === "bank_account" &&
+      paymentMethod.bankAccount
+    ) {
       return `Bank Account ending in ${paymentMethod.bankAccount.last4}`;
     }
-    return 'Payment Method';
+    return "Payment Method";
   };
 
   const formatCardSubtitle = (paymentMethod: PaymentMethod) => {
-    if (paymentMethod.type === 'card' && paymentMethod.card) {
-      return `Expires ${paymentMethod.card.expMonth.toString().padStart(2, '0')}/${paymentMethod.card.expYear}`;
-    } else if (paymentMethod.type === 'bank_account' && paymentMethod.bankAccount) {
+    if (paymentMethod.type === "card" && paymentMethod.card) {
+      return `Expires ${paymentMethod.card.expMonth.toString().padStart(2, "0")}/${paymentMethod.card.expYear}`;
+    } else if (
+      paymentMethod.type === "bank_account" &&
+      paymentMethod.bankAccount
+    ) {
       return paymentMethod.bankAccount.bankName;
     }
-    return '';
+    return "";
   };
 
   if (loading) {
@@ -130,7 +145,9 @@ export default function PaymentMethods() {
 
   return (
     <>
-      <h1 className="mb-6 text-[26px] font-bold text-[#0A0A0A]">Payment Method</h1>
+      <h1 className="mb-6 text-[26px] font-bold text-[#0A0A0A]">
+        Payment Method
+      </h1>
 
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-4">
@@ -149,7 +166,9 @@ export default function PaymentMethods() {
 
       <div className="grid grid-cols-2 gap-6">
         <Panel className="p-6">
-          <div className="text-[16px] font-semibold text-[#0A0A0A]">Saved Payment Methods</div>
+          <div className="text-[16px] font-semibold text-[#0A0A0A]">
+            Saved Payment Methods
+          </div>
 
           <div className="mt-4 space-y-3">
             {paymentMethods.length === 0 ? (
@@ -158,7 +177,7 @@ export default function PaymentMethods() {
               </div>
             ) : (
               paymentMethods.map((paymentMethod) => {
-                console.log('Rendering payment method:', paymentMethod);
+                console.log("Rendering payment method:", paymentMethod);
                 return (
                   <PaymentRow
                     key={paymentMethod._id || paymentMethod.id}
@@ -170,16 +189,33 @@ export default function PaymentMethods() {
                           <Pill tone="grey">Default</Pill>
                         ) : (
                           <button
-                            onClick={() => handleSetDefault(paymentMethod._id || paymentMethod.id)}
-                            disabled={actionLoading === (paymentMethod._id || paymentMethod.id)}
+                            onClick={() =>
+                              handleSetDefault(
+                                paymentMethod._id || paymentMethod.id,
+                              )
+                            }
+                            disabled={
+                              actionLoading ===
+                              (paymentMethod._id || paymentMethod.id)
+                            }
                             className="rounded-[8px] border border-[#CDBEE3] px-3 py-1 text-[12px] font-semibold text-[#3F205F] hover:bg-[#3F205F] hover:text-white disabled:opacity-50"
                           >
-                            {actionLoading === (paymentMethod._id || paymentMethod.id) ? 'Setting...' : 'Save as Default'}
+                            {actionLoading ===
+                            (paymentMethod._id || paymentMethod.id)
+                              ? "Setting..."
+                              : "Save as Default"}
                           </button>
                         )}
                         <RowActions
-                          onDelete={() => handleDeletePaymentMethod(paymentMethod._id || paymentMethod.id)}
-                          loading={actionLoading === (paymentMethod._id || paymentMethod.id)}
+                          onDelete={() =>
+                            handleDeletePaymentMethod(
+                              paymentMethod._id || paymentMethod.id,
+                            )
+                          }
+                          loading={
+                            actionLoading ===
+                            (paymentMethod._id || paymentMethod.id)
+                          }
                         />
                       </>
                     }
@@ -191,22 +227,34 @@ export default function PaymentMethods() {
         </Panel>
 
         <Panel className="p-6">
-          <div className="text-[16px] font-semibold text-[#0A0A0A]">Auto-Pay Settings</div>
+          <div className="text-[16px] font-semibold text-[#0A0A0A]">
+            Auto-Pay Settings
+          </div>
 
           <div className="mt-4 space-y-3">
             <SettingRow
               title="Auto-Pay Enabled"
               desc="Automatically pay bills when due using your default payment method"
               enabled={autoPaySettings.autoPayEnabled}
-              onToggle={() => handleUpdateAutoPaySetting('autoPayEnabled', !autoPaySettings.autoPayEnabled)}
-              loading={actionLoading === 'autoPayEnabled'}
+              onToggle={() =>
+                handleUpdateAutoPaySetting(
+                  "autoPayEnabled",
+                  !autoPaySettings.autoPayEnabled,
+                )
+              }
+              loading={actionLoading === "autoPayEnabled"}
             />
             <SettingRow
               title="Email Notifications"
               desc="Receive email confirmations for successful payments"
               enabled={autoPaySettings.emailNotifications}
-              onToggle={() => handleUpdateAutoPaySetting('emailNotifications', !autoPaySettings.emailNotifications)}
-              loading={actionLoading === 'emailNotifications'}
+              onToggle={() =>
+                handleUpdateAutoPaySetting(
+                  "emailNotifications",
+                  !autoPaySettings.emailNotifications,
+                )
+              }
+              loading={actionLoading === "emailNotifications"}
             />
           </div>
         </Panel>
@@ -234,10 +282,23 @@ function PaymentRow({
     <div className="flex items-center justify-between rounded-[12px] border border-[#EEEAF4] bg-[#F7F7FA] px-4 py-3">
       <div className="flex items-center gap-3">
         <span className="grid h-9 w-9 place-items-center rounded-full bg-[#3F205F] text-white">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="white" strokeWidth="1.7" /><path d="M2 9h20" stroke="white" strokeWidth="1.7" /></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <rect
+              x="2"
+              y="5"
+              width="20"
+              height="14"
+              rx="2"
+              stroke="white"
+              strokeWidth="1.7"
+            />
+            <path d="M2 9h20" stroke="white" strokeWidth="1.7" />
+          </svg>
         </span>
         <div>
-          <div className="text-[14px] font-semibold text-[#0A0A0A]">{title}</div>
+          <div className="text-[14px] font-semibold text-[#0A0A0A]">
+            {title}
+          </div>
           <div className="text-[12px] text-[#6F6C90]">{subtitle}</div>
         </div>
       </div>
@@ -246,7 +307,13 @@ function PaymentRow({
   );
 }
 
-function RowActions({ onDelete, loading }: { onDelete: () => void; loading?: boolean }) {
+function RowActions({
+  onDelete,
+  loading,
+}: {
+  onDelete: () => void;
+  loading?: boolean;
+}) {
   return (
     <>
       <button
@@ -254,7 +321,7 @@ function RowActions({ onDelete, loading }: { onDelete: () => void; loading?: boo
         disabled={loading}
         className="rounded-[8px] border border-[#D9D4E5] px-2.5 py-1 text-[12px] text-[#C63D3D] hover:bg-[#C63D3D] hover:text-white disabled:opacity-50"
       >
-        {loading ? 'Deleting...' : 'Delete'}
+        {loading ? "Deleting..." : "Delete"}
       </button>
     </>
   );
@@ -265,7 +332,7 @@ function SettingRow({
   desc,
   enabled,
   onToggle,
-  loading
+  loading,
 }: {
   title: string;
   desc: string;
@@ -287,7 +354,9 @@ function SettingRow({
           onChange={onToggle}
           disabled={loading}
         />
-        <div className={`peer h-5 w-9 rounded-full ${enabled ? "bg-[#3F205F]" : "bg-[#D9D4E5]"} transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-4 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}></div>
+        <div
+          className={`peer h-5 w-9 rounded-full ${enabled ? "bg-[#3F205F]" : "bg-[#D9D4E5]"} transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-4 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+        ></div>
       </label>
     </div>
   );

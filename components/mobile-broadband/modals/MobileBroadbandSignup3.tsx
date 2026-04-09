@@ -72,9 +72,13 @@ export default function MobileBroadbandSignup3({
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [dobError, setDobError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [billingAddressError, setBillingAddressError] = useState<string | null>(null);
+  const [billingAddressError, setBillingAddressError] = useState<string | null>(
+    null,
+  );
   const [simNumberError, setSimNumberError] = useState<string | null>(null);
-  const [esimNotificationEmailError, setEsimNotificationEmailError] = useState<string | null>(null);
+  const [esimNotificationEmailError, setEsimNotificationEmailError] = useState<
+    string | null
+  >(null);
   const [submitted, setSubmitted] = useState(false);
 
   const isValidEmail = (email: string) => {
@@ -82,7 +86,8 @@ export default function MobileBroadbandSignup3({
     return emailRegex.test(email);
   };
 
-  const isValidName = (value: string) => /^[a-zA-Z\s'-]{2,}$/.test(value.trim());
+  const isValidName = (value: string) =>
+    /^[a-zA-Z\s'-]{2,}$/.test(value.trim());
   const isValidPhone = (value: string) => {
     const digits = value.replace(/[^\d+]/g, "");
     return digits.length >= 8;
@@ -121,18 +126,52 @@ export default function MobileBroadbandSignup3({
   }, [email]);
 
   const validate = (): boolean => {
-    const fnErr = !firstName ? "First name is required" : !isValidName(firstName) ? "Enter a valid first name" : null;
-    const lnErr = !lastName ? "Last name is required" : !isValidName(lastName) ? "Enter a valid last name" : null;
-    const phErr = !phone ? "Phone number is required" : !isValidPhone(phone) ? "Enter a valid phone number" : null;
-    const dbErr = !dateOfBirth ? "Date of birth is required" : !isAdult(dateOfBirth) ? "You must be at least 18 years old" : null;
-    const pwErr = !password ? "Password is required" : password.length < 6 ? "Password must be at least 6 characters" : null;
+    const fnErr = !firstName
+      ? "First name is required"
+      : !isValidName(firstName)
+        ? "Enter a valid first name"
+        : null;
+    const lnErr = !lastName
+      ? "Last name is required"
+      : !isValidName(lastName)
+        ? "Enter a valid last name"
+        : null;
+    const phErr = !phone
+      ? "Phone number is required"
+      : !isValidPhone(phone)
+        ? "Enter a valid phone number"
+        : null;
+    const dbErr = !dateOfBirth
+      ? "Date of birth is required"
+      : !isAdult(dateOfBirth)
+        ? "You must be at least 18 years old"
+        : null;
+    const pwErr = !password
+      ? "Password is required"
+      : password.length < 6
+        ? "Password must be at least 6 characters"
+        : null;
     const baErr = !billingAddress ? "Billing address is required" : null;
-    const emErr = !email ? "Email is required" : !isValidEmail(email) ? "Please enter a valid email address" : emailExists ? (emailError || "Email already registered") : null;
+    const emErr = !email
+      ? "Email is required"
+      : !isValidEmail(email)
+        ? "Please enter a valid email address"
+        : emailExists
+          ? emailError || "Email already registered"
+          : null;
 
-    const simNumErr = simType === "physical" && (!simNumber || !simNumber.trim()) ? "SIM Card Number (ICCID) is required for physical SIM" : null;
+    const simNumErr =
+      simType === "physical" && (!simNumber || !simNumber.trim())
+        ? "SIM Card Number (ICCID) is required for physical SIM"
+        : null;
     const actualEsimEmail = esimNotificationEmail || email;
-    const esimEmailErr = simType === "eSim" && (!actualEsimEmail || !actualEsimEmail.trim() || !isValidEmail(actualEsimEmail))
-      ? "eSIM Notification Email is required and must be a valid email address" : null;
+    const esimEmailErr =
+      simType === "eSim" &&
+      (!actualEsimEmail ||
+        !actualEsimEmail.trim() ||
+        !isValidEmail(actualEsimEmail))
+        ? "eSIM Notification Email is required and must be a valid email address"
+        : null;
 
     setFirstNameError(fnErr);
     setLastNameError(lnErr);
@@ -144,13 +183,29 @@ export default function MobileBroadbandSignup3({
     setSimNumberError(simNumErr);
     setEsimNotificationEmailError(esimEmailErr);
 
-    return !fnErr && !lnErr && !phErr && !dbErr && !pwErr && !baErr && !emErr && !simNumErr && !esimEmailErr;
+    return (
+      !fnErr &&
+      !lnErr &&
+      !phErr &&
+      !dbErr &&
+      !pwErr &&
+      !baErr &&
+      !emErr &&
+      !simNumErr &&
+      !esimEmailErr
+    );
   };
 
   return (
     <ModalShell onClose={onClose} size="wide">
       <MbbHeaderBanner />
-      <div className="mt-6"><MbbStepper active={3} onStepClick={onStepClick} maxReached={maxReached} /></div>
+      <div className="mt-6">
+        <MbbStepper
+          active={3}
+          onStepClick={onStepClick}
+          maxReached={maxReached}
+        />
+      </div>
 
       <SectionPanel>
         <div className="text-center">
@@ -160,80 +215,118 @@ export default function MobileBroadbandSignup3({
               <path d="M4 18c0-3 3.6-5 8-5s8 2 8 5" />
             </svg>
           </div>
-          <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Customer Details</h2>
-          <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Please provide your contact information</p>
+          <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">
+            Customer Details
+          </h2>
+          <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">
+            Please provide your contact information
+          </p>
         </div>
 
         <div className="mx-auto mt-8 max-w-[880px] rounded-[16px] border border-[#E7E4EC] bg-white p-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm text-[#6B6478]">First Name</label>
+              <label className="mb-1 block text-sm text-[#6B6478]">
+                First Name
+              </label>
               <input
                 value={firstName}
                 onChange={(e) => onChangeFirstName(e.target.value)}
                 className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${firstNameError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
                 placeholder="Enter your first name"
               />
-              {firstNameError && <p className="mt-1 text-xs text-red-600">{firstNameError}</p>}
+              {firstNameError && (
+                <p className="mt-1 text-xs text-red-600">{firstNameError}</p>
+              )}
             </div>
             <div>
-              <label className="mb-1 block text-sm text-[#6B6478]">Last Name</label>
+              <label className="mb-1 block text-sm text-[#6B6478]">
+                Last Name
+              </label>
               <input
                 value={lastName}
                 onChange={(e) => onChangeLastName(e.target.value)}
                 className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${lastNameError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
                 placeholder="Enter your last name"
               />
-              {lastNameError && <p className="mt-1 text-xs text-red-600">{lastNameError}</p>}
+              {lastNameError && (
+                <p className="mt-1 text-xs text-red-600">{lastNameError}</p>
+              )}
             </div>
             <div className="md:col-span-2">
-              <label className="mb-1 block text-sm text-[#6B6478]">Email Address</label>
+              <label className="mb-1 block text-sm text-[#6B6478]">
+                Email Address
+              </label>
               <input
                 value={email}
                 onChange={(e) => onChangeEmail(e.target.value)}
                 type="email"
-                className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] ${emailExists || (email && !isValidEmail(email))
-                  ? 'border-red-300 bg-red-50'
-                  : email && isValidEmail(email) && !emailChecking
-                    ? 'border-green-300 bg-green-50'
-                    : 'border-[#E7E4EC] bg-[#FBF9FF]'
-                  }`}
+                className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] ${
+                  emailExists || (email && !isValidEmail(email))
+                    ? "border-red-300 bg-red-50"
+                    : email && isValidEmail(email) && !emailChecking
+                      ? "border-green-300 bg-green-50"
+                      : "border-[#E7E4EC] bg-[#FBF9FF]"
+                }`}
                 placeholder="Enter your email"
               />
-              {emailChecking && <p className="mt-1 text-xs text-gray-500">Checking availability...</p>}
+              {emailChecking && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Checking availability...
+                </p>
+              )}
               {email && !isValidEmail(email) && !emailChecking && (
-                <p className="mt-1 text-xs text-red-600">Please enter a valid email address</p>
+                <p className="mt-1 text-xs text-red-600">
+                  Please enter a valid email address
+                </p>
               )}
               {emailExists && (
-                <p className="mt-1 text-xs text-red-600">{emailError || "Email already registered"}</p>
+                <p className="mt-1 text-xs text-red-600">
+                  {emailError || "Email already registered"}
+                </p>
               )}
-              {email && isValidEmail(email) && !emailExists && !emailChecking && (
-                <p className="mt-1 text-xs text-green-600">Email is available</p>
-              )}
+              {email &&
+                isValidEmail(email) &&
+                !emailExists &&
+                !emailChecking && (
+                  <p className="mt-1 text-xs text-green-600">
+                    Email is available
+                  </p>
+                )}
             </div>
             <div>
-              <label className="mb-1 block text-sm text-[#6B6478]">Contact Phone Number <span className="text-red-600">*</span></label>
+              <label className="mb-1 block text-sm text-[#6B6478]">
+                Contact Phone Number <span className="text-red-600">*</span>
+              </label>
               <input
                 value={phone}
                 onChange={(e) => onChangePhone(e.target.value)}
                 className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${phoneError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
                 placeholder="Enter your phone number"
               />
-              {phoneError && <p className="mt-1 text-xs text-red-600">{phoneError}</p>}
+              {phoneError && (
+                <p className="mt-1 text-xs text-red-600">{phoneError}</p>
+              )}
             </div>
             <div>
-              <label className="mb-1 block text-sm text-[#6B6478]">Date of Birth</label>
+              <label className="mb-1 block text-sm text-[#6B6478]">
+                Date of Birth
+              </label>
               <input
                 type="date"
                 value={dateOfBirth}
                 onChange={(e) => onChangeDateOfBirth(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
+                max={new Date().toISOString().split("T")[0]}
                 className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${dobError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
               />
-              {dobError && <p className="mt-1 text-xs text-red-600">{dobError}</p>}
+              {dobError && (
+                <p className="mt-1 text-xs text-red-600">{dobError}</p>
+              )}
             </div>
             <div>
-              <label className="mb-1 block text-sm text-[#6B6478]">Password</label>
+              <label className="mb-1 block text-sm text-[#6B6478]">
+                Password
+              </label>
               <input
                 type="password"
                 value={password}
@@ -241,30 +334,39 @@ export default function MobileBroadbandSignup3({
                 className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${passwordError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
                 placeholder="Create a password (min 6 chars)"
               />
-              {passwordError && <p className="mt-1 text-xs text-red-600">{passwordError}</p>}
+              {passwordError && (
+                <p className="mt-1 text-xs text-red-600">{passwordError}</p>
+              )}
             </div>
           </div>
           <div className="mt-4">
-            <label className="mb-1 block text-sm text-[#6B6478]">Billing Address</label>
+            <label className="mb-1 block text-sm text-[#6B6478]">
+              Billing Address
+            </label>
             <input
               value={billingAddress}
               onChange={(e) => onChangeBillingAddress(e.target.value)}
               className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${billingAddressError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
               placeholder="Enter your full billing address"
             />
-            {billingAddressError && <p className="mt-1 text-xs text-red-600">{billingAddressError}</p>}
+            {billingAddressError && (
+              <p className="mt-1 text-xs text-red-600">{billingAddressError}</p>
+            )}
           </div>
 
           {(simType === "physical" || simType === "eSim") && (
             <div className="mt-6 border-t border-[#E7E4EC] pt-6">
               <h3 className="text-[16px] font-semibold text-[#2E2745] mb-4">
-                {simType === "physical" ? "Physical SIM Details" : "eSIM Details"}
+                {simType === "physical"
+                  ? "Physical SIM Details"
+                  : "eSIM Details"}
               </h3>
 
               {simType === "physical" && (
                 <div>
                   <label className="mb-1 block text-sm text-[#6B6478]">
-                    SIM Card Number (ICCID) <span className="text-red-600">*</span>
+                    SIM Card Number (ICCID){" "}
+                    <span className="text-red-600">*</span>
                   </label>
                   <input
                     value={simNumber || ""}
@@ -275,9 +377,14 @@ export default function MobileBroadbandSignup3({
                     className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${simNumberError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
                     placeholder="Enter SIM Card Number (ICCID)"
                   />
-                  {simNumberError && <p className="mt-1 text-xs text-red-600">{simNumberError}</p>}
+                  {simNumberError && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {simNumberError}
+                    </p>
+                  )}
                   <p className="mt-1 text-xs text-[#6F6C90]">
-                    The ICCID is printed on the physical SIM card. This is required for physical SIM provisioning.
+                    The ICCID is printed on the physical SIM card. This is
+                    required for physical SIM provisioning.
                   </p>
                 </div>
               )}
@@ -285,21 +392,29 @@ export default function MobileBroadbandSignup3({
               {simType === "eSim" && (
                 <div>
                   <label className="mb-1 block text-sm text-[#6B6478]">
-                    eSIM Notification Email <span className="text-red-600">*</span>
+                    eSIM Notification Email{" "}
+                    <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="email"
                     value={esimNotificationEmail || email || ""}
                     onChange={(e) => {
-                      if (onChangeEsimNotificationEmail) onChangeEsimNotificationEmail(e.target.value);
+                      if (onChangeEsimNotificationEmail)
+                        onChangeEsimNotificationEmail(e.target.value);
                       if (submitted) setEsimNotificationEmailError(null);
                     }}
                     className={`h-11 w-full rounded-[10px] border px-3 focus:border-[#4F1C76] focus:outline-none ${esimNotificationEmailError ? "border-red-300 bg-red-50" : "border-[#E7E4EC] bg-[#FBF9FF]"}`}
                     placeholder="Enter email for eSIM notifications"
                   />
-                  {esimNotificationEmailError && <p className="mt-1 text-xs text-red-600">{esimNotificationEmailError}</p>}
+                  {esimNotificationEmailError && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {esimNotificationEmailError}
+                    </p>
+                  )}
                   <p className="mt-1 text-xs text-[#6F6C90]">
-                    This email will receive the eSIM activation QR code and instructions. Defaults to your account email but can be changed.
+                    This email will receive the eSIM activation QR code and
+                    instructions. Defaults to your account email but can be
+                    changed.
                   </p>
                 </div>
               )}

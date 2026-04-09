@@ -13,7 +13,12 @@ type Props = {
   availableRoles: Role[];
 };
 
-export default function InviteUserModal({ open, onClose, onInvite, availableRoles }: Props) {
+export default function InviteUserModal({
+  open,
+  onClose,
+  onInvite,
+  availableRoles,
+}: Props) {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -38,17 +43,17 @@ export default function InviteUserModal({ open, onClose, onInvite, availableRole
     if (open) {
       // Save current scroll position
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
 
       return () => {
         // Restore scroll position
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -92,7 +97,10 @@ export default function InviteUserModal({ open, onClose, onInvite, availableRole
         lastName: lastName.trim(),
         subrole: role, // Send as 'subrole' to backend
       };
-      const { data } = await apiClient.post<{ success: boolean; user: UserRow }>("/auth/createUserByAdmin", payload);
+      const { data } = await apiClient.post<{
+        success: boolean;
+        user: UserRow;
+      }>("/auth/createUserByAdmin", payload);
 
       if (data?.success && data.user) {
         onInvite(data.user);
@@ -118,9 +126,9 @@ export default function InviteUserModal({ open, onClose, onInvite, availableRole
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
       }}
     >
       <div
@@ -131,9 +139,9 @@ export default function InviteUserModal({ open, onClose, onInvite, availableRole
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 90
+          width: "100vw",
+          height: "100vh",
+          zIndex: 90,
         }}
       />
       <div
@@ -141,7 +149,9 @@ export default function InviteUserModal({ open, onClose, onInvite, availableRole
         style={{ zIndex: 91 }}
       >
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">Invite New User</h2>
+          <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">
+            Invite New User
+          </h2>
           <button
             onClick={onClose}
             className="grid h-7 w-7 place-items-center rounded-full bg-[#FFF0F0] text-[#E0342F]"
@@ -151,12 +161,15 @@ export default function InviteUserModal({ open, onClose, onInvite, availableRole
           </button>
         </div>
         <p className="mb-5 text-[14px] text-[#6F6C90]">
-          Send an invitation to a new team member. They will receive an email to set up their account.
+          Send an invitation to a new team member. They will receive an email to
+          set up their account.
         </p>
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">Email Address</label>
+            <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
+              Email Address
+            </label>
             <input
               type="email"
               value={email}
@@ -168,7 +181,9 @@ export default function InviteUserModal({ open, onClose, onInvite, availableRole
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">First Name</label>
+              <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
+                First Name
+              </label>
               <input
                 type="text"
                 value={firstName}
@@ -178,7 +193,9 @@ export default function InviteUserModal({ open, onClose, onInvite, availableRole
               />
             </div>
             <div>
-              <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">Last Name</label>
+              <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
+                Last Name
+              </label>
               <input
                 type="text"
                 value={lastName}
@@ -190,7 +207,9 @@ export default function InviteUserModal({ open, onClose, onInvite, availableRole
           </div>
 
           <div>
-            <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">Initial Role</label>
+            <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
+              Initial Role
+            </label>
             {availableRoles.length === 0 ? (
               <div className="flex h-[48px] items-center justify-between rounded-[10px] border border-[#DFDBE3] bg-white px-4 text-left text-[14px] font-medium text-[#6F6C90]">
                 Loading roles...

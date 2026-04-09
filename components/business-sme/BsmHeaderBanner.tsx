@@ -10,7 +10,13 @@ export default function BsmHeaderBanner() {
         <div className="flex items-center gap-4">
           <div className="grid h-10 w-10 place-items-center rounded-full bg-[#4F1C76] text-white">
             {/* headset */}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden
+            >
               <path d="M12 3a7 7 0 0 0-7 7v3a3 3 0 0 0 3 3v5h4v-4h2v4h4v-5a3 3 0 0 0 3-3v-3a7 7 0 0 0-7-7z" />
             </svg>
           </div>
@@ -19,7 +25,8 @@ export default function BsmHeaderBanner() {
               Having trouble or have a question? Our team is here to help.
             </div>
             <div className="text-sm text-[#6B7280]">
-              Call us on <span className="font-semibold">(02) 8123 4567</span> or request a callback.
+              Call us on <span className="font-semibold">(02) 8123 4567</span>{" "}
+              or request a callback.
             </div>
           </div>
         </div>
@@ -30,7 +37,9 @@ export default function BsmHeaderBanner() {
           >
             Contact Us
           </button>
-          <button className="rounded-[12px] bg-[#4F1C76] px-4 py-2 font-semibold text-white">Call Now</button>
+          <button className="rounded-[12px] bg-[#4F1C76] px-4 py-2 font-semibold text-white">
+            Call Now
+          </button>
         </div>
       </div>
     </div>

@@ -16,9 +16,22 @@ type Plan = {
 };
 
 const fallbackPlans: Plan[] = [
-  { title: "Data Light", price: 20, bullets: ["10GB Data", "4G/5G Network", "30 days validity"] },
-  { title: "Data Standard", price: 35, badge: "Most Popular", bullets: ["50GB Data", "4G/5G Network", "30 days validity"] },
-  { title: "Data Unlimited", price: 65, bullets: ["Unlimited Data", "4G/5G Network", "30 days validity"] },
+  {
+    title: "Data Light",
+    price: 20,
+    bullets: ["10GB Data", "4G/5G Network", "30 days validity"],
+  },
+  {
+    title: "Data Standard",
+    price: 35,
+    badge: "Most Popular",
+    bullets: ["50GB Data", "4G/5G Network", "30 days validity"],
+  },
+  {
+    title: "Data Unlimited",
+    price: 65,
+    bullets: ["Unlimited Data", "4G/5G Network", "30 days validity"],
+  },
 ];
 
 export default function MobileBroadbandSignup1({
@@ -34,7 +47,11 @@ export default function MobileBroadbandSignup1({
   onBack: () => void;
   onClose: () => void;
   selectedPlan?: { id?: string | number; name: string; price: number } | null;
-  onPlanSelect?: (plan: { id?: string | number; name: string; price: number }) => void;
+  onPlanSelect?: (plan: {
+    id?: string | number;
+    name: string;
+    price: number;
+  }) => void;
   onStepClick?: (step: number) => void;
   maxReached?: number;
 }) {
@@ -49,31 +66,37 @@ export default function MobileBroadbandSignup1({
       setLoading(true);
       setLoadError(null);
       try {
-        const resp = await apiClient.get('/wholesaler-plans');
+        const resp = await apiClient.get("/wholesaler-plans");
         const data = resp.data && resp.data.data ? resp.data.data : resp.data;
         if (!mounted) return;
         if (Array.isArray(data) && data.length > 0) {
-          const broadbandPlans = data.filter((p: any) => p.connection_type_name === 'Broadband');
+          const broadbandPlans = data.filter(
+            (p: any) => p.connection_type_name === "Broadband",
+          );
           const mapped = broadbandPlans.map((s: any) => ({
             id: s.value?.toString() || s._id,
-            title: s.custom_name || s.label || 'Data Plan',
+            title: s.custom_name || s.label || "Data Plan",
             price: s.price,
-            bullets: s.label ? [s.label.split('UTB:')[0].trim()] : []
+            bullets: s.label ? [s.label.split("UTB:")[0].trim()] : [],
           }));
           setPlans(mapped);
           if (initialSelectedPlan) {
-            const found = mapped.find((p: any) => p.title === initialSelectedPlan.name);
+            const found = mapped.find(
+              (p: any) => p.title === initialSelectedPlan.name,
+            );
             if (found) setSelectedPlan(found);
           }
         }
       } catch (err: any) {
-        console.error('Failed to load Data Only services:', err);
-        setLoadError(err?.message || 'Failed to load plans');
+        console.error("Failed to load Data Only services:", err);
+        setLoadError(err?.message || "Failed to load plans");
       } finally {
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handlePlanSelect = (plan: Plan) => {
@@ -86,21 +109,42 @@ export default function MobileBroadbandSignup1({
   return (
     <ModalShell onClose={onClose} size="wide">
       <MbbHeaderBanner />
-      <div className="mt-6"><MbbStepper active={1} onStepClick={onStepClick} maxReached={maxReached} /></div>
+      <div className="mt-6">
+        <MbbStepper
+          active={1}
+          onStepClick={onStepClick}
+          maxReached={maxReached}
+        />
+      </div>
 
       <SectionPanel>
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#4F1C76] text-white">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden><circle cx="12" cy="12" r="10" /></svg>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden
+            >
+              <circle cx="12" cy="12" r="10" />
+            </svg>
           </div>
-          <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Choose Your Data Plan</h2>
-          <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Select the data plan that suits your usage</p>
+          <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">
+            Choose Your Data Plan
+          </h2>
+          <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">
+            Select the data plan that suits your usage
+          </p>
         </div>
 
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {loading ? (
-            [1, 2, 3].map(i => (
-              <div key={i} className="p-6 rounded-[16px] border bg-white animate-pulse">
+            [1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="p-6 rounded-[16px] border bg-white animate-pulse"
+              >
                 <div className="h-6 w-6 mb-3 rounded-full bg-gray-200" />
                 <div className="h-6 w-1/2 bg-gray-200 mb-4 rounded" />
                 <div className="h-10 w-1/4 bg-gray-200 mb-4 rounded" />
@@ -111,11 +155,13 @@ export default function MobileBroadbandSignup1({
               </div>
             ))
           ) : loadError ? (
-            <div className="col-span-3 text-center text-red-600">Failed to load plans. Please try again later.</div>
+            <div className="col-span-3 text-center text-red-600">
+              Failed to load plans. Please try again later.
+            </div>
           ) : plans.length === 0 ? (
             <div className="col-span-3 text-center">No plans available</div>
           ) : (
-            plans.map(plan => {
+            plans.map((plan) => {
               const isSelected = selectedPlan?.id === plan.id;
               const isDisabled = plan.price == null;
               return (
@@ -126,27 +172,53 @@ export default function MobileBroadbandSignup1({
                   onClick={() => handlePlanSelect(plan)}
                   className={[
                     "text-left rounded-[16px] border p-6 transition-all",
-                    isDisabled ? "opacity-50 cursor-not-allowed bg-gray-50 border-gray-200" : "bg-white shadow-[0_24px_60px_rgba(64,27,118,0.10)]",
-                    isSelected && !isDisabled ? "border-2 border-[#4F1C76] bg-[#FBF8FF]" : !isDisabled ? "border border-[#E7E4EC] hover:border-[#CFC6DC]" : "",
+                    isDisabled
+                      ? "opacity-50 cursor-not-allowed bg-gray-50 border-gray-200"
+                      : "bg-white shadow-[0_24px_60px_rgba(64,27,118,0.10)]",
+                    isSelected && !isDisabled
+                      ? "border-2 border-[#4F1C76] bg-[#FBF8FF]"
+                      : !isDisabled
+                        ? "border border-[#E7E4EC] hover:border-[#CFC6DC]"
+                        : "",
                   ].join(" ")}
                 >
                   {isSelected && !isDisabled && (
                     <div className="mb-3 flex items-center justify-end">
                       <div className="grid h-6 w-6 place-items-center rounded-full bg-[#4F1C76] text-white">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <path
+                            d="M20 6L9 17l-5-5"
+                            stroke="white"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
                         </svg>
                       </div>
                     </div>
                   )}
                   <div className="flex items-start justify-between">
                     <div>
-                      <div className={[("text-[18px] font-semibold"), isSelected ? "text-[#4F1C76]" : "text-[#3B3551]"].join(" ")}>
+                      <div
+                        className={[
+                          "text-[18px] font-semibold",
+                          isSelected ? "text-[#4F1C76]" : "text-[#3B3551]",
+                        ].join(" ")}
+                      >
                         {plan.title}
                       </div>
                       <div className="mt-2 text-[32px] font-extrabold text-[#4F1C76]">
                         {plan.price != null ? `$${plan.price}` : "N/A"}
-                        {plan.price != null && <span className="ml-1 text-[16px] font-semibold">/month</span>}
+                        {plan.price != null && (
+                          <span className="ml-1 text-[16px] font-semibold">
+                            /month
+                          </span>
+                        )}
                       </div>
                     </div>
                     {!isSelected && (
@@ -165,8 +237,20 @@ export default function MobileBroadbandSignup1({
                   <ul className="mt-4 space-y-2 text-[14px] text-[#5B5668]">
                     {plan.bullets.map((b, idx) => (
                       <li key={idx} className="flex items-center gap-2">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-                          <path d="M20 6 9 17l-5-5" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          aria-hidden
+                        >
+                          <path
+                            d="M20 6 9 17l-5-5"
+                            stroke="#10B981"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
                         </svg>
                         {b}
                       </li>
@@ -179,7 +263,11 @@ export default function MobileBroadbandSignup1({
         </div>
       </SectionPanel>
 
-      <BarActions onBack={onBack} onNext={onNext} nextDisabled={!selectedPlan || loading || !!loadError} />
+      <BarActions
+        onBack={onBack}
+        onNext={onNext}
+        nextDisabled={!selectedPlan || loading || !!loadError}
+      />
     </ModalShell>
   );
 }

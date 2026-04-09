@@ -69,7 +69,9 @@ export default function AccountManagement() {
         setFormData(response?.data?.user);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch user data");
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch user data",
+        );
         console.error("Error fetching user data:", err);
       } finally {
         setLoading(false);
@@ -114,14 +116,19 @@ export default function AccountManagement() {
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update user data");
+      setError(
+        err instanceof Error ? err.message : "Failed to update user data",
+      );
       console.error("Error updating user data:", err);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleAddressInputChange = (key: keyof AddressInformation, value: string) => {
+  const handleAddressInputChange = (
+    key: keyof AddressInformation,
+    value: string,
+  ) => {
     setFormData((prev) => ({
       ...prev,
       addressInformation: {
@@ -161,7 +168,9 @@ export default function AccountManagement() {
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update address data");
+      setError(
+        err instanceof Error ? err.message : "Failed to update address data",
+      );
       console.error("Error updating address data:", err);
     } finally {
       setIsSavingAddress(false);
@@ -195,7 +204,11 @@ export default function AccountManagement() {
 
   const handleChangePassword = async () => {
     // Validation
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
       setPasswordError("All fields are required");
       return;
     }
@@ -230,14 +243,20 @@ export default function AccountManagement() {
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setPasswordError(err instanceof Error ? err.message : "Failed to change password");
+      setPasswordError(
+        err instanceof Error ? err.message : "Failed to change password",
+      );
       console.error("Error changing password:", err);
     } finally {
       setIsChangingPassword(false);
     }
   };
 
-  const handleToggleChange = (field: string, label: string, currentValue: boolean) => {
+  const handleToggleChange = (
+    field: string,
+    label: string,
+    currentValue: boolean,
+  ) => {
     setConfirmModal({
       isOpen: true,
       field,
@@ -255,16 +274,30 @@ export default function AccountManagement() {
         [confirmModal.field]: confirmModal.newValue,
       });
 
-      setUserData(response.data.user || { ...userData, [confirmModal.field]: confirmModal.newValue });
-      setFormData(response.data.user || { ...formData, [confirmModal.field]: confirmModal.newValue });
-      setSuccess(`${confirmModal.label} ${confirmModal.newValue ? "enabled" : "disabled"} successfully!`);
+      setUserData(
+        response.data.user || {
+          ...userData,
+          [confirmModal.field]: confirmModal.newValue,
+        },
+      );
+      setFormData(
+        response.data.user || {
+          ...formData,
+          [confirmModal.field]: confirmModal.newValue,
+        },
+      );
+      setSuccess(
+        `${confirmModal.label} ${confirmModal.newValue ? "enabled" : "disabled"} successfully!`,
+      );
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
 
       setConfirmModal({ isOpen: false, field: "", label: "", newValue: false });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update preference");
+      setError(
+        err instanceof Error ? err.message : "Failed to update preference",
+      );
       console.error("Error updating preference:", err);
     } finally {
       setIsUpdatingPreference(false);
@@ -277,7 +310,9 @@ export default function AccountManagement() {
 
   return (
     <>
-      <h1 className="mb-6 text-[26px] font-bold text-[#0A0A0A]">Account Management</h1>
+      <h1 className="mb-6 text-[26px] font-bold text-[#0A0A0A]">
+        Account Management
+      </h1>
 
       {error && (
         <div className="mb-4 rounded-[12px] border border-red-300 bg-red-50 p-4 text-sm text-red-600">
@@ -294,7 +329,9 @@ export default function AccountManagement() {
       <div className="grid grid-cols-2 gap-6">
         <Panel className="p-6">
           <div className="mb-4 flex items-center justify-between">
-            <div className="text-[16px] font-semibold text-[#0A0A0A]">Personal Information</div>
+            <div className="text-[16px] font-semibold text-[#0A0A0A]">
+              Personal Information
+            </div>
             <div className="flex gap-2">
               {isEditing ? (
                 <>
@@ -329,7 +366,11 @@ export default function AccountManagement() {
               { label: "Last Name", key: "lastName" as const, locked: false },
               { label: "Email Address", key: "email" as const, locked: true },
               { label: "Phone Number", key: "phone" as const, locked: true },
-              { label: "Delivery Address", key: "serviceAddress" as const, locked: false },
+              {
+                label: "Delivery Address",
+                key: "serviceAddress" as const,
+                locked: false,
+              },
             ].map(({ label, key, locked }, i) => {
               const isFieldEditable = isEditing && !locked;
               const fieldValue = formData[key] as string | undefined;
@@ -338,18 +379,28 @@ export default function AccountManagement() {
                   <label className="mb-1 flex items-center gap-1 text-[13px] text-[#0A0A0A]">
                     {label}
                     {locked && (
-                      <span className="text-[11px] text-[#6F6C90]" title="This field cannot be edited">
+                      <span
+                        className="text-[11px] text-[#6F6C90]"
+                        title="This field cannot be edited"
+                      >
                         🔒
                       </span>
                     )}
                   </label>
                   <input
-                    className={`h-[44px] w-full rounded-[12px] border px-3 text-[14px] outline-none ${isFieldEditable
-                      ? "border-[#E5E2EA] bg-white focus:border-[#3F205F]"
-                      : "border-[#E5E2EA] bg-[#F8F8FB] cursor-not-allowed"
-                      }`}
+                    className={`h-[44px] w-full rounded-[12px] border px-3 text-[14px] outline-none ${
+                      isFieldEditable
+                        ? "border-[#E5E2EA] bg-white focus:border-[#3F205F]"
+                        : "border-[#E5E2EA] bg-[#F8F8FB] cursor-not-allowed"
+                    }`}
                     placeholder={`Enter your ${label.toLowerCase()}`}
-                    value={loading ? "Loading..." : (key === "phone" ? (formData.phone || formData.mblSelectedNumber || "") : (fieldValue || ""))}
+                    value={
+                      loading
+                        ? "Loading..."
+                        : key === "phone"
+                          ? formData.phone || formData.mblSelectedNumber || ""
+                          : fieldValue || ""
+                    }
                     onChange={(e) => handleInputChange(key, e.target.value)}
                     readOnly={!isFieldEditable || loading}
                     disabled={loading || locked}
@@ -362,7 +413,9 @@ export default function AccountManagement() {
 
         <Panel className="p-6">
           <div className="mb-4 flex items-center justify-between">
-            <div className="text-[16px] font-semibold text-[#0A0A0A]">Address Information</div>
+            <div className="text-[16px] font-semibold text-[#0A0A0A]">
+              Address Information
+            </div>
             <div className="flex gap-2">
               {isEditingAddress ? (
                 <>
@@ -402,15 +455,29 @@ export default function AccountManagement() {
               { label: "Postcode", key: "postcode" },
             ].map(({ label, key }) => (
               <div key={label}>
-                <label className="mb-1 block text-[13px] text-[#0A0A0A]">{label}</label>
+                <label className="mb-1 block text-[13px] text-[#0A0A0A]">
+                  {label}
+                </label>
                 <input
-                  className={`h-[44px] w-full rounded-[12px] border px-3 text-[14px] outline-none ${isEditingAddress
-                    ? "border-[#E5E2EA] bg-white focus:border-[#3F205F]"
-                    : "border-[#E5E2EA] bg-[#F8F8FB] cursor-not-allowed"
-                    }`}
+                  className={`h-[44px] w-full rounded-[12px] border px-3 text-[14px] outline-none ${
+                    isEditingAddress
+                      ? "border-[#E5E2EA] bg-white focus:border-[#3F205F]"
+                      : "border-[#E5E2EA] bg-[#F8F8FB] cursor-not-allowed"
+                  }`}
                   placeholder={`Enter your ${label.toLowerCase()}`}
-                  value={loading ? "Loading..." : (formData.addressInformation?.[key as keyof AddressInformation] || "")}
-                  onChange={(e) => handleAddressInputChange(key as keyof AddressInformation, e.target.value)}
+                  value={
+                    loading
+                      ? "Loading..."
+                      : formData.addressInformation?.[
+                          key as keyof AddressInformation
+                        ] || ""
+                  }
+                  onChange={(e) =>
+                    handleAddressInputChange(
+                      key as keyof AddressInformation,
+                      e.target.value,
+                    )
+                  }
                   readOnly={!isEditingAddress || loading}
                   disabled={loading}
                 />
@@ -423,7 +490,9 @@ export default function AccountManagement() {
       <div className="mt-6 grid grid-cols-2 gap-6">
         <Panel className="p-6">
           <div className="mb-4 flex items-center justify-between">
-            <div className="text-[16px] font-semibold text-[#0A0A0A]">Security Settings</div>
+            <div className="text-[16px] font-semibold text-[#0A0A0A]">
+              Security Settings
+            </div>
             <button
               onClick={handleOpenPasswordModal}
               className="rounded-[8px] border border-[#D9D4E5] px-3 py-1 text-[12px] text-[#3F205F] hover:bg-gray-50"
@@ -434,16 +503,30 @@ export default function AccountManagement() {
 
           <div className="space-y-3">
             {[
-              { title: "Two-Factor Authentication", desc: "Add an extra layer of security to your account", field: "twoFactorAuthentication" as const },
-              { title: "Email Notifications", desc: "Receive security alerts and account updates", field: "emailNotifications" as const },
-              { title: "SMS Notifications", desc: "Receive service alerts and payment reminders", field: "smsNotifications" as const },
+              {
+                title: "Two-Factor Authentication",
+                desc: "Add an extra layer of security to your account",
+                field: "twoFactorAuthentication" as const,
+              },
+              {
+                title: "Email Notifications",
+                desc: "Receive security alerts and account updates",
+                field: "emailNotifications" as const,
+              },
+              {
+                title: "SMS Notifications",
+                desc: "Receive service alerts and payment reminders",
+                field: "smsNotifications" as const,
+              },
             ].map(({ title, desc, field }) => (
               <ToggleRow
                 key={title}
                 title={title}
                 desc={desc}
                 checked={formData[field] ?? true}
-                onChange={() => handleToggleChange(field, title, formData[field] ?? true)}
+                onChange={() =>
+                  handleToggleChange(field, title, formData[field] ?? true)
+                }
                 disabled={loading}
               />
             ))}
@@ -451,20 +534,36 @@ export default function AccountManagement() {
         </Panel>
 
         <Panel className="p-6">
-          <div className="mb-4 text-[16px] font-semibold text-[#0A0A0A]">Communication Preferences</div>
+          <div className="mb-4 text-[16px] font-semibold text-[#0A0A0A]">
+            Communication Preferences
+          </div>
 
           <div className="space-y-3">
             {[
-              { title: "Marketing Communications", desc: "Receive offers and product updates", field: "marketingCommunications" as const },
-              { title: "Service Updates", desc: "Network maintenance and service improvements", field: "serviceUpdates" as const },
-              { title: "Billing Notifications", desc: "Invoice and payment confirmations", field: "billingNotifications" as const },
+              {
+                title: "Marketing Communications",
+                desc: "Receive offers and product updates",
+                field: "marketingCommunications" as const,
+              },
+              {
+                title: "Service Updates",
+                desc: "Network maintenance and service improvements",
+                field: "serviceUpdates" as const,
+              },
+              {
+                title: "Billing Notifications",
+                desc: "Invoice and payment confirmations",
+                field: "billingNotifications" as const,
+              },
             ].map(({ title, desc, field }) => (
               <ToggleRow
                 key={title}
                 title={title}
                 desc={desc}
                 checked={formData[field] ?? true}
-                onChange={() => handleToggleChange(field, title, formData[field] ?? true)}
+                onChange={() =>
+                  handleToggleChange(field, title, formData[field] ?? true)
+                }
                 disabled={loading}
               />
             ))}
@@ -498,19 +597,21 @@ export default function AccountManagement() {
               // width: '100vw',
               // height: '100vh',
               // zIndex: 50,
-              opacity: 0.5
+              opacity: 0.5,
             }}
           />
           <div
             className="fixed z-51 w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)'
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
             }}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[20px] font-bold text-[#0A0A0A]">Change Password</h2>
+              <h2 className="text-[20px] font-bold text-[#0A0A0A]">
+                Change Password
+              </h2>
               <button
                 onClick={handleClosePasswordModal}
                 className="text-[24px] text-[#6F6C90] hover:text-[#0A0A0A]"
@@ -527,37 +628,49 @@ export default function AccountManagement() {
 
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-[13px] text-[#0A0A0A]">Current Password</label>
+                <label className="mb-1 block text-[13px] text-[#0A0A0A]">
+                  Current Password
+                </label>
                 <input
                   type="password"
                   className="h-[44px] w-full rounded-[12px] border border-[#E5E2EA] bg-white px-3 text-[14px] outline-none focus:border-[#3F205F]"
                   placeholder="Enter current password"
                   value={passwordData.currentPassword}
-                  onChange={(e) => handlePasswordInputChange("currentPassword", e.target.value)}
+                  onChange={(e) =>
+                    handlePasswordInputChange("currentPassword", e.target.value)
+                  }
                   disabled={isChangingPassword}
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-[13px] text-[#0A0A0A]">New Password</label>
+                <label className="mb-1 block text-[13px] text-[#0A0A0A]">
+                  New Password
+                </label>
                 <input
                   type="password"
                   className="h-[44px] w-full rounded-[12px] border border-[#E5E2EA] bg-white px-3 text-[14px] outline-none focus:border-[#3F205F]"
                   placeholder="Enter new password"
                   value={passwordData.newPassword}
-                  onChange={(e) => handlePasswordInputChange("newPassword", e.target.value)}
+                  onChange={(e) =>
+                    handlePasswordInputChange("newPassword", e.target.value)
+                  }
                   disabled={isChangingPassword}
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-[13px] text-[#0A0A0A]">Confirm New Password</label>
+                <label className="mb-1 block text-[13px] text-[#0A0A0A]">
+                  Confirm New Password
+                </label>
                 <input
                   type="password"
                   className="h-[44px] w-full rounded-[12px] border border-[#E5E2EA] bg-white px-3 text-[14px] outline-none focus:border-[#3F205F]"
                   placeholder="Confirm new password"
                   value={passwordData.confirmPassword}
-                  onChange={(e) => handlePasswordInputChange("confirmPassword", e.target.value)}
+                  onChange={(e) =>
+                    handlePasswordInputChange("confirmPassword", e.target.value)
+                  }
                   disabled={isChangingPassword}
                 />
               </div>
@@ -594,39 +707,52 @@ export default function AccountManagement() {
             bottom: 0,
             margin: 0,
             padding: 0,
-            width: '100vw',
-            height: '100vh'
+            width: "100vw",
+            height: "100vh",
           }}
         >
           <div
             className="fixed bg-black"
-            onClick={() => setConfirmModal({ isOpen: false, field: "", label: "", newValue: false })}
+            onClick={() =>
+              setConfirmModal({
+                isOpen: false,
+                field: "",
+                label: "",
+                newValue: false,
+              })
+            }
             style={{
               top: 0,
               left: 0,
               right: 0,
               bottom: 0,
-              width: '100vw',
-              height: '100vh',
+              width: "100vw",
+              height: "100vh",
               zIndex: 50,
-              opacity: 0.5
+              opacity: 0.5,
             }}
           />
           <div
             className="fixed z-51 w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)'
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
             }}
           >
             <div className="mb-4">
-              <h2 className="text-[20px] font-bold text-[#0A0A0A]">Confirm Change</h2>
+              <h2 className="text-[20px] font-bold text-[#0A0A0A]">
+                Confirm Change
+              </h2>
             </div>
 
             <p className="mb-6 text-[14px] text-[#6F6C90]">
-              Are you sure you want to {confirmModal.newValue ? "enable" : "disable"}{" "}
-              <span className="font-semibold text-[#0A0A0A]">{confirmModal.label}</span>?
+              Are you sure you want to{" "}
+              {confirmModal.newValue ? "enable" : "disable"}{" "}
+              <span className="font-semibold text-[#0A0A0A]">
+                {confirmModal.label}
+              </span>
+              ?
             </p>
 
             <div className="flex gap-3">
@@ -657,7 +783,7 @@ function ToggleRow({
   desc,
   checked = true,
   onChange,
-  disabled = false
+  disabled = false,
 }: {
   title: string;
   desc: string;
@@ -679,7 +805,9 @@ function ToggleRow({
           onChange={onChange}
           disabled={disabled}
         />
-        <div className={`peer h-5 w-9 rounded-full ${checked ? "bg-[#3F205F]" : "bg-[#D9D4E5]"} transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-4 ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}></div>
+        <div
+          className={`peer h-5 w-9 rounded-full ${checked ? "bg-[#3F205F]" : "bg-[#D9D4E5]"} transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-4 ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+        ></div>
       </label>
     </div>
   );

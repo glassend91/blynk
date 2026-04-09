@@ -1,9 +1,7 @@
 // components/BlynkDifference.tsx
 export default function BlynkDifference() {
   return (
-    <section
-      className="bg-cover bg-center bg-[#401B60]/10"
-    >
+    <section className="bg-cover bg-center bg-[#401B60]/10">
       {/* section padding 100px; inner canvas width 1434px */}
       <div className="mx-auto max-w-[1434px] px-6 py-[100px] md:py-4 lg:py-10">
         {/* top emblem + heading block */}
@@ -22,9 +20,11 @@ export default function BlynkDifference() {
 
             {/* subcopy: 18/27 centered, width 922px */}
             <p className="mx-auto max-w-[922px] text-center text-[18px] leading-[27px] text-[#6F6C90]">
-              What makes us truly unique is our support model. We&apos;re building a new kind of support network by
-              partnering with a growing number of trusted, independent computer stores in communities across
-              Australia—the places you already go for expert tech help.
+              What makes us truly unique is our support model. We&apos;re
+              building a new kind of support network by partnering with a
+              growing number of trusted, independent computer stores in
+              communities across Australia—the places you already go for expert
+              tech help.
             </p>
           </div>
         </div>
@@ -59,11 +59,14 @@ export default function BlynkDifference() {
             </div>
 
             <div className="w-full text-center">
-              <h3 className="text-[22px] leading-[33px] font-bold text-black">Real Experts, Not Scripts.</h3>
+              <h3 className="text-[22px] leading-[33px] font-bold text-black">
+                Real Experts, Not Scripts.
+              </h3>
               <p className="mt-2 text-[16px] leading-[24px] text-[#6F6C90]">
-                We believe support should be a conversation, not a checklist. When you have a problem, you&apos;ll talk
-                to an experienced, local computer technician who will listen to understand your issue and has the
-                expertise to actually fix it.
+                We believe support should be a conversation, not a checklist.
+                When you have a problem, you&apos;ll talk to an experienced,
+                local computer technician who will listen to understand your
+                issue and has the expertise to actually fix it.
               </p>
             </div>
           </div>
@@ -88,10 +91,14 @@ export default function BlynkDifference() {
             </div>
 
             <div className="w-full text-center">
-              <h3 className="text-[22px] leading-[33px] font-bold text-black">Radically Simple Plans</h3>
+              <h3 className="text-[22px] leading-[33px] font-bold text-black">
+                Radically Simple Plans
+              </h3>
               <p className="mt-2 text-[16px] leading-[24px] text-[#6F6C90]">
-                We believe in transparency. That means no confusing bundles, no hidden fees, and no lock-in contracts.
-                Just straightforward NBN and Mobile plans that are easy to understand and even easier to use.
+                We believe in transparency. That means no confusing bundles, no
+                hidden fees, and no lock-in contracts. Just straightforward NBN
+                and Mobile plans that are easy to understand and even easier to
+                use.
               </p>
             </div>
           </div>
@@ -116,10 +123,14 @@ export default function BlynkDifference() {
             </div>
 
             <div className="w-full text-center">
-              <h3 className="text-[22px] leading-[33px] font-bold text-black">Founded on Service</h3>
+              <h3 className="text-[22px] leading-[33px] font-bold text-black">
+                Founded on Service
+              </h3>
               <p className="mt-2 text-[16px] leading-[24px] text-[#6F6C90]">
-                Blynk was founded on the conviction that customers deserve better. We&apos;re here to build relationships
-                and provide support you can actually understand and trust, every step of the way.
+                Blynk was founded on the conviction that customers deserve
+                better. We&apos;re here to build relationships and provide
+                support you can actually understand and trust, every step of the
+                way.
               </p>
             </div>
           </div>

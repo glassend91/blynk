@@ -11,8 +11,19 @@ type Props = {
   onCreate: (plan: PlanRow) => void;
 };
 
-const planTypeOptions: PlanType[] = ["NBN", "Business NBN", "Mobile", "Data Only", "Voice Only"];
-const statusOptions: PlanStatus[] = ["Published", "Draft", "Staff-Only", "Hidden"];
+const planTypeOptions: PlanType[] = [
+  "NBN",
+  "Business NBN",
+  "Mobile",
+  "Data Only",
+  "Voice Only",
+];
+const statusOptions: PlanStatus[] = [
+  "Published",
+  "Draft",
+  "Staff-Only",
+  "Hidden",
+];
 const billingCycleOptions = [
   { value: "monthly", label: "Monthly" },
   { value: "quarterly", label: "Quarterly" },
@@ -28,7 +39,9 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
   const [type, setType] = useState<PlanType>("NBN");
   const [price, setPrice] = useState("69.95");
   const [currency, setCurrency] = useState("AUD");
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "quarterly" | "yearly">("monthly");
+  const [billingCycle, setBillingCycle] = useState<
+    "monthly" | "quarterly" | "yearly"
+  >("monthly");
   const [speed, setSpeed] = useState("");
   const [features, setFeatures] = useState("");
   const [desc, setDesc] = useState("");
@@ -90,15 +103,15 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -153,7 +166,10 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
         }),
       };
 
-      const { data } = await apiClient.post<{ success: boolean; service: PlanRow }>("/services/admin", payload);
+      const { data } = await apiClient.post<{
+        success: boolean;
+        service: PlanRow;
+      }>("/services/admin", payload);
       if (data?.success && data.service) {
         onCreate(data.service);
         onClose();
@@ -177,9 +193,9 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
       }}
     >
       <div
@@ -190,9 +206,9 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 90
+          width: "100vw",
+          height: "100vh",
+          zIndex: 90,
         }}
       />
       <div
@@ -201,8 +217,12 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
       >
         <div className="mb-1 flex items-center justify-between">
           <div>
-            <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">Plan Builder</p>
-            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">Create New Service Plan</h2>
+            <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">
+              Plan Builder
+            </p>
+            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">
+              Create New Service Plan
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -214,12 +234,15 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
         </div>
 
         <p className="text-[14px] text-[#6F6C90]">
-          Define how this plan appears in the catalogue. Customers will see the name, highlights, pricing, and speed/data
-          headline.
+          Define how this plan appears in the catalogue. Customers will see the
+          name, highlights, pricing, and speed/data headline.
         </p>
 
         <div className="mt-6 space-y-5">
-          <SectionCard title="General details" description="Core information customers use to compare plans.">
+          <SectionCard
+            title="General details"
+            description="Core information customers use to compare plans."
+          >
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Plan name" required>
                 <input
@@ -272,7 +295,10 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                 </div>
               </Field>
 
-              <Field label="Monthly price" hint="Customers will see currency + billing cadence.">
+              <Field
+                label="Monthly price"
+                hint="Customers will see currency + billing cadence."
+              >
                 <div className="grid grid-cols-2 gap-3">
                   <input
                     type="number"
@@ -302,7 +328,11 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                   <div className="relative">
                     <select
                       value={billingCycle}
-                      onChange={(e) => setBillingCycle(e.target.value as "monthly" | "quarterly" | "yearly")}
+                      onChange={(e) =>
+                        setBillingCycle(
+                          e.target.value as "monthly" | "quarterly" | "yearly",
+                        )
+                      }
                       className={`${fieldClass} appearance-none pr-9`}
                     >
                       {billingCycleOptions.map((option) => (
@@ -316,7 +346,10 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                 </div>
               </Field>
 
-              <Field label="Backend Wholesale Reference" hint="Links this retail plan to a wholesale ID for ordering and billing.">
+              <Field
+                label="Backend Wholesale Reference"
+                hint="Links this retail plan to a wholesale ID for ordering and billing."
+              >
                 <div className="relative">
                   <select
                     value={wholesalerPlanLink}
@@ -325,13 +358,22 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                       setWholesalerPlanLink(selectedId);
 
                       // Auto-fill price and speed if selected
-                      const selectedPlan = filteredWholesalePlans.find(p => p._id === selectedId);
+                      const selectedPlan = filteredWholesalePlans.find(
+                        (p) => p._id === selectedId,
+                      );
                       if (selectedPlan) {
-                        if (selectedPlan.custom_name && !name) setName(selectedPlan.custom_name);
-                        if (selectedPlan.price && (!price || price === "69.95")) setPrice(selectedPlan.price.toString());
-                        if (selectedPlan.speed && !speed) setSpeed(selectedPlan.speed);
-                        if (selectedPlan.features && selectedPlan.features.length > 0 && !features) {
-                          setFeatures(selectedPlan.features.join('\n'));
+                        if (selectedPlan.custom_name && !name)
+                          setName(selectedPlan.custom_name);
+                        if (selectedPlan.price && (!price || price === "69.95"))
+                          setPrice(selectedPlan.price.toString());
+                        if (selectedPlan.speed && !speed)
+                          setSpeed(selectedPlan.speed);
+                        if (
+                          selectedPlan.features &&
+                          selectedPlan.features.length > 0 &&
+                          !features
+                        ) {
+                          setFeatures(selectedPlan.features.join("\n"));
                         }
                       }
                     }}
@@ -340,7 +382,12 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                     <option value="">-- No Wholesale Link --</option>
                     {filteredWholesalePlans.map((option) => (
                       <option key={option._id} value={option._id}>
-                        {option.label} {option.speed ? `(${option.speed})` : ""} [{option.type === 'nbn' ? option.bandwidth_id : option.value}]
+                        {option.label} {option.speed ? `(${option.speed})` : ""}{" "}
+                        [
+                        {option.type === "nbn"
+                          ? option.bandwidth_id
+                          : option.value}
+                        ]
                       </option>
                     ))}
                   </select>
@@ -350,10 +397,19 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
             </div>
           </SectionCard>
 
-          <SectionCard title="Plan experience" description="Highlight the performance headline and key callouts.">
+          <SectionCard
+            title="Plan experience"
+            description="Highlight the performance headline and key callouts."
+          >
             <div className="grid gap-4 md:grid-cols-2">
               <Field
-                label={type === "NBN" || type === "Business NBN" ? "Speed headline" : type === "Voice Only" ? "Voice minutes headline" : "Data headline"}
+                label={
+                  type === "NBN" || type === "Business NBN"
+                    ? "Speed headline"
+                    : type === "Voice Only"
+                      ? "Voice minutes headline"
+                      : "Data headline"
+                }
                 hint={
                   type === "NBN" || type === "Business NBN"
                     ? "Examples: 100/20 Mbps, 50 Mbps"
@@ -365,12 +421,21 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                 <input
                   value={speed}
                   onChange={(e) => setSpeed(e.target.value)}
-                  placeholder={type === "NBN" || type === "Business NBN" ? "100/20 Mbps" : type === "Voice Only" ? "Unlimited mins" : "50GB + 5G"}
+                  placeholder={
+                    type === "NBN" || type === "Business NBN"
+                      ? "100/20 Mbps"
+                      : type === "Voice Only"
+                        ? "Unlimited mins"
+                        : "50GB + 5G"
+                  }
                   className={fieldClass}
                 />
               </Field>
 
-              <Field label="Key Benefits" hint="Customer facing highlights. Separate by comma or new line.">
+              <Field
+                label="Key Benefits"
+                hint="Customer facing highlights. Separate by comma or new line."
+              >
                 <textarea
                   value={features}
                   onChange={(e) => setFeatures(e.target.value)}
@@ -393,7 +458,10 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
               </Field>
             </div>
 
-            <Field label="Plan description" hint="What makes this plan perfect for your customers?">
+            <Field
+              label="Plan description"
+              hint="What makes this plan perfect for your customers?"
+            >
               <textarea
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
@@ -405,7 +473,10 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
           </SectionCard>
 
           {type === "Business NBN" && (
-            <SectionCard title="Business-specific options" description="Configure business features for this NBN plan.">
+            <SectionCard
+              title="Business-specific options"
+              description="Configure business features for this NBN plan."
+            >
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Static IP Address">
                   <div className="flex items-center gap-3">
@@ -416,16 +487,23 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                       onChange={(e) => setStaticIP(e.target.checked)}
                       className="h-4 w-4 accent-[#401B60]"
                     />
-                    <label htmlFor="staticIP" className="text-[14px] text-[#0A0A0A] cursor-pointer">
+                    <label
+                      htmlFor="staticIP"
+                      className="text-[14px] text-[#0A0A0A] cursor-pointer"
+                    >
                       Include static IP address
                     </label>
                   </div>
                   <p className="mt-1 text-[12px] text-[#8E8CA2]">
-                    Business plans often require a static IP for hosting services or VPN access
+                    Business plans often require a static IP for hosting
+                    services or VPN access
                   </p>
                 </Field>
 
-                <Field label="SLA Details" hint="Service Level Agreement details (e.g., 99.9% uptime, 4-hour response time)">
+                <Field
+                  label="SLA Details"
+                  hint="Service Level Agreement details (e.g., 99.9% uptime, 4-hour response time)"
+                >
                   <input
                     value={slaDetails}
                     onChange={(e) => setSlaDetails(e.target.value)}
@@ -524,7 +602,12 @@ function Caret() {
       fill="none"
       className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6F6C90]"
     >
-      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M6 9l6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

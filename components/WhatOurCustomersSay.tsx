@@ -5,10 +5,10 @@ export default function WhatOurCustomersSay() {
   return (
     <section
       className="bg-cover bg-center bg-[#401B60]/10"
-    // style={{
-    //   backgroundImage:
-    //     "linear-gradient(0deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.1) 100%), url(https://api.builder.io/api/v1/image/assets/TEMP/c1a89bf878f52350be0114a9f31a36f08f13ccac?width=3840)",
-    // }}
+      // style={{
+      //   backgroundImage:
+      //     "linear-gradient(0deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.1) 100%), url(https://api.builder.io/api/v1/image/assets/TEMP/c1a89bf878f52350be0114a9f31a36f08f13ccac?width=3840)",
+      // }}
     >
       {/* Figma: padding 150px vertical, 243px horizontal. Keep canvas centered at 1434px. */}
       <div className="mx-auto max-w-[1434px] px-4 md:px-32 py-12 md:py-[150px]">
@@ -20,17 +20,28 @@ export default function WhatOurCustomersSay() {
               What Our Customers Say
             </h2>
             <p className="mt-2 text-[#6F6C90] text-[14px] leading-[22px] md:text-[18px] md:leading-[27px]">
-              Real stories from real customers who&apos;ve experienced the Blynk difference
+              Real stories from real customers who&apos;ve experienced the Blynk
+              difference
             </p>
           </div>
 
           {/* Right rating block */}
           <div className="w-full max-w-[559px] flex flex-col items-center gap-1">
             <div className="md:hidden">
-              <Stars width={180} height={36} fill="currentColor" className="text-[#F9C01D]" />
+              <Stars
+                width={180}
+                height={36}
+                fill="currentColor"
+                className="text-[#F9C01D]"
+              />
             </div>
             <div className="hidden md:block">
-              <Stars width={263} height={52} fill="currentColor" className="text-[#F9C01D]" />
+              <Stars
+                width={263}
+                height={52}
+                fill="currentColor"
+                className="text-[#F9C01D]"
+              />
             </div>
             <div className="text-black text-[16px] leading-[28px] md:text-[20px] md:leading-[46px] font-bold text-center">
               4.8 average rating from 1,000+ customers
@@ -90,7 +101,9 @@ function TestimonialCard(props: {
     <div
       className={[
         "flex w-full max-w-[458px] h-auto md:h-[284px] flex-col justify-center items-start rounded-[24px] border px-5 py-6 md:px-[30px] md:py-[44px]",
-        primary ? "bg-[#401B60] border-[#401B60]" : "bg-white border-[rgba(64,27,96,0.05)]",
+        primary
+          ? "bg-[#401B60] border-[#401B60]"
+          : "bg-white border-[rgba(64,27,96,0.05)]",
       ].join(" ")}
     >
       <div className="md:hidden">
@@ -118,10 +131,20 @@ function TestimonialCard(props: {
             className="h-[44px] w-[44px] rounded-full object-cover"
           />
           <div>
-            <div className={["text-[15px] leading-[22px] md:text-[16px] md:leading-[24px] font-bold", primary ? "text-white" : "text-black"].join(" ")}>
+            <div
+              className={[
+                "text-[15px] leading-[22px] md:text-[16px] md:leading-[24px] font-bold",
+                primary ? "text-white" : "text-black",
+              ].join(" ")}
+            >
               {props.name}
             </div>
-            <div className={["text-[13px] leading-[20px] md:text-[14px] md:leading-[21px]", primary ? "text-white" : "text-black"].join(" ")}>
+            <div
+              className={[
+                "text-[13px] leading-[20px] md:text-[14px] md:leading-[21px]",
+                primary ? "text-white" : "text-black",
+              ].join(" ")}
+            >
               {props.location}
             </div>
           </div>
@@ -134,7 +157,12 @@ function TestimonialCard(props: {
               primary ? "bg-white" : "bg-[#401B60]",
             ].join(" ")}
           />
-          <span className={["text-[12px] leading-[18px] md:text-[14px] md:leading-[21px] font-bold", primary ? "text-white" : "text-[#401B60]"].join(" ")}>
+          <span
+            className={[
+              "text-[12px] leading-[18px] md:text-[14px] md:leading-[21px] font-bold",
+              primary ? "text-white" : "text-[#401B60]",
+            ].join(" ")}
+          >
             {props.tag}
           </span>
         </div>

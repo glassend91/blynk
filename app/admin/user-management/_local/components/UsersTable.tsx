@@ -9,13 +9,25 @@ function StatusPill({ value }: { value: UserRow["status"] }) {
     Inactive: "text-[#E0342F]",
     Pending: "text-[#F59E0B]",
   } as const;
-  return <span className={["text-[14px] font-semibold", map[value]].join(" ")}>{value}</span>;
+  return (
+    <span className={["text-[14px] font-semibold", map[value]].join(" ")}>
+      {value}
+    </span>
+  );
 }
 
 const IconEdit = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Z" stroke="#401B60" strokeWidth="1.6" />
-    <path d="M14.06 6.19 16.56 3.69 20.31 7.44l-2.5 2.5" stroke="#401B60" strokeWidth="1.6" />
+    <path
+      d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Z"
+      stroke="#401B60"
+      strokeWidth="1.6"
+    />
+    <path
+      d="M14.06 6.19 16.56 3.69 20.31 7.44l-2.5 2.5"
+      stroke="#401B60"
+      strokeWidth="1.6"
+    />
   </svg>
 );
 const IconTrash = () => (
@@ -27,18 +39,33 @@ const IconTrash = () => (
 );
 const IconView = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#6F6C90" strokeWidth="1.6" />
+    <path
+      d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"
+      stroke="#6F6C90"
+      strokeWidth="1.6"
+    />
     <circle cx="12" cy="12" r="3" stroke="#6F6C90" strokeWidth="1.6" />
   </svg>
 );
 const IconCharge = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M12 2v20M17 5H9.5a4.5 4.5 0 0 0 0 9h5a4.5 4.5 0 0 1 0 9H7" stroke="#19BF66" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path
+      d="M12 2v20M17 5H9.5a4.5 4.5 0 0 0 0 9h5a4.5 4.5 0 0 1 0 9H7"
+      stroke="#19BF66"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 const IconReceipt = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h6m-6 4h6" stroke="#6F6C90" strokeWidth="1.6" strokeLinecap="round" />
+    <path
+      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h6m-6 4h6"
+      stroke="#6F6C90"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
@@ -51,7 +78,14 @@ type Props = {
   onInvoices?: (user: UserRow) => void;
 };
 
-export default function UsersTable({ rows, onView, onEdit, onDelete, onCharge, onInvoices }: Props) {
+export default function UsersTable({
+  rows,
+  onView,
+  onEdit,
+  onDelete,
+  onCharge,
+  onInvoices,
+}: Props) {
   const canEdit = usePermission("user.edit");
   const canDelete = usePermission("user.delete");
   const canCharge = usePermission("billing.credits_refunds");
@@ -76,10 +110,16 @@ export default function UsersTable({ rows, onView, onEdit, onDelete, onCharge, o
             </thead>
             <tbody className="text-[14px] text-[#0A0A0A]">
               {rows.map((r) => (
-                <tr key={r.id} className="border-t border-[#F0EEF3] hover:bg-[#FBFAFD] [&>td]:px-4 [&>td]:py-3">
+                <tr
+                  key={r.id}
+                  className="border-t border-[#F0EEF3] hover:bg-[#FBFAFD] [&>td]:px-4 [&>td]:py-3"
+                >
                   <td>{r.id}</td>
                   <td>
-                    <a href="#" className="text-[#401B60] underline-offset-2 hover:underline">
+                    <a
+                      href="#"
+                      className="text-[#401B60] underline-offset-2 hover:underline"
+                    >
                       {r.name}
                     </a>
                   </td>
@@ -144,7 +184,10 @@ export default function UsersTable({ rows, onView, onEdit, onDelete, onCharge, o
               ))}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-10 text-center text-[14px] text-[#6F6C90]">
+                  <td
+                    colSpan={9}
+                    className="px-4 py-10 text-center text-[14px] text-[#6F6C90]"
+                  >
                     No users found.
                   </td>
                 </tr>
@@ -153,6 +196,6 @@ export default function UsersTable({ rows, onView, onEdit, onDelete, onCharge, o
           </table>
         </div>
       </div>
-    </div >
+    </div>
   );
 }

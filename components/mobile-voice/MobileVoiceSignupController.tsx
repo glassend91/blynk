@@ -47,7 +47,11 @@ export default function MobileVoiceSignupController({
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
 
   // Collected data across steps
-  const [selectedPlan, setSelectedPlan] = useState<{ id?: string | number; name: string; price: number } | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<{
+    id?: string | number;
+    name: string;
+    price: number;
+  } | null>(null);
   const [mblSelectedNumber, setMblSelectedNumber] = useState<string>("");
   const [simType, setSimType] = useState<"ESIM" | "PHYSICAL">("ESIM");
   const [numberChoice, setNumberChoice] = useState<"keep" | "new" | null>(null);
@@ -64,7 +68,8 @@ export default function MobileVoiceSignupController({
   const [identity, setIdentity] = useState<any>(null);
   const [otpVerified, setOtpVerified] = useState(false);
   const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
-  const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
+  const [esimNotificationEmail, setEsimNotificationEmail] =
+    useState<string>(""); // Email for eSIM notifications
   const canProceedIdentity = !!identity;
 
   const closeAll = useCallback(() => {
@@ -114,14 +119,17 @@ export default function MobileVoiceSignupController({
         password,
         phone,
         dateOfBirth,
-        mblSelectedNumber: mblKeepExistingNumber ? mblCurrentMobileNumber : mblSelectedNumber,
+        mblSelectedNumber: mblKeepExistingNumber
+          ? mblCurrentMobileNumber
+          : mblSelectedNumber,
         mblKeepExistingNumber,
         mblCurrentMobileNumber,
         mblCurrentProvider,
         identity,
         simType: simType === "ESIM" ? "eSim" : "physical",
         simNumber: simType === "PHYSICAL" ? simNumber : undefined, // Only include if physical SIM
-        esimNotificationEmail: simType === "ESIM" ? (esimNotificationEmail || email) : undefined, // Default to account email if not provided
+        esimNotificationEmail:
+          simType === "ESIM" ? esimNotificationEmail || email : undefined, // Default to account email if not provided
         billingAddress,
         selectedPlan: selectedPlan || undefined,
       });
@@ -134,7 +142,24 @@ export default function MobileVoiceSignupController({
     } finally {
       setLoading(false);
     }
-  }, [firstName, lastName, email, password, phone, dateOfBirth, mblSelectedNumber, mblKeepExistingNumber, mblCurrentMobileNumber, mblCurrentProvider, identity, simType, simNumber, esimNotificationEmail, billingAddress, selectedPlan]);
+  }, [
+    firstName,
+    lastName,
+    email,
+    password,
+    phone,
+    dateOfBirth,
+    mblSelectedNumber,
+    mblKeepExistingNumber,
+    mblCurrentMobileNumber,
+    mblCurrentProvider,
+    identity,
+    simType,
+    simNumber,
+    esimNotificationEmail,
+    billingAddress,
+    selectedPlan,
+  ]);
 
   const goNext = useCallback(() => {
     const idx = order.indexOf(step);
@@ -156,17 +181,20 @@ export default function MobileVoiceSignupController({
     setStep(prevStep);
   }, [step, numberChoice, order]);
 
-  const handleStepClick = useCallback((s: number) => {
-    // Allow clicking on any step already reached
-    if (s <= maxReached && s !== step) {
-      let targetStep = s as Step;
-      // Skip step 4 if keeping existing number
-      if (targetStep === 4 && numberChoice === "keep") {
-        targetStep = 3;
+  const handleStepClick = useCallback(
+    (s: number) => {
+      // Allow clicking on any step already reached
+      if (s <= maxReached && s !== step) {
+        let targetStep = s as Step;
+        // Skip step 4 if keeping existing number
+        if (targetStep === 4 && numberChoice === "keep") {
+          targetStep = 3;
+        }
+        setStep(targetStep);
       }
-      setStep(targetStep);
-    }
-  }, [maxReached, step, numberChoice]);
+    },
+    [maxReached, step, numberChoice],
+  );
 
   if (!open) return null;
 
@@ -298,7 +326,7 @@ export default function MobileVoiceSignupController({
         {/* Step 8: Confirmation */}
         {step === 8 && (
           <MVSignup7
-            onComplete={() => { }} // Not used anymore, signup already completed
+            onComplete={() => {}} // Not used anymore, signup already completed
             onBack={goBack}
             onClose={closeAll}
             loading={false}
@@ -315,16 +343,39 @@ export default function MobileVoiceSignupController({
               <SectionPanel>
                 <div className="text-center">
                   <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#2F2151] text-white">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                      <path d="M20 7 10 17 4 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden
+                    >
+                      <path
+                        d="M20 7 10 17 4 11"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </div>
-                  <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Thank You!</h2>
-                  <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Your order is complete.</p>
-                  <p className="mt-4 text-[15px] text-[#6A6486] max-w-md mx-auto">
-                    You will receive an email shortly with your new plan details and receipt.
+                  <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">
+                    Thank You!
+                  </h2>
+                  <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">
+                    Your order is complete.
                   </p>
-                  <button type="button" onClick={closeAll} className="btn-primary mt-6">Close</button>
+                  <p className="mt-4 text-[15px] text-[#6A6486] max-w-md mx-auto">
+                    You will receive an email shortly with your new plan details
+                    and receipt.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={closeAll}
+                    className="btn-primary mt-6"
+                  >
+                    Close
+                  </button>
                 </div>
               </SectionPanel>
             </ModalShell>

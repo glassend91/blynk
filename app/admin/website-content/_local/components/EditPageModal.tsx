@@ -28,22 +28,25 @@ export default function EditPageModal({
   });
 
   useEffect(() => {
-    if (open) setState(initial ?? { title: "", slug: "", description: "", status: "Draft" });
+    if (open)
+      setState(
+        initial ?? { title: "", slug: "", description: "", status: "Draft" },
+      );
   }, [open, initial]);
 
   // Lock body scroll when modal is open
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -57,7 +60,7 @@ export default function EditPageModal({
       title: state.title || "Untitled",
       slug: state.slug || "/new-page",
       description: state.description || "",
-      status: (state.status ?? "Draft"),
+      status: state.status ?? "Draft",
       lastUpdated: new Date().toISOString(),
     });
 
@@ -71,9 +74,9 @@ export default function EditPageModal({
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
       }}
     >
       <div
@@ -84,9 +87,9 @@ export default function EditPageModal({
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 90
+          width: "100vw",
+          height: "100vh",
+          zIndex: 90,
         }}
       />
       <div
@@ -108,7 +111,9 @@ export default function EditPageModal({
           <Field label="Title">
             <input
               value={state.title}
-              onChange={(e) => setState((s) => ({ ...s, title: e.target.value }))}
+              onChange={(e) =>
+                setState((s) => ({ ...s, title: e.target.value }))
+              }
               placeholder="Page title"
               className="field"
             />
@@ -117,7 +122,9 @@ export default function EditPageModal({
           <Field label="Slug">
             <input
               value={state.slug}
-              onChange={(e) => setState((s) => ({ ...s, slug: e.target.value }))}
+              onChange={(e) =>
+                setState((s) => ({ ...s, slug: e.target.value }))
+              }
               placeholder="/page-slug"
               className="field"
             />
@@ -127,7 +134,9 @@ export default function EditPageModal({
             <textarea
               rows={4}
               value={state.description}
-              onChange={(e) => setState((s) => ({ ...s, description: e.target.value }))}
+              onChange={(e) =>
+                setState((s) => ({ ...s, description: e.target.value }))
+              }
               placeholder="Short description…"
               className="field"
             />
@@ -137,7 +146,9 @@ export default function EditPageModal({
             <div className="relative">
               <select
                 value={state.status}
-                onChange={(e) => setState((s) => ({ ...s, status: e.target.value }))}
+                onChange={(e) =>
+                  setState((s) => ({ ...s, status: e.target.value }))
+                }
                 className="field appearance-none pr-9"
               >
                 <option value="Published">Published</option>
@@ -167,10 +178,18 @@ export default function EditPageModal({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
-      <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">{label}</label>
+      <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
+        {label}
+      </label>
       {children}
     </div>
   );
@@ -185,7 +204,12 @@ function Caret() {
       fill="none"
       className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6F6C90]"
     >
-      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M6 9l6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

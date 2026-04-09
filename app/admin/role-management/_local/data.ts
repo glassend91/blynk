@@ -41,9 +41,15 @@ export const permissionGroups: PermissionGroup[] = [
       { key: "profiles.view", title: "View Customer Profiles & Services" },
       { key: "notes.manage", title: "View & Add Customer Notes" },
       { key: "tickets.manage", title: "Manage Support Tickets (Zendesk)" },
-      { key: "services.manage", title: "Manage Customer Services (Add/Remove Plans)" },
+      {
+        key: "services.manage",
+        title: "Manage Customer Services (Add/Remove Plans)",
+      },
       { key: "sim.manage", title: "Manage Physical SIM Orders" },
-      { key: "billing.credits_refunds", title: "Can Issue Credits and Refunds" },
+      {
+        key: "billing.credits_refunds",
+        title: "Can Issue Credits and Refunds",
+      },
     ],
   },
   {
@@ -58,13 +64,15 @@ export const permissionGroups: PermissionGroup[] = [
 
 // Seed roles to match “Admin / Content Manager / Support Agent / Technician Manager”
 const allowAll = Object.fromEntries(
-  permissionGroups.flatMap((g) => g.items.map((i) => [i.key, true]))
+  permissionGroups.flatMap((g) => g.items.map((i) => [i.key, true])),
 );
 
 const allowSubset = (keys: string[]) =>
-  Object.fromEntries(permissionGroups.flatMap((g) =>
-    g.items.map((i) => [i.key, keys.includes(i.key)])
-  ));
+  Object.fromEntries(
+    permissionGroups.flatMap((g) =>
+      g.items.map((i) => [i.key, keys.includes(i.key)]),
+    ),
+  );
 
 export const rolesSeed: Role[] = [
   {
@@ -82,18 +90,27 @@ export const rolesSeed: Role[] = [
     usersCount: 7,
     badge: "Default",
     permissions: allowSubset([
-      "plans.view", "plans.create", "plans.publish",
-      "web.edit", "seo.manage", "analytics.view", "testimonials.manage"
+      "plans.view",
+      "plans.create",
+      "plans.publish",
+      "web.edit",
+      "seo.manage",
+      "analytics.view",
+      "testimonials.manage",
     ]), // billing.credits_refunds disabled by default
   },
   {
     id: "3",
     name: "Support Agent",
-    description: "Handle customer support tickets and manage customer interactions",
+    description:
+      "Handle customer support tickets and manage customer interactions",
     usersCount: 2,
     badge: "Default",
     permissions: allowSubset([
-      "profiles.view", "notes.manage", "tickets.manage", "services.manage"
+      "profiles.view",
+      "notes.manage",
+      "tickets.manage",
+      "services.manage",
     ]), // billing.credits_refunds disabled by default
   },
   {

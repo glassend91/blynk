@@ -1,9 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import Panel from "../Panel";
 import { Pill } from "../Pill";
-import { getUserSubscriptions, type ServiceSubscription } from "../../../lib/services/services";
+import {
+  getUserSubscriptions,
+  type ServiceSubscription,
+} from "../../../lib/services/services";
 import { parseAndFormatDateTime } from "@/lib/dateUtils";
 
 export default function Diagnostics() {
@@ -21,11 +24,13 @@ export default function Diagnostics() {
       setError(null);
       const data = await getUserSubscriptions();
       console.log(data);
-      setSubscriptions(data.subscriptions.filter(sub =>
-        sub.subscriptionStatus === 'active'
-      ));
+      setSubscriptions(
+        data.subscriptions.filter((sub) => sub.subscriptionStatus === "active"),
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load service status');
+      setError(
+        err instanceof Error ? err.message : "Failed to load service status",
+      );
     } finally {
       setLoading(false);
     }
@@ -33,39 +38,39 @@ export default function Diagnostics() {
 
   const getServiceStatus = (subscription: ServiceSubscription) => {
     switch (subscription.subscriptionStatus) {
-      case 'active':
-        return 'Active';
-      case 'inactive':
-        return 'Inactive';
-      case 'suspended':
-        return 'Suspended';
-      case 'cancelled':
-        return 'Cancelled';
-      case 'pending':
-        return 'Pending';
-      case 'expired':
-        return 'Expired';
+      case "active":
+        return "Active";
+      case "inactive":
+        return "Inactive";
+      case "suspended":
+        return "Suspended";
+      case "cancelled":
+        return "Cancelled";
+      case "pending":
+        return "Pending";
+      case "expired":
+        return "Expired";
       default:
-        return 'Unknown';
+        return "Unknown";
     }
   };
 
   const getStatusTone = (subscription: ServiceSubscription) => {
     switch (subscription.subscriptionStatus) {
-      case 'active':
-        return 'green';
-      case 'inactive':
-        return 'yellow';
-      case 'suspended':
-        return 'red';
-      case 'cancelled':
-        return 'grey';
-      case 'pending':
-        return 'yellow';
-      case 'expired':
-        return 'grey';
+      case "active":
+        return "green";
+      case "inactive":
+        return "yellow";
+      case "suspended":
+        return "red";
+      case "cancelled":
+        return "grey";
+      case "pending":
+        return "yellow";
+      case "expired":
+        return "grey";
       default:
-        return 'grey';
+        return "grey";
     }
   };
 
@@ -91,13 +96,19 @@ export default function Diagnostics() {
   }
   return (
     <>
-      <h1 className="mb-6 text-[26px] font-bold text-[#0A0A0A]">Service Diagnostics & Outages</h1>
+      <h1 className="mb-6 text-[26px] font-bold text-[#0A0A0A]">
+        Service Diagnostics & Outages
+      </h1>
 
       <div className="grid grid-cols-3 gap-6">
         <Panel className="col-span-2 p-6">
           <div className="mb-4 flex items-center justify-between">
-            <div className="text-[16px] font-semibold text-[#0A0A0A]">Service Status</div>
-            <button className="rounded-[8px] border border-[#CDBEE3] px-3 py-1 text-[12px] font-semibold text-[#3F205F]">Run Network Test</button>
+            <div className="text-[16px] font-semibold text-[#0A0A0A]">
+              Service Status
+            </div>
+            <button className="rounded-[8px] border border-[#CDBEE3] px-3 py-1 text-[12px] font-semibold text-[#3F205F]">
+              Run Network Test
+            </button>
           </div>
 
           <div className="space-y-3">
@@ -107,7 +118,10 @@ export default function Diagnostics() {
               </div>
             ) : (
               subscriptions.map((subscription) => (
-                <div key={subscription._id} className="flex items-center justify-between rounded-[12px] bg-[#F7F7FA] px-4 py-3">
+                <div
+                  key={subscription._id}
+                  className="flex items-center justify-between rounded-[12px] bg-[#F7F7FA] px-4 py-3"
+                >
                   <div>
                     <div className="text-[14px] font-semibold text-[#0A0A0A]">
                       {getServiceDisplayName(subscription)}
@@ -126,7 +140,9 @@ export default function Diagnostics() {
         </Panel>
 
         <Panel className="p-6">
-          <div className="text-[16px] font-semibold text-[#0A0A0A]">Recent Outages</div>
+          <div className="text-[16px] font-semibold text-[#0A0A0A]">
+            Recent Outages
+          </div>
           <div className="mt-4 space-y-3">
             <OutageRow
               place="Sydney CBD"
@@ -164,7 +180,9 @@ function OutageRow({
         <div className="text-[14px] font-semibold text-[#0A0A0A]">{place}</div>
         <div className="text-[12px] text-[#6F6C90]">{meta}</div>
       </div>
-      <span className={`rounded-[8px] px-3 py-1 text-[12px] font-semibold ${tone === "grey" ? "bg-[#EFF1F5] text-[#667085]" : "bg-[#EFE9F7] text-[#3F205F]"}`}>
+      <span
+        className={`rounded-[8px] px-3 py-1 text-[12px] font-semibold ${tone === "grey" ? "bg-[#EFF1F5] text-[#667085]" : "bg-[#EFE9F7] text-[#3F205F]"}`}
+      >
         {action}
       </span>
     </div>

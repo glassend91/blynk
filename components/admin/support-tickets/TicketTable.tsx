@@ -122,12 +122,18 @@ function mapTicket(ticket: ApiTicket): Ticket {
   const id = ticket.ticketId || ticket.id || ticket._id || "TICKET";
   const customer =
     ticket.customer?.name ||
-    [ticket.customer?.firstName, ticket.customer?.lastName].filter(Boolean).join(" ").trim() ||
+    [ticket.customer?.firstName, ticket.customer?.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .trim() ||
     ticket.customer?.email ||
     "Customer";
   const assignee =
     ticket.assignedTo?.name ||
-    [ticket.assignedTo?.firstName, ticket.assignedTo?.lastName].filter(Boolean).join(" ").trim() ||
+    [ticket.assignedTo?.firstName, ticket.assignedTo?.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .trim() ||
     ticket.assignedTo?.email ||
     "Unassigned";
 
@@ -184,7 +190,8 @@ function formatRelativeTime(dateInput?: string) {
   if (diffMs < 0) return "Just now";
   const diffMinutes = Math.floor(diffMs / 60000);
   if (diffMinutes < 1) return "Just now";
-  if (diffMinutes < 60) return `${diffMinutes} min${diffMinutes === 1 ? "" : "s"} ago`;
+  if (diffMinutes < 60)
+    return `${diffMinutes} min${diffMinutes === 1 ? "" : "s"} ago`;
   const diffHours = Math.floor(diffMinutes / 60);
   if (diffHours < 24) return `${diffHours} hr${diffHours === 1 ? "" : "s"} ago`;
   const diffDays = Math.floor(diffHours / 24);
