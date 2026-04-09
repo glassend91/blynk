@@ -19,7 +19,7 @@ export default function StripeProvider({ children }: StripeProviderProps) {
                     </div>
                     <div>
                         <p className="font-semibold text-red-800">Stripe Configuration Error</p>
-                        <p className="text-sm text-red-600">Please set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY in your environment variables</p>
+                        <p className="text-sm text-red-600">Please set STRIPE_PUBLISHABLE_KEY in your environment variables</p>
                     </div>
                 </div>
             </div>

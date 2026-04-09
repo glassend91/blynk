@@ -2,10 +2,10 @@ import { loadStripe } from '@stripe/stripe-js';
 import apiClient from './apiClient';
 
 // Get the publishable key with fallback
-const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const publishableKey = process.env.STRIPE_PUBLISHABLE_KEY;
 
 if (!publishableKey) {
-    console.error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set in environment variables');
+    console.error('STRIPE_PUBLISHABLE_KEY is not set in environment variables');
 }
 
 // Initialize Stripe with your publishable key
@@ -13,7 +13,7 @@ export const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 
 // Stripe configuration
 export const STRIPE_CONFIG = {
-    publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY!,
     secretKey: process.env.STRIPE_SECRET_KEY!,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
 };
