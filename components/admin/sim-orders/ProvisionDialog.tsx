@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import apiClient from '@/lib/apiClient';
+import { useState, useEffect } from "react";
+import apiClient from "@/lib/apiClient";
 
 type Props = {
   open: boolean;
@@ -10,13 +10,18 @@ type Props = {
   onSuccess?: (order: any) => void;
 };
 
-export default function ProvisionDialog({ open, onClose, order, onSuccess }: Props) {
-  const [provisioningNotes, setProvisioningNotes] = useState('');
+export default function ProvisionDialog({
+  open,
+  onClose,
+  order,
+  onSuccess,
+}: Props) {
+  const [provisioningNotes, setProvisioningNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const handleClose = () => {
-    setProvisioningNotes('');
+    setProvisioningNotes("");
     setError(null);
     setSubmitting(false);
     onClose();
@@ -29,17 +34,17 @@ export default function ProvisionDialog({ open, onClose, order, onSuccess }: Pro
 
       const { data } = await apiClient.post<{ success: boolean; data: any }>(
         `/sim-orders/${order.id}/provision`,
-        { provisioningNotes: provisioningNotes.trim() || undefined }
+        { provisioningNotes: provisioningNotes.trim() || undefined },
       );
 
       if (data?.success && data.data) {
         onSuccess?.(data.data);
         handleClose();
       } else {
-        setError('Failed to provision order. Please try again.');
+        setError("Failed to provision order. Please try again.");
       }
     } catch (err: any) {
-      setError(err?.message || 'Failed to provision order. Please try again.');
+      setError(err?.message || "Failed to provision order. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -49,15 +54,15 @@ export default function ProvisionDialog({ open, onClose, order, onSuccess }: Pro
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -75,8 +80,8 @@ export default function ProvisionDialog({ open, onClose, order, onSuccess }: Pro
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh'
+        width: "100vw",
+        height: "100vh",
       }}
     >
       <div
@@ -87,18 +92,18 @@ export default function ProvisionDialog({ open, onClose, order, onSuccess }: Pro
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 50
+          width: "100vw",
+          height: "100vh",
+          zIndex: 50,
         }}
       />
       <div
         className="fixed w-full max-w-[640px] rounded-2xl bg-white p-6 shadow-xl"
         style={{
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 51
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 51,
         }}
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
@@ -118,7 +123,7 @@ export default function ProvisionDialog({ open, onClose, order, onSuccess }: Pro
         </div>
 
         <p className="mb-5 text-[14px] text-[#6F6C90]">
-          Confirm provisioning for order{' '}
+          Confirm provisioning for order{" "}
           <span className="font-semibold text-[#401B60]">
             {order.orderNumber}
           </span>
@@ -159,7 +164,7 @@ export default function ProvisionDialog({ open, onClose, order, onSuccess }: Pro
             disabled={submitting}
             className="rounded-md bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Provisioning...' : 'Provision'}
+            {submitting ? "Provisioning..." : "Provision"}
           </button>
         </div>
       </div>

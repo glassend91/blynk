@@ -19,8 +19,9 @@ export default function Tabs({
             onClick={() => onChange(it.key)}
             className={[
               "min-w-[150px] rounded-[8px] px-4 py-2 text-[14px] font-semibold",
-              active ? "bg-white text-[#0A0A0A] shadow-[0_1px_1px_rgba(0,0,0,0.04)]"
-                     : "text-[#6F6C90] hover:bg-white/60",
+              active
+                ? "bg-white text-[#0A0A0A] shadow-[0_1px_1px_rgba(0,0,0,0.04)]"
+                : "text-[#6F6C90] hover:bg-white/60",
             ].join(" ")}
           >
             {it.label}

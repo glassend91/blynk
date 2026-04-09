@@ -64,15 +64,15 @@ export default function AddTestimonialModal({
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -109,10 +109,10 @@ export default function AddTestimonialModal({
       };
 
       if (isEditMode && editingTestimonial) {
-        const { data } = await apiClient.put<{ success: boolean; data: Testimonial }>(
-          `/testimonials/${editingTestimonial.id}`,
-          testimonialData
-        );
+        const { data } = await apiClient.put<{
+          success: boolean;
+          data: Testimonial;
+        }>(`/testimonials/${editingTestimonial.id}`, testimonialData);
 
         if (data?.success && data.data) {
           onUpdate?.(data.data);
@@ -121,10 +121,10 @@ export default function AddTestimonialModal({
         }
         setError("Failed to update testimonial. Please try again.");
       } else {
-        const { data } = await apiClient.post<{ success: boolean; data: Testimonial }>(
-          "/testimonials",
-          testimonialData
-        );
+        const { data } = await apiClient.post<{
+          success: boolean;
+          data: Testimonial;
+        }>("/testimonials", testimonialData);
 
         if (data?.success && data.data) {
           onCreate?.(data.data);
@@ -150,9 +150,9 @@ export default function AddTestimonialModal({
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
       }}
     >
       <div
@@ -163,9 +163,9 @@ export default function AddTestimonialModal({
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 90
+          width: "100vw",
+          height: "100vh",
+          zIndex: 90,
         }}
       />
       <div
@@ -236,7 +236,9 @@ export default function AddTestimonialModal({
             <div className="relative">
               <select
                 value={rating}
-                onChange={(e) => setRating(Number(e.target.value) as 1 | 2 | 3 | 4 | 5)}
+                onChange={(e) =>
+                  setRating(Number(e.target.value) as 1 | 2 | 3 | 4 | 5)
+                }
                 className={`${fieldClass} appearance-none pr-9`}
                 disabled={submitting}
               >
@@ -277,7 +279,9 @@ export default function AddTestimonialModal({
 
           <div className="md:col-span-2">
             <label className="flex items-center justify-between rounded-[10px] border border-[#DFDBE3] bg-[#F8F8F8] px-4 py-3">
-              <span className="text-[14px] text-[#0A0A0A]">Publish immediately</span>
+              <span className="text-[14px] text-[#0A0A0A]">
+                Publish immediately
+              </span>
               <input
                 type="checkbox"
                 checked={published}
@@ -308,7 +312,13 @@ export default function AddTestimonialModal({
             disabled={submitting}
             className="h-[44px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? (isEditMode ? "Updating..." : "Creating...") : isEditMode ? "Update Testimonial" : "Add Testimonial"}
+            {submitting
+              ? isEditMode
+                ? "Updating..."
+                : "Creating..."
+              : isEditMode
+                ? "Update Testimonial"
+                : "Add Testimonial"}
           </button>
         </div>
       </div>
@@ -316,7 +326,15 @@ export default function AddTestimonialModal({
   );
 }
 
-function Field({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
+function Field({
+  label,
+  children,
+  required,
+}: {
+  label: string;
+  children: React.ReactNode;
+  required?: boolean;
+}) {
   return (
     <div>
       <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
@@ -337,7 +355,12 @@ function Caret() {
       fill="none"
       className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6F6C90]"
     >
-      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M6 9l6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

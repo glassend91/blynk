@@ -3,13 +3,27 @@ import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
 
 export default function BusinessSmeSignup1({
-  onNext, onBack, address, onChangeAddress,
-}: { onNext: () => void; onBack: () => void; address: string; onChangeAddress: (v: string) => void }) {
+  onNext,
+  onBack,
+  address,
+  onChangeAddress,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  address: string;
+  onChangeAddress: (v: string) => void;
+}) {
   return (
     <SectionPanel>
       <div className="text-center">
         <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#4F1C76] text-white">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden
+          >
             <path d="M12 2a7 7 0 0 0-7 7c0 5 7 12 7 12s7-7 7-12a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
           </svg>
         </div>
@@ -31,7 +45,9 @@ export default function BusinessSmeSignup1({
         />
 
         <div className="mt-5 rounded-[12px] bg-[#FBF8FF] p-4">
-          <div className="text-[14px] font-semibold text-[#2B1940]">Business Service Benefits</div>
+          <div className="text-[14px] font-semibold text-[#2B1940]">
+            Business Service Benefits
+          </div>
           <ul className="mt-3 space-y-2 text-[13px] leading-6 text-[#6F6C90]">
             <li>• Dedicated business support team</li>
             <li>• Service Level Agreement (SLA) protection</li>

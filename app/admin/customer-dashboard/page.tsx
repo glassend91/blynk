@@ -22,7 +22,9 @@ export default function CustomerDashboardPage() {
   const router = useRouter();
   const customerIdFromUrl = searchParams.get("customerId") || "";
   const queryFromUrl = searchParams.get("q") || "";
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null,
+  );
   const [showDetailView, setShowDetailView] = useState(false);
 
   // Check if we should show detail view based on URL params
@@ -72,9 +74,12 @@ export default function CustomerDashboardPage() {
 
       {/* Page Title */}
       <div>
-        <h1 className="text-[26px] font-bold text-[#0A0A0A]">Customer Dashboard</h1>
+        <h1 className="text-[26px] font-bold text-[#0A0A0A]">
+          Customer Dashboard
+        </h1>
         <p className="mt-1 text-[14px] text-[#6F6C90]">
-          Primary command center for all customer interactions, verification, notes, and service plans
+          Primary command center for all customer interactions, verification,
+          notes, and service plans
         </p>
       </div>
 
@@ -109,7 +114,9 @@ export default function CustomerDashboardPage() {
               }
             }}
           />
-          <NotesHistory customerId={customerIdFromUrl || selectedCustomer?.id} />
+          <NotesHistory
+            customerId={customerIdFromUrl || selectedCustomer?.id}
+          />
         </div>
 
         {/* Right Column: Services & Financials */}

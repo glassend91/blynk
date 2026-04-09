@@ -15,7 +15,13 @@ type Props = {
 const fieldClass =
   "w-full rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none placeholder-[#6F6C90] focus:border-[#6A1D99]";
 
-export default function FeaturesSectionModal({ open, onClose, pageKey, initialValue, onSave }: Props) {
+export default function FeaturesSectionModal({
+  open,
+  onClose,
+  pageKey,
+  initialValue,
+  onSave,
+}: Props) {
   const [title, setTitle] = useState(initialValue.title || "");
   const [subtitle, setSubtitle] = useState(initialValue.subtitle || "");
   const [error, setError] = useState<string | null>(null);
@@ -34,15 +40,15 @@ export default function FeaturesSectionModal({ open, onClose, pageKey, initialVa
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -67,7 +73,7 @@ export default function FeaturesSectionModal({ open, onClose, pageKey, initialVa
 
       const { data } = await apiClient.patch<{ success: boolean; data: any }>(
         `/website-content/${pageKey}/features`,
-        blockData
+        blockData,
       );
 
       if (data?.success) {
@@ -93,9 +99,9 @@ export default function FeaturesSectionModal({ open, onClose, pageKey, initialVa
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
       }}
     >
       <div
@@ -106,9 +112,9 @@ export default function FeaturesSectionModal({ open, onClose, pageKey, initialVa
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 90
+          width: "100vw",
+          height: "100vh",
+          zIndex: 90,
         }}
       />
       <div
@@ -117,8 +123,12 @@ export default function FeaturesSectionModal({ open, onClose, pageKey, initialVa
       >
         <div className="mb-1 flex items-center justify-between">
           <div>
-            <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">Edit Content</p>
-            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">Features Section</h2>
+            <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">
+              Edit Content
+            </p>
+            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">
+              Features Section
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -199,4 +209,3 @@ function Field({
     </div>
   );
 }
-

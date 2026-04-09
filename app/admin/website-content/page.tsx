@@ -7,14 +7,23 @@ import FeaturesSectionModal from "./_local/components/FeaturesSectionModal";
 import SeoModal from "./_local/components/SeoModal";
 import StaticPageEditor from "./_local/components/StaticPageEditor";
 import { pages, seed } from "./_local/data";
-import type { CmsPageKey, HeroBlock, SeoBlock, FeaturesBlock, CmsPageData } from "./_local/types";
+import type {
+  CmsPageKey,
+  HeroBlock,
+  SeoBlock,
+  FeaturesBlock,
+  CmsPageData,
+} from "./_local/types";
 import apiClient from "@/lib/apiClient";
 import { usePermission } from "@/lib/permissions";
 
 export default function WebsiteContentPage() {
   const [tab, setTab] = useState<CmsPageKey>("home");
   const [content, setContent] = useState<Record<CmsPageKey, CmsPageData>>(
-    Object.fromEntries(pages.map((k) => [k, seed[k]])) as Record<CmsPageKey, CmsPageData>
+    Object.fromEntries(pages.map((k) => [k, seed[k]])) as Record<
+      CmsPageKey,
+      CmsPageData
+    >,
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +43,9 @@ export default function WebsiteContentPage() {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await apiClient.get<{ success: boolean; data: any[] }>("/website-content");
+      const { data } = await apiClient.get<{ success: boolean; data: any[] }>(
+        "/website-content",
+      );
 
       if (data?.success && data.data) {
         // Transform API response into our content structure
@@ -44,9 +55,16 @@ export default function WebsiteContentPage() {
           if (pages.includes(page.pageKey as CmsPageKey)) {
             contentMap[page.pageKey as CmsPageKey] = {
               hero: page.hero || seed[page.pageKey as CmsPageKey].hero,
-              features: page.features || seed[page.pageKey as CmsPageKey].features,
-              bodyContent: page.bodyContent || seed[page.pageKey as CmsPageKey].bodyContent || '',
-              pageTitle: page.pageTitle || seed[page.pageKey as CmsPageKey].pageTitle || '',
+              features:
+                page.features || seed[page.pageKey as CmsPageKey].features,
+              bodyContent:
+                page.bodyContent ||
+                seed[page.pageKey as CmsPageKey].bodyContent ||
+                "",
+              pageTitle:
+                page.pageTitle ||
+                seed[page.pageKey as CmsPageKey].pageTitle ||
+                "",
               seo: page.seo || seed[page.pageKey as CmsPageKey].seo,
             };
           }
@@ -161,14 +179,18 @@ export default function WebsiteContentPage() {
             >
               <div className="space-y-3">
                 <div>
-                  <p className="text-[12px] font-medium text-[#6F6C90]">Headline</p>
+                  <p className="text-[12px] font-medium text-[#6F6C90]">
+                    Headline
+                  </p>
                   <p className="text-[14px] font-semibold text-[#0A0A0A]">
                     {content[tab].hero?.headline || "Not set"}
                   </p>
                 </div>
                 {content[tab].hero?.subtitle && (
                   <div>
-                    <p className="text-[12px] font-medium text-[#6F6C90]">Subtitle</p>
+                    <p className="text-[12px] font-medium text-[#6F6C90]">
+                      Subtitle
+                    </p>
                     <p className="text-[14px] text-[#0A0A0A]">
                       {content[tab].hero.subtitle}
                     </p>
@@ -183,14 +205,18 @@ export default function WebsiteContentPage() {
             >
               <div className="space-y-3">
                 <div>
-                  <p className="text-[12px] font-medium text-[#6F6C90]">Title</p>
+                  <p className="text-[12px] font-medium text-[#6F6C90]">
+                    Title
+                  </p>
                   <p className="text-[14px] font-semibold text-[#0A0A0A]">
                     {content[tab].features?.title || "Not set"}
                   </p>
                 </div>
                 {content[tab].features?.subtitle && (
                   <div>
-                    <p className="text-[12px] font-medium text-[#6F6C90]">Subtitle</p>
+                    <p className="text-[12px] font-medium text-[#6F6C90]">
+                      Subtitle
+                    </p>
                     <p className="text-[14px] text-[#0A0A0A]">
                       {content[tab].features.subtitle}
                     </p>

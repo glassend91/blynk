@@ -31,7 +31,10 @@ export default function ServicePlansPage() {
       try {
         setError(null);
         setLoading(true);
-        const { data } = await apiClient.get<{ success: boolean; services: PlanRow[] }>("/services/admin/list");
+        const { data } = await apiClient.get<{
+          success: boolean;
+          services: PlanRow[];
+        }>("/services/admin/list");
         if (ignore) return;
         if (data?.success && Array.isArray(data.services)) {
           setRows(data.services);
@@ -57,15 +60,15 @@ export default function ServicePlansPage() {
   useEffect(() => {
     if (deletePlan) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -86,7 +89,9 @@ export default function ServicePlansPage() {
   const stats = useMemo(() => {
     const total = rows.length;
     const published = rows.filter((r) => r.status === "Published").length;
-    const nbn = rows.filter((r) => r.type === "NBN" || r.type === "Business NBN").length;
+    const nbn = rows.filter(
+      (r) => r.type === "NBN" || r.type === "Business NBN",
+    ).length;
     const mobile = rows.filter((r) => r.type === "Mobile").length;
     return { total, published, nbn, mobile };
   }, [rows]);
@@ -136,35 +141,53 @@ export default function ServicePlansPage() {
           <PlansTable
             rows={filtered}
             onEdit={canEdit ? (plan) => setEditPlan(plan) : undefined}
-            onToggleActive={canEdit ? async (plan) => {
-              if (!plan.serviceId) return;
-              try {
-                setToggleLoading(plan.serviceId);
-                const newStatus = plan.status === "Published" ? "Draft" : "Published";
-                const { data } = await apiClient.patch(`/services/admin/${plan.serviceId}/active`, {
-                  isActive: newStatus === "Published",
-                });
-                // Update the row directly if response includes updated service
-                if (data?.success && data.service) {
-                  setRows((prev) =>
-                    prev.map((r) =>
-                      r.serviceId === plan.serviceId ? { ...data.service, id: r.id } : r
-                    )
-                  );
-                } else {
-                  // Fallback: reload all data
-                  const listResponse = await apiClient.get<{ success: boolean; services: PlanRow[] }>("/services/admin/list");
-                  if (listResponse.data?.success && Array.isArray(listResponse.data.services)) {
-                    setRows(listResponse.data.services);
+            onToggleActive={
+              canEdit
+                ? async (plan) => {
+                    if (!plan.serviceId) return;
+                    try {
+                      setToggleLoading(plan.serviceId);
+                      const newStatus =
+                        plan.status === "Published" ? "Draft" : "Published";
+                      const { data } = await apiClient.patch(
+                        `/services/admin/${plan.serviceId}/active`,
+                        {
+                          isActive: newStatus === "Published",
+                        },
+                      );
+                      // Update the row directly if response includes updated service
+                      if (data?.success && data.service) {
+                        setRows((prev) =>
+                          prev.map((r) =>
+                            r.serviceId === plan.serviceId
+                              ? { ...data.service, id: r.id }
+                              : r,
+                          ),
+                        );
+                      } else {
+                        // Fallback: reload all data
+                        const listResponse = await apiClient.get<{
+                          success: boolean;
+                          services: PlanRow[];
+                        }>("/services/admin/list");
+                        if (
+                          listResponse.data?.success &&
+                          Array.isArray(listResponse.data.services)
+                        ) {
+                          setRows(listResponse.data.services);
+                        }
+                      }
+                    } catch (err) {
+                      console.error("Failed to toggle plan status", err);
+                      setError(
+                        "Failed to update plan status. Please try again.",
+                      );
+                    } finally {
+                      setToggleLoading(null);
+                    }
                   }
-                }
-              } catch (err) {
-                console.error("Failed to toggle plan status", err);
-                setError("Failed to update plan status. Please try again.");
-              } finally {
-                setToggleLoading(null);
-              }
-            } : undefined}
+                : undefined
+            }
             onDelete={canDelete ? (plan) => setDeletePlan(plan) : undefined}
           />
         )}
@@ -194,10 +217,12 @@ export default function ServicePlansPage() {
           onUpdate={(updatedPlan) => {
             setRows((prev) =>
               prev.map((r) =>
-                r.serviceId && updatedPlan.serviceId && r.serviceId === updatedPlan.serviceId
+                r.serviceId &&
+                updatedPlan.serviceId &&
+                r.serviceId === updatedPlan.serviceId
                   ? { ...updatedPlan, id: r.id }
-                  : r
-              )
+                  : r,
+              ),
             );
             setEditPlan(null);
           }}
@@ -215,8 +240,8 @@ export default function ServicePlansPage() {
             bottom: 0,
             margin: 0,
             padding: 0,
-            width: '100vw',
-            height: '100vh'
+            width: "100vw",
+            height: "100vh",
           }}
         >
           <div
@@ -226,25 +251,27 @@ export default function ServicePlansPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              width: '100vw',
-              height: '100vh',
-              zIndex: 40
+              width: "100vw",
+              height: "100vh",
+              zIndex: 40,
             }}
             onClick={() => setDeletePlan(null)}
           />
           <div
             className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 41
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 41,
             }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">Delete Service Plan</h2>
+              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">
+                Delete Service Plan
+              </h2>
               <button
                 type="button"
                 onClick={() => setDeletePlan(null)}
@@ -255,10 +282,14 @@ export default function ServicePlansPage() {
             </div>
             <p className="text-[14px] text-[#6F6C90]">
               Are you sure you want to delete{" "}
-              <span className="font-semibold text-[#0A0A0A]">{deletePlan.name}</span>?
+              <span className="font-semibold text-[#0A0A0A]">
+                {deletePlan.name}
+              </span>
+              ?
               {deletePlan.customers > 0 && (
                 <span className="block mt-2 text-[13px] text-[#E0342F]">
-                  Warning: This plan has {deletePlan.customers} active {deletePlan.customers === 1 ? "customer" : "customers"}.
+                  Warning: This plan has {deletePlan.customers} active{" "}
+                  {deletePlan.customers === 1 ? "customer" : "customers"}.
                   Deletion may affect active subscriptions.
                 </span>
               )}
@@ -282,12 +313,19 @@ export default function ServicePlansPage() {
                   }
                   try {
                     setDeleteLoading(true);
-                    await apiClient.delete(`/services/admin/${deletePlan.serviceId}`);
-                    setRows((prev) => prev.filter((r) => r.serviceId !== deletePlan.serviceId));
+                    await apiClient.delete(
+                      `/services/admin/${deletePlan.serviceId}`,
+                    );
+                    setRows((prev) =>
+                      prev.filter((r) => r.serviceId !== deletePlan.serviceId),
+                    );
                     setDeletePlan(null);
                   } catch (err: any) {
                     console.error("Failed to delete plan", err);
-                    setError(err?.response?.data?.message || "Failed to delete plan. Please try again.");
+                    setError(
+                      err?.response?.data?.message ||
+                        "Failed to delete plan. Please try again.",
+                    );
                     setDeletePlan(null);
                   } finally {
                     setDeleteLoading(false);

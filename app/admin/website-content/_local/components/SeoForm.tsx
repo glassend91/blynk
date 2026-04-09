@@ -29,7 +29,9 @@ export default function SeoForm({
       <Field label="Meta Title">
         <input
           value={state.metaTitle}
-          onChange={(e) => setState((s) => ({ ...s, metaTitle: e.target.value }))}
+          onChange={(e) =>
+            setState((s) => ({ ...s, metaTitle: e.target.value }))
+          }
           placeholder="Why Choose Our Services?"
           className="field"
         />
@@ -39,7 +41,9 @@ export default function SeoForm({
         <textarea
           rows={3}
           value={state.metaDescription || ""}
-          onChange={(e) => setState((s) => ({ ...s, metaDescription: e.target.value }))}
+          onChange={(e) =>
+            setState((s) => ({ ...s, metaDescription: e.target.value }))
+          }
           placeholder="Page description for search engines (max 160 characters)"
           className="field"
         />
@@ -48,7 +52,9 @@ export default function SeoForm({
       <Field label="Focus Keywords" extraClass="mt-4">
         <input
           value={state.keywords || ""}
-          onChange={(e) => setState((s) => ({ ...s, keywords: e.target.value }))}
+          onChange={(e) =>
+            setState((s) => ({ ...s, keywords: e.target.value }))
+          }
           placeholder="Main keywords for this page (comma separated)"
           className="field"
         />
@@ -68,7 +74,9 @@ function Field({
 }) {
   return (
     <div className={extraClass}>
-      <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">{label}</label>
+      <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
+        {label}
+      </label>
       {children}
     </div>
   );

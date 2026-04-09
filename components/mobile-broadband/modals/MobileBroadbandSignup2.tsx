@@ -30,7 +30,13 @@ export default function MobileBroadbandSignup2({
   return (
     <ModalShell onClose={onClose} size="wide">
       <MbbHeaderBanner />
-      <div className="mt-6"><MbbStepper active={2} onStepClick={onStepClick} maxReached={maxReached} /></div>
+      <div className="mt-6">
+        <MbbStepper
+          active={2}
+          onStepClick={onStepClick}
+          maxReached={maxReached}
+        />
+      </div>
 
       <SectionPanel>
         <div className="text-center">
@@ -39,7 +45,9 @@ export default function MobileBroadbandSignup2({
               <circle cx="12" cy="12" r="10" />
             </svg>
           </div>
-          <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">SIM Selection</h2>
+          <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">
+            SIM Selection
+          </h2>
           <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">
             We're an eSIM-only provider for all online sign-ups
           </p>
@@ -51,8 +59,12 @@ export default function MobileBroadbandSignup2({
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <span className="text-[16px] font-semibold text-[#3B3551]">eSIM</span>
-                  <span className="rounded-full bg-black/5 px-2 py-[2px] text-[11px] font-semibold text-[#111827]">SELECTED</span>
+                  <span className="text-[16px] font-semibold text-[#3B3551]">
+                    eSIM
+                  </span>
+                  <span className="rounded-full bg-black/5 px-2 py-[2px] text-[11px] font-semibold text-[#111827]">
+                    SELECTED
+                  </span>
                 </div>
                 <div className="mt-2 text-[13px] text-[#6B6478]">
                   Instant activation, environmentally friendly
@@ -60,7 +72,13 @@ export default function MobileBroadbandSignup2({
               </div>
               <div className="grid h-6 w-6 place-items-center rounded-full border-2 border-[#4F1C76] bg-[#4F1C76]">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M20 6L9 17l-5-5"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
             </div>
@@ -69,7 +87,11 @@ export default function MobileBroadbandSignup2({
           {/* Required text */}
           <div className="mt-6 rounded-[12px] border border-[#E9E3F2] bg-[#FBF8FF] p-5">
             <p className="text-[14px] leading-[22px] text-[#3B3551]">
-              We're an eSIM-only provider for all online sign-ups! This means you get connected in minutes without waiting for a plastic SIM in the mail, and it's better for the planet. Before proceeding, please ensure your device is eSIM compatible. Simply confirm by clicking 'Next' to continue.
+              We're an eSIM-only provider for all online sign-ups! This means
+              you get connected in minutes without waiting for a plastic SIM in
+              the mail, and it's better for the planet. Before proceeding,
+              please ensure your device is eSIM compatible. Simply confirm by
+              clicking 'Next' to continue.
             </p>
           </div>
         </div>

@@ -63,23 +63,39 @@ export default function MobileVoiceSignup2({
   const paginatedNumbers = numbers.slice(startIndex, startIndex + pageSize);
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
   const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(prev => prev - 1);
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
   return (
     <ModalShell onClose={onClose} size="wide">
       <MVHeaderBanner />
-      <div className="mt-6"><MVStepper active={4} onStepClick={onStepClick} maxReached={maxReached} /></div>
+      <div className="mt-6">
+        <MVStepper
+          active={4}
+          onStepClick={onStepClick}
+          maxReached={maxReached}
+        />
+      </div>
 
       <SectionPanel>
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#2F2151] text-white">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M22 16.9v2a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 3 5.2 2 2 0 0 1 5 3h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 10a16 16 0 0 0 7 7l.6-.6a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.9Z" stroke="white" strokeWidth="1.5" />
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M22 16.9v2a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 3 5.2 2 2 0 0 1 5 3h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 10a16 16 0 0 0 7 7l.6-.6a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.9Z"
+                stroke="white"
+                strokeWidth="1.5"
+              />
             </svg>
           </div>
           <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">
@@ -105,11 +121,15 @@ export default function MobileVoiceSignup2({
                 key={n}
                 className={[
                   "flex cursor-pointer items-center justify-between rounded-[12px] border px-5 py-4 transition-all",
-                  selectedNumber === n ? "border-2 border-[#5C3B86] bg-[#FBF8FF]" : "border border-[#DFDBE3] hover:border-[#5C3B86]/50",
+                  selectedNumber === n
+                    ? "border-2 border-[#5C3B86] bg-[#FBF8FF]"
+                    : "border border-[#DFDBE3] hover:border-[#5C3B86]/50",
                   "bg-white shadow-[0_40px_60px_rgba(0,0,0,0.06)]",
                 ].join(" ")}
               >
-                <span className="text-[15px] font-medium text-[#2E2745]">{n}</span>
+                <span className="text-[15px] font-medium text-[#2E2745]">
+                  {n}
+                </span>
                 <input
                   type="radio"
                   name="mv-number"
@@ -120,12 +140,20 @@ export default function MobileVoiceSignup2({
                 <span
                   className={[
                     "grid h-5 w-5 place-items-center rounded-full border-2",
-                    selectedNumber === n ? "border-[#5C3B86] bg-[#5C3B86]" : "border-[#CFC8DA]",
+                    selectedNumber === n
+                      ? "border-[#5C3B86] bg-[#5C3B86]"
+                      : "border-[#CFC8DA]",
                   ].join(" ")}
                 >
                   {selectedNumber === n && (
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                      <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M20 6L9 17l-5-5"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   )}
                 </span>
@@ -136,9 +164,19 @@ export default function MobileVoiceSignup2({
             {totalNumbers > pageSize && (
               <div className="mt-8 flex flex-col items-center gap-4">
                 <div className="text-[14px] text-[#6F6C90]">
-                  Showing <span className="font-semibold text-[#170F49]">{startIndex + 1}</span> to{" "}
-                  <span className="font-semibold text-[#170F49]">{Math.min(startIndex + pageSize, totalNumbers)}</span> of{" "}
-                  <span className="font-semibold text-[#170F49]">{totalNumbers}</span> numbers
+                  Showing{" "}
+                  <span className="font-semibold text-[#170F49]">
+                    {startIndex + 1}
+                  </span>{" "}
+                  to{" "}
+                  <span className="font-semibold text-[#170F49]">
+                    {Math.min(startIndex + pageSize, totalNumbers)}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-semibold text-[#170F49]">
+                    {totalNumbers}
+                  </span>{" "}
+                  numbers
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -147,7 +185,16 @@ export default function MobileVoiceSignup2({
                     className="flex h-10 w-10 items-center justify-center rounded-full border border-[#DFDBE3] bg-white text-[#6F6C90] transition-all hover:border-[#5C3B86] hover:text-[#5C3B86] disabled:opacity-50 disabled:hover:border-[#DFDBE3] disabled:hover:text-[#6F6C90]"
                     aria-label="Previous page"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="m15 18-6-6 6-6" />
                     </svg>
                   </button>
@@ -176,9 +223,14 @@ export default function MobileVoiceSignup2({
                     }
                     if (
                       (pageNum === 2 && currentPage > 3) ||
-                      (pageNum === totalPages - 1 && currentPage < totalPages - 2)
+                      (pageNum === totalPages - 1 &&
+                        currentPage < totalPages - 2)
                     ) {
-                      return <span key={pageNum} className="text-[#6F6C90]">...</span>;
+                      return (
+                        <span key={pageNum} className="text-[#6F6C90]">
+                          ...
+                        </span>
+                      );
                     }
                     return null;
                   })}
@@ -188,7 +240,16 @@ export default function MobileVoiceSignup2({
                     className="flex h-10 w-10 items-center justify-center rounded-full border border-[#DFDBE3] bg-white text-[#6F6C90] transition-all hover:border-[#5C3B86] hover:text-[#5C3B86] disabled:opacity-50 disabled:hover:border-[#DFDBE3] disabled:hover:text-[#6F6C90]"
                     aria-label="Next page"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="m9 18 6-6-6-6" />
                     </svg>
                   </button>
@@ -198,12 +259,18 @@ export default function MobileVoiceSignup2({
           </div>
         ) : (
           <div className="mx-auto mt-8 max-w-[720px] text-center py-8">
-            <p className="text-[14px] text-[#6F6C90]">No available numbers found.</p>
+            <p className="text-[14px] text-[#6F6C90]">
+              No available numbers found.
+            </p>
           </div>
         )}
       </SectionPanel>
 
-      <BarActions onBack={onBack} onNext={onNext} nextDisabled={!selectedNumber} />
+      <BarActions
+        onBack={onBack}
+        onNext={onNext}
+        nextDisabled={!selectedNumber}
+      />
     </ModalShell>
   );
 }

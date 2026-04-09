@@ -22,11 +22,13 @@ export default function StaticPageEditor({
   onSave,
   onCancel,
 }: StaticPageEditorProps) {
-  const [bodyContent, setBodyContent] = useState(initialData?.bodyContent || "");
+  const [bodyContent, setBodyContent] = useState(
+    initialData?.bodyContent || "",
+  );
   const [pageTitle, setPageTitle] = useState(initialData?.pageTitle || "");
   const [metaTitle, setMetaTitle] = useState(initialData?.seo?.metaTitle || "");
   const [metaDescription, setMetaDescription] = useState(
-    initialData?.seo?.metaDescription || ""
+    initialData?.seo?.metaDescription || "",
   );
   const [keywords, setKeywords] = useState(initialData?.seo?.keywords || "");
   const [saving, setSaving] = useState(false);
@@ -55,18 +57,18 @@ export default function StaticPageEditor({
         return;
       }
 
-      const { data } = await apiClient.put<{ success: boolean; message?: string }>(
-        `/website-content/${pageKey}`,
-        {
-          bodyContent: bodyContent.trim(),
-          pageTitle: pageTitle.trim(),
-          seo: {
-            metaTitle: metaTitle.trim(),
-            metaDescription: metaDescription.trim(),
-            keywords: keywords.trim(),
-          },
-        }
-      );
+      const { data } = await apiClient.put<{
+        success: boolean;
+        message?: string;
+      }>(`/website-content/${pageKey}`, {
+        bodyContent: bodyContent.trim(),
+        pageTitle: pageTitle.trim(),
+        seo: {
+          metaTitle: metaTitle.trim(),
+          metaDescription: metaDescription.trim(),
+          keywords: keywords.trim(),
+        },
+      });
 
       if (data?.success) {
         setSuccess(true);
@@ -78,7 +80,11 @@ export default function StaticPageEditor({
         setError(data?.message || "Failed to save content");
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || "Failed to save content");
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to save content",
+      );
     } finally {
       setSaving(false);
     }
@@ -142,7 +148,9 @@ export default function StaticPageEditor({
 
       {/* SEO Section */}
       <div className="rounded-[12px] border border-[#DFDBE3] bg-[#F8F8F8] p-5">
-        <h3 className="text-[16px] font-semibold text-[#0A0A0A] mb-4">SEO Settings</h3>
+        <h3 className="text-[16px] font-semibold text-[#0A0A0A] mb-4">
+          SEO Settings
+        </h3>
         <div className="space-y-4">
           <div>
             <label className="block text-[13px] font-medium text-[#0A0A0A] mb-2">

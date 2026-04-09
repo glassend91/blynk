@@ -5,8 +5,12 @@ import BarActions from "@/components/shared/BarActions";
 import InfoStaticIpModal from "./InfoStaticIpModal";
 
 export default function BusinessSmeSignup3({
-  onNext, onBack,
-}: { onNext: () => void; onBack: () => void }) {
+  onNext,
+  onBack,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+}) {
   const [on, setOn] = useState(true);
   const [info, setInfo] = useState(false);
 
@@ -15,7 +19,9 @@ export default function BusinessSmeSignup3({
       <SectionPanel>
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#4F1C76] text-white">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="12" height="16" rx="2"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="4" width="12" height="16" rx="2" />
+            </svg>
           </div>
         </div>
         <h2 className="mt-4 text-center text-[28px] font-extrabold leading-[34px] text-[#170F49]">
@@ -29,7 +35,9 @@ export default function BusinessSmeSignup3({
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <div className="text-[15px] font-semibold text-[#2B1940]">Static IP Address</div>
+                <div className="text-[15px] font-semibold text-[#2B1940]">
+                  Static IP Address
+                </div>
                 <button
                   type="button"
                   aria-label="Static IP information"
@@ -40,15 +48,18 @@ export default function BusinessSmeSignup3({
                 </button>
               </div>
               <div className="mt-1 text-[13px] text-[#6F6C90]">
-                Essential for servers, remote access, and professional applications
+                Essential for servers, remote access, and professional
+                applications
               </div>
-              <div className="mt-2 text-[12px] font-semibold text-[#4F1C76]">+$15/month</div>
+              <div className="mt-2 text-[12px] font-semibold text-[#4F1C76]">
+                +$15/month
+              </div>
             </div>
 
             {/* toggle */}
             <button
               type="button"
-              onClick={() => setOn(v => !v)}
+              onClick={() => setOn((v) => !v)}
               className={[
                 "relative mt-1 h-7 w-12 rounded-full transition-colors",
                 on ? "bg-[#22C55E]" : "bg-[#D1D5DB]",

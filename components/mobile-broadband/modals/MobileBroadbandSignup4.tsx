@@ -4,11 +4,27 @@ import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
 import MbbHeaderBanner from "../MbbHeaderBanner";
 import MbbStepper from "../MbbStepper";
-import DVSVerification, { DVSSubmitPayload } from "@/components/signup/DVSVerification";
+import DVSVerification, {
+  DVSSubmitPayload,
+} from "@/components/signup/DVSVerification";
 
 export default function MobileBroadbandSignup4({
-  onNext, onBack, onClose, onIdentityVerified, canProceed, onStepClick, maxReached,
-}: { onNext: () => void; onBack: () => void; onClose: () => void; onIdentityVerified: (payload: any) => void; canProceed?: boolean; onStepClick?: (step: number) => void; maxReached?: number; }) {
+  onNext,
+  onBack,
+  onClose,
+  onIdentityVerified,
+  canProceed,
+  onStepClick,
+  maxReached,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  onClose: () => void;
+  onIdentityVerified: (payload: any) => void;
+  canProceed?: boolean;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
+}) {
   function handleVerify(payload: DVSSubmitPayload) {
     onIdentityVerified(payload);
     onNext();
@@ -22,23 +38,49 @@ export default function MobileBroadbandSignup4({
   return (
     <ModalShell onClose={onClose} size="wide">
       <MbbHeaderBanner />
-      <div className="mt-6"><MbbStepper active={4} onStepClick={onStepClick} maxReached={maxReached} /></div>
+      <div className="mt-6">
+        <MbbStepper
+          active={4}
+          onStepClick={onStepClick}
+          maxReached={maxReached}
+        />
+      </div>
 
       <SectionPanel>
         <div className="text-center">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[#401B60] text-white">
             {/* id badge */}
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <rect x="3" y="6" width="18" height="12" rx="2" stroke="white" strokeWidth="1.6" />
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <rect
+                x="3"
+                y="6"
+                width="18"
+                height="12"
+                rx="2"
+                stroke="white"
+                strokeWidth="1.6"
+              />
               <circle cx="8.5" cy="12" r="2" stroke="white" strokeWidth="1.6" />
-              <path d="M13 12h5M13 15h4" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
+              <path
+                d="M13 12h5M13 15h4"
+                stroke="white"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
             </svg>
           </div>
           <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">
             Identity Verification
           </h2>
           <p className="mt-2 text-[14px] text-[#6F6C90]">
-            Enter your document details exactly as they appear. Your information is encrypted.
+            Enter your document details exactly as they appear. Your information
+            is encrypted.
           </p>
         </div>
 

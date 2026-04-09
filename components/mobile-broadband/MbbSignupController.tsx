@@ -30,7 +30,11 @@ export default function MbbSignupController({
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
 
   // State across steps
-  const [selectedPlan, setSelectedPlan] = useState<{ id?: string | number; name: string; price: number } | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<{
+    id?: string | number;
+    name: string;
+    price: number;
+  } | null>(null);
   const [simType, setSimType] = useState<"eSim" | "physical">("eSim");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -42,7 +46,8 @@ export default function MbbSignupController({
   const [serviceAddress, setServiceAddress] = useState("");
   const [identity, setIdentity] = useState<any>(null);
   const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
-  const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
+  const [esimNotificationEmail, setEsimNotificationEmail] =
+    useState<string>(""); // Email for eSIM notifications
 
   const [maxReached, setMaxReached] = useState<number>(() => {
     if (typeof window !== "undefined") {
@@ -107,7 +112,8 @@ export default function MbbSignupController({
         identity,
         simType,
         simNumber: simType === "physical" ? simNumber : undefined,
-        esimNotificationEmail: simType === "eSim" ? (esimNotificationEmail || email) : undefined,
+        esimNotificationEmail:
+          simType === "eSim" ? esimNotificationEmail || email : undefined,
         selectedPlan: selectedPlan || undefined,
       });
 
@@ -119,7 +125,21 @@ export default function MbbSignupController({
     } finally {
       setLoading(false);
     }
-  }, [firstName, lastName, email, password, phone, dateOfBirth, billingAddress, serviceAddress, identity, simType, simNumber, esimNotificationEmail, selectedPlan]);
+  }, [
+    firstName,
+    lastName,
+    email,
+    password,
+    phone,
+    dateOfBirth,
+    billingAddress,
+    serviceAddress,
+    identity,
+    simType,
+    simNumber,
+    esimNotificationEmail,
+    selectedPlan,
+  ]);
 
   const goNext = useCallback(() => {
     if (step === 5) {
@@ -135,11 +155,14 @@ export default function MbbSignupController({
     setStep(order[Math.max(idx - 1, 0)]);
   }, [step]);
 
-  const handleStepClick = useCallback((s: number) => {
-    if (s <= maxReached && s !== step) {
-      setStep(s as Step);
-    }
-  }, [maxReached, step]);
+  const handleStepClick = useCallback(
+    (s: number) => {
+      if (s <= maxReached && s !== step) {
+        setStep(s as Step);
+      }
+    },
+    [maxReached, step],
+  );
 
   if (!open) return null;
 
@@ -232,16 +255,39 @@ export default function MbbSignupController({
             <SectionPanel>
               <div className="text-center">
                 <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#4F1C76] text-white">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <path d="M20 7 10 17 4 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden
+                  >
+                    <path
+                      d="M20 7 10 17 4 11"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </div>
-                <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">Thank You!</h2>
-                <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">Your order is complete.</p>
-                <p className="mt-4 text-[15px] text-[#6A6486] max-w-md mx-auto">
-                  You will receive an email shortly with your new plan details and receipt.
+                <h2 className="mt-4 text-[28px] font-extrabold leading-[34px] text-[#170F49]">
+                  Thank You!
+                </h2>
+                <p className="mt-1 text-[14px] leading-[22px] text-[#6F6C90]">
+                  Your order is complete.
                 </p>
-                <button type="button" onClick={closeAll} className="btn-primary mt-6">Close</button>
+                <p className="mt-4 text-[15px] text-[#6A6486] max-w-md mx-auto">
+                  You will receive an email shortly with your new plan details
+                  and receipt.
+                </p>
+                <button
+                  type="button"
+                  onClick={closeAll}
+                  className="btn-primary mt-6"
+                >
+                  Close
+                </button>
               </div>
             </SectionPanel>
           </ModalShell>

@@ -31,15 +31,15 @@ export default function AddTechnicianModal({
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -57,9 +57,9 @@ export default function AddTechnicianModal({
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
       }}
     >
       <div
@@ -70,9 +70,9 @@ export default function AddTechnicianModal({
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 90
+          width: "100vw",
+          height: "100vh",
+          zIndex: 90,
         }}
       />
       <div
@@ -80,7 +80,9 @@ export default function AddTechnicianModal({
         style={{ zIndex: 91 }}
       >
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">Add Technician Profile</h2>
+          <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">
+            Add Technician Profile
+          </h2>
           <button
             onClick={onClose}
             className="grid h-7 w-7 place-items-center rounded-full bg-[#FFF0F0] text-[#E0342F]"
@@ -96,41 +98,78 @@ export default function AddTechnicianModal({
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <Field label="Full Name">
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="John Smith" className="field" />
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="John Smith"
+              className="field"
+            />
           </Field>
 
           <Field label="Role/Title">
-            <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Senior Technician" className="field" />
+            <input
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              placeholder="Senior Technician"
+              className="field"
+            />
           </Field>
 
           <Field label="Years of Experience">
-            <input value={years} onChange={(e) => setYears(e.target.value)} placeholder="8 years" className="field" />
+            <input
+              value={years}
+              onChange={(e) => setYears(e.target.value)}
+              placeholder="8 years"
+              className="field"
+            />
           </Field>
 
           <div className="md:col-span-2">
             <Field label="Specialties (comma separated)">
-              <input value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="NBN Installation, Business Networks, Troubleshooting" className="field" />
+              <input
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
+                placeholder="NBN Installation, Business Networks, Troubleshooting"
+                className="field"
+              />
             </Field>
           </div>
 
           <div className="md:col-span-2">
             <Field label="Introduction Video URL">
-              <input value={video} onChange={(e) => setVideo(e.target.value)} placeholder="https://youtube.com/watch?v=…" className="field" />
+              <input
+                value={video}
+                onChange={(e) => setVideo(e.target.value)}
+                placeholder="https://youtube.com/watch?v=…"
+                className="field"
+              />
             </Field>
           </div>
 
           <div className="md:col-span-2">
             <Field label="Bio/Introduction">
-              <textarea rows={4} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Describe the technician’s background and expertise…" className="field" />
+              <textarea
+                rows={4}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Describe the technician’s background and expertise…"
+                className="field"
+              />
             </Field>
           </div>
         </div>
 
         <div className="mt-6 flex items-center justify-between gap-3">
-          <button onClick={onClose} className="h-[44px] flex-1 rounded-[10px] border border-[#DFDBE3] bg-[#F8F8F8] text-[14px] font-semibold text-[#6F6C90]">
+          <button
+            onClick={onClose}
+            className="h-[44px] flex-1 rounded-[10px] border border-[#DFDBE3] bg-[#F8F8F8] text-[14px] font-semibold text-[#6F6C90]"
+          >
             Cancel
           </button>
-          <button onClick={onClose} className="h-[44px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white">
+          <button
+            onClick={onClose}
+            className="h-[44px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white"
+          >
             Add Technician
           </button>
         </div>
@@ -139,10 +178,18 @@ export default function AddTechnicianModal({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
-      <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">{label}</label>
+      <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
+        {label}
+      </label>
       {children}
     </div>
   );

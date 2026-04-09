@@ -1,34 +1,42 @@
-import { loadStripe } from '@stripe/stripe-js';
-import apiClient from './apiClient';
+import { loadStripe } from "@stripe/stripe-js";
+import apiClient from "./apiClient";
 
-// Get the publishable key with fallback
-const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-
-if (!publishableKey) {
-    console.error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set in environment variables');
-}
-
-// Initialize Stripe with your publishable key
-export const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
-
-// Stripe configuration
-export const STRIPE_CONFIG = {
-    publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-    secretKey: process.env.STRIPE_SECRET_KEY!,
-    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+// Fetch the publishable key from the server
+const getPublishableKey = async () => {
+  if (typeof window === "undefined") return ""; // Don't run on server during build
+  try {
+    const response = await fetch("/api/config/stripe");
+    const data = await response.json();
+    return data.publishableKey || "";
+  } catch (error) {
+    console.error("Error fetching Stripe publishable key:", error);
+    return "";
+  }
 };
 
-// Payment intent/Invoice creation response
-export const createPaymentIntent = async (amount: number, currency: string = 'aud') => {
-    try {
-        const response = await apiClient.post('/stripe/create-payment-intent', {
-            amount: Math.round(amount * 100), // convert to cents
-            currency,
-        });
+// Initialize Stripe with the fetched key
+export const stripePromise =
+  typeof window !== "undefined"
+    ? getPublishableKey().then((key) => (key ? loadStripe(key) : null))
+    : Promise.resolve(null);
 
-        return response.data;
-    } catch (error) {
-        console.error('Error creating payment intent:', error);
-        throw error;
-    }
+// Stripe configuration (only exported if needed on server)
+// Note: secret keys should only be accessed via process.env directly in server-side code
+
+// Payment intent/Invoice creation response
+export const createPaymentIntent = async (
+  amount: number,
+  currency: string = "aud",
+) => {
+  try {
+    const response = await apiClient.post("/stripe/create-payment-intent", {
+      amount: Math.round(amount * 100), // convert to cents
+      currency,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error creating payment intent:", error);
+    throw error;
+  }
 };

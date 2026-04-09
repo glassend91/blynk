@@ -38,7 +38,11 @@ export default function TestimonialCard({
             title="Edit"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Z" stroke="currentColor" strokeWidth="1.5" />
+              <path
+                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Z"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
             </svg>
           </button>
           <button
@@ -48,7 +52,11 @@ export default function TestimonialCard({
             title="Delete"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M6 7h12M9 7V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1M9 11v6M12 11v6M15 11v6M5 7l1 13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-13" stroke="currentColor" strokeWidth="1.5" />
+              <path
+                d="M6 7h12M9 7V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1M9 11v6M12 11v6M15 11v6M5 7l1 13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-13"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
             </svg>
           </button>
         </div>

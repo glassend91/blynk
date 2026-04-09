@@ -4,7 +4,7 @@ import "./globals.css";
 
 const mulish = Mulish({
   subsets: ["latin"],
-  weight: ["400","500","600","700","800"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -13,7 +13,11 @@ export const metadata: Metadata = {
   description: "Simple plans, powerful support",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body className={mulish.className}>{children}</body>

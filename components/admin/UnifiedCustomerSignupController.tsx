@@ -42,7 +42,10 @@ export default function UnifiedCustomerSignupController({
 
   // Common fields
   const [serviceAddress, setServiceAddress] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number } | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<{
+    name: string;
+    price: number;
+  } | null>(null);
   const [identity, setIdentity] = useState<any>(null);
 
   // Mobile-only fields
@@ -50,7 +53,8 @@ export default function UnifiedCustomerSignupController({
   const [isPortIn, setIsPortIn] = useState(false);
   const [simType, setSimType] = useState<"eSim" | "physical">("eSim");
   const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
-  const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
+  const [esimNotificationEmail, setEsimNotificationEmail] =
+    useState<string>(""); // Email for eSIM notifications
 
   // Residential fields
   const [firstName, setFirstName] = useState("");
@@ -72,9 +76,9 @@ export default function UnifiedCustomerSignupController({
   const [primaryEmail, setPrimaryEmail] = useState("");
   const [primaryPhone, setPrimaryPhone] = useState("");
   const [businessPassword, setBusinessPassword] = useState("");
-  const [authorizedContacts, setAuthorizedContacts] = useState<AuthorizedContact[]>([
-    { firstName: "", lastName: "" },
-  ]);
+  const [authorizedContacts, setAuthorizedContacts] = useState<
+    AuthorizedContact[]
+  >([{ firstName: "", lastName: "" }]);
 
   const closeAll = useCallback(() => {
     setStep(0);
@@ -124,7 +128,8 @@ export default function UnifiedCustomerSignupController({
 
       // ----- MOBILE SERVICE SIGNUP -----
       if (serviceType === "MOBILE") {
-        const customerEmail = customerType === "business" ? primaryEmail : email;
+        const customerEmail =
+          customerType === "business" ? primaryEmail : email;
         await signup({
           type: "MBL",
           mblSelectedNumber: !isPortIn ? mobileNumber : undefined,
@@ -139,7 +144,10 @@ export default function UnifiedCustomerSignupController({
           password: customerType === "business" ? businessPassword : password,
           simType: simType,
           simNumber: simType === "physical" ? simNumber : undefined, // Only include if physical SIM
-          esimNotificationEmail: simType === "eSim" ? (esimNotificationEmail || customerEmail) : undefined, // Default to account email if not provided
+          esimNotificationEmail:
+            simType === "eSim"
+              ? esimNotificationEmail || customerEmail
+              : undefined, // Default to account email if not provided
         });
         setShowSuccess(true);
         return;
@@ -155,7 +163,9 @@ export default function UnifiedCustomerSignupController({
           phone,
           serviceAddress,
           dateOfBirth,
-          billingAddress: billingSameAsService ? serviceAddress : billingAddress,
+          billingAddress: billingSameAsService
+            ? serviceAddress
+            : billingAddress,
           selectedPlan: selectedPlan || undefined,
           identity,
           customerType: "residential",
@@ -259,7 +269,7 @@ export default function UnifiedCustomerSignupController({
     }
 
     // Default advance
-    setStep((s) => Math.min(7, (s + 1)) as Step);
+    setStep((s) => Math.min(7, s + 1) as Step);
   }, [step, handleComplete, serviceType, customerType]);
 
   const goBack = useCallback(() => {
@@ -282,12 +292,15 @@ export default function UnifiedCustomerSignupController({
     }
 
     // Default back (ensure we don't go below 0)
-    setStep((s) => Math.max(0, (s - 1)) as Step);
+    setStep((s) => Math.max(0, s - 1) as Step);
   }, [step, serviceType, customerType]);
 
   const addAuthorizedContact = () => {
     if (authorizedContacts.length < 3) {
-      setAuthorizedContacts([...authorizedContacts, { firstName: "", lastName: "" }]);
+      setAuthorizedContacts([
+        ...authorizedContacts,
+        { firstName: "", lastName: "" },
+      ]);
     }
   };
 
@@ -297,7 +310,11 @@ export default function UnifiedCustomerSignupController({
     }
   };
 
-  const updateAuthorizedContact = (index: number, field: "firstName" | "lastName", value: string) => {
+  const updateAuthorizedContact = (
+    index: number,
+    field: "firstName" | "lastName",
+    value: string,
+  ) => {
     const updated = [...authorizedContacts];
     updated[index] = { ...updated[index], [field]: value };
     setAuthorizedContacts(updated);
@@ -315,7 +332,9 @@ export default function UnifiedCustomerSignupController({
             <SectionPanel>
               <div className="text-center">
                 <h2 className="modal-h1">Select Service Type</h2>
-                <p className="modal-sub mt-1">Is this an NBN or a Mobile service?</p>
+                <p className="modal-sub mt-1">
+                  Is this an NBN or a Mobile service?
+                </p>
               </div>
 
               <div className="mx-auto mt-8 max-w-[600px] space-y-4">
@@ -327,8 +346,12 @@ export default function UnifiedCustomerSignupController({
                   }}
                   className="w-full rounded-[12px] border-2 border-[#E7E4EC] bg-white p-6 text-left transition-all hover:border-[#401B60] hover:shadow-md"
                 >
-                  <h3 className="text-[18px] font-semibold text-[#0A0A0A]">NBN (Fixed-Line)</h3>
-                  <p className="mt-1 text-[14px] text-[#6F6C90]">Broadband & VOIP</p>
+                  <h3 className="text-[18px] font-semibold text-[#0A0A0A]">
+                    NBN (Fixed-Line)
+                  </h3>
+                  <p className="mt-1 text-[14px] text-[#6F6C90]">
+                    Broadband & VOIP
+                  </p>
                 </button>
 
                 <button
@@ -339,12 +362,20 @@ export default function UnifiedCustomerSignupController({
                   }}
                   className="w-full rounded-[12px] border-2 border-[#E7E4EC] bg-white p-6 text-left transition-all hover:border-[#401B60] hover:shadow-md"
                 >
-                  <h3 className="text-[18px] font-semibold text-[#0A0A0A]">Mobile</h3>
-                  <p className="mt-1 text-[14px] text-[#6F6C90]">Voice + Data / Data-only</p>
+                  <h3 className="text-[18px] font-semibold text-[#0A0A0A]">
+                    Mobile
+                  </h3>
+                  <p className="mt-1 text-[14px] text-[#6F6C90]">
+                    Voice + Data / Data-only
+                  </p>
                 </button>
               </div>
             </SectionPanel>
-            <BarActions onBack={closeAll} onNext={() => { }} nextDisabled={true} />
+            <BarActions
+              onBack={closeAll}
+              onNext={() => {}}
+              nextDisabled={true}
+            />
           </ModalShell>
         )}
 
@@ -369,7 +400,9 @@ export default function UnifiedCustomerSignupController({
                   </svg>
                 </div>
                 <h2 className="modal-h1 mt-4">Select Customer Type</h2>
-                <p className="modal-sub mt-1">Choose whether this is a residential or business customer</p>
+                <p className="modal-sub mt-1">
+                  Choose whether this is a residential or business customer
+                </p>
               </div>
 
               <div className="mx-auto mt-8 max-w-[600px] space-y-4">
@@ -383,7 +416,12 @@ export default function UnifiedCustomerSignupController({
                 >
                   <div className="flex items-center gap-4">
                     <div className="grid h-12 w-12 place-items-center rounded-full bg-[#F8F8F8]">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
                         <path
                           d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
                           stroke="#401B60"
@@ -392,8 +430,12 @@ export default function UnifiedCustomerSignupController({
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-[18px] font-semibold text-[#0A0A0A]">Residential Customer</h3>
-                      <p className="mt-1 text-[14px] text-[#6F6C90]">For personal/home use</p>
+                      <h3 className="text-[18px] font-semibold text-[#0A0A0A]">
+                        Residential Customer
+                      </h3>
+                      <p className="mt-1 text-[14px] text-[#6F6C90]">
+                        For personal/home use
+                      </p>
                     </div>
                   </div>
                 </button>
@@ -408,7 +450,12 @@ export default function UnifiedCustomerSignupController({
                 >
                   <div className="flex items-center gap-4">
                     <div className="grid h-12 w-12 place-items-center rounded-full bg-[#F8F8F8]">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
                         <path
                           d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v12M9 9l6 4M9 9l-6 4"
                           stroke="#401B60"
@@ -417,14 +464,22 @@ export default function UnifiedCustomerSignupController({
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-[18px] font-semibold text-[#0A0A0A]">Business Customer</h3>
-                      <p className="mt-1 text-[14px] text-[#6F6C90]">For business/commercial use</p>
+                      <h3 className="text-[18px] font-semibold text-[#0A0A0A]">
+                        Business Customer
+                      </h3>
+                      <p className="mt-1 text-[14px] text-[#6F6C90]">
+                        For business/commercial use
+                      </p>
                     </div>
                   </div>
                 </button>
               </div>
             </SectionPanel>
-            <BarActions onBack={closeAll} onNext={() => { }} nextDisabled={true} />
+            <BarActions
+              onBack={closeAll}
+              onNext={() => {}}
+              nextDisabled={true}
+            />
           </ModalShell>
         )}
 
@@ -446,7 +501,9 @@ export default function UnifiedCustomerSignupController({
             <SectionPanel>
               <div className="text-center">
                 <h2 className="modal-h1">Mobile Service Details</h2>
-                <p className="modal-sub mt-1">Choose a plan and supply the mobile number</p>
+                <p className="modal-sub mt-1">
+                  Choose a plan and supply the mobile number
+                </p>
               </div>
 
               <div className="card mx-auto mt-8 max-w-[860px] p-6 space-y-6">
@@ -462,7 +519,11 @@ export default function UnifiedCustomerSignupController({
                   </label>
                 </FormField>
 
-                <FormField label={isPortIn ? "Existing Mobile Number" : "Preferred New Number"}>
+                <FormField
+                  label={
+                    isPortIn ? "Existing Mobile Number" : "Preferred New Number"
+                  }
+                >
                   <input
                     className="input w-full"
                     placeholder="04xxxxxxxx"
@@ -479,7 +540,7 @@ export default function UnifiedCustomerSignupController({
                       setSelectedPlan(
                         e.target.value
                           ? { name: e.target.value, price: 0 }
-                          : null
+                          : null,
                       )
                     }
                   >
@@ -517,7 +578,9 @@ export default function UnifiedCustomerSignupController({
                         }}
                         className="h-4 w-4 accent-[#401B60]"
                       />
-                      <span className="text-[14px] text-[#0A0A0A]">Physical SIM</span>
+                      <span className="text-[14px] text-[#0A0A0A]">
+                        Physical SIM
+                      </span>
                     </label>
                   </div>
                 </FormField>
@@ -533,7 +596,8 @@ export default function UnifiedCustomerSignupController({
                       placeholder="Enter SIM Card Number (ICCID)"
                     />
                     <p className="mt-1 text-xs text-[#6F6C90]">
-                      The ICCID is printed on the physical SIM card. This is required for physical SIM provisioning.
+                      The ICCID is printed on the physical SIM card. This is
+                      required for physical SIM provisioning.
                     </p>
                   </FormField>
                 )}
@@ -548,21 +612,26 @@ export default function UnifiedCustomerSignupController({
                       placeholder="Enter email for eSIM notifications (defaults to customer email)"
                     />
                     <p className="mt-1 text-xs text-[#6F6C90]">
-                      This email will receive the eSIM activation QR code and instructions. Defaults to customer's account email but can be changed.
+                      This email will receive the eSIM activation QR code and
+                      instructions. Defaults to customer's account email but can
+                      be changed.
                     </p>
                   </FormField>
                 )}
               </div>
             </SectionPanel>
-            <BarActions 
-              onBack={goBack} 
-              onNext={goNext} 
+            <BarActions
+              onBack={goBack}
+              onNext={goNext}
               nextDisabled={
-                !selectedPlan || 
-                !mobileNumber || 
+                !selectedPlan ||
+                !mobileNumber ||
                 (simType === "physical" && !simNumber?.trim()) ||
-                (simType === "eSim" && !esimNotificationEmail?.trim() && !email?.trim() && !primaryEmail?.trim())
-              } 
+                (simType === "eSim" &&
+                  !esimNotificationEmail?.trim() &&
+                  !email?.trim() &&
+                  !primaryEmail?.trim())
+              }
             />
           </ModalShell>
         )}
@@ -636,9 +705,15 @@ export default function UnifiedCustomerSignupController({
         )}
 
         {/* Step 5: ID Check (only for residential) */}
-        {step === 5 && serviceType === "NBN" && customerType === "residential" && (
-          <SignupModal5 onNext={goNext} onBack={goBack} onClose={handleCloseClick} />
-        )}
+        {step === 5 &&
+          serviceType === "NBN" &&
+          customerType === "residential" && (
+            <SignupModal5
+              onNext={goNext}
+              onBack={goBack}
+              onClose={handleCloseClick}
+            />
+          )}
 
         {/* Step 6: Payment & Agreement */}
         {step === 6 && customerType && (
@@ -655,7 +730,13 @@ export default function UnifiedCustomerSignupController({
             <SectionPanel>
               <div className="text-center">
                 <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[var(--cl-brand-ink,#2F2151)] text-white">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden
+                  >
                     <path
                       d="M20 7 10 17 4 11"
                       stroke="white"
@@ -666,11 +747,17 @@ export default function UnifiedCustomerSignupController({
                   </svg>
                 </div>
                 <h2 className="modal-h1 mt-4">Thank You!</h2>
-                <p className="modal-sub mt-1">Customer account created successfully.</p>
+                <p className="modal-sub mt-1">
+                  Customer account created successfully.
+                </p>
                 <p className="mt-4 text-[15px] text-[#6A6486] max-w-md mx-auto">
                   The customer will receive an email with their account details.
                 </p>
-                <button type="button" onClick={closeAll} className="btn-primary mt-6">
+                <button
+                  type="button"
+                  onClick={closeAll}
+                  className="btn-primary mt-6"
+                >
                   Close
                 </button>
               </div>
@@ -727,15 +814,20 @@ function CustomerDetailsResidential({
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [dobError, setDobError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [serviceAddressError, setServiceAddressError] = useState<string | null>(null);
-  const [billingAddressError, setBillingAddressError] = useState<string | null>(null);
+  const [serviceAddressError, setServiceAddressError] = useState<string | null>(
+    null,
+  );
+  const [billingAddressError, setBillingAddressError] = useState<string | null>(
+    null,
+  );
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const isValidName = (value: string) => /^[a-zA-Z\s'-]{2,}$/.test(value.trim());
+  const isValidName = (value: string) =>
+    /^[a-zA-Z\s'-]{2,}$/.test(value.trim());
   const isValidPhone = (value: string) => {
     const digits = value.replace(/[^\d+]/g, "");
     return digits.length >= 8;
@@ -781,7 +873,9 @@ function CustomerDetailsResidential({
         : null;
     const saErr = !serviceAddress ? "Service address is required" : null;
     const baErr =
-      !billingSameAsService && !billingAddress ? "Billing address is required" : null;
+      !billingSameAsService && !billingAddress
+        ? "Billing address is required"
+        : null;
     const emErr = !email
       ? "Email is required"
       : !isValidEmail(email)
@@ -799,7 +893,16 @@ function CustomerDetailsResidential({
     setBillingAddressError(baErr);
     setEmailError(emErr);
 
-    return !fnErr && !lnErr && !phErr && !dbErr && !pwErr && !saErr && !baErr && !emErr;
+    return (
+      !fnErr &&
+      !lnErr &&
+      !phErr &&
+      !dbErr &&
+      !pwErr &&
+      !saErr &&
+      !baErr &&
+      !emErr
+    );
   };
 
   useEffect(() => {
@@ -832,7 +935,11 @@ function CustomerDetailsResidential({
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[var(--cl-brand-ink)] text-white">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="8" r="4" stroke="white" strokeWidth="1.5" />
-              <path d="M20 20c0-4-3.6-6-8-6s-8 2-8 6" stroke="white" strokeWidth="1.5" />
+              <path
+                d="M20 20c0-4-3.6-6-8-6s-8 2-8 6"
+                stroke="white"
+                strokeWidth="1.5"
+              />
             </svg>
           </div>
           <h2 className="modal-h1 mt-4">Customer Details</h2>
@@ -850,7 +957,9 @@ function CustomerDetailsResidential({
                   if (submitted) setFirstNameError(null);
                 }}
               />
-              {firstNameError && <p className="mt-1 text-xs text-red-600">{firstNameError}</p>}
+              {firstNameError && (
+                <p className="mt-1 text-xs text-red-600">{firstNameError}</p>
+              )}
             </FormField>
             <FormField label="Last Name">
               <input
@@ -861,7 +970,9 @@ function CustomerDetailsResidential({
                   if (submitted) setLastNameError(null);
                 }}
               />
-              {lastNameError && <p className="mt-1 text-xs text-red-600">{lastNameError}</p>}
+              {lastNameError && (
+                <p className="mt-1 text-xs text-red-600">{lastNameError}</p>
+              )}
             </FormField>
           </div>
           <div className="mt-4">
@@ -869,25 +980,36 @@ function CustomerDetailsResidential({
               <input
                 type="email"
                 autoComplete="email"
-                className={`input w-full ${emailError || emailExists || (email && !isValidEmail(email))
-                  ? "border-red-300 bg-red-50"
-                  : email && isValidEmail(email) && !emailChecking
-                    ? "border-green-300 bg-green-50"
-                    : ""
-                  }`}
+                className={`input w-full ${
+                  emailError || emailExists || (email && !isValidEmail(email))
+                    ? "border-red-300 bg-red-50"
+                    : email && isValidEmail(email) && !emailChecking
+                      ? "border-green-300 bg-green-50"
+                      : ""
+                }`}
                 value={email}
                 onChange={(e) => {
                   onChangeEmail(e.target.value);
                   if (submitted) setEmailError(null);
                 }}
               />
-              {emailChecking && <p className="mt-1 text-xs text-gray-500">Checking availability...</p>}
+              {emailChecking && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Checking availability...
+                </p>
+              )}
               {emailError && !emailChecking && (
                 <p className="mt-1 text-xs text-red-600">{emailError}</p>
               )}
-              {!emailError && email && isValidEmail(email) && !emailExists && !emailChecking && (
-                <p className="mt-1 text-xs text-green-600">Email is available</p>
-              )}
+              {!emailError &&
+                email &&
+                isValidEmail(email) &&
+                !emailExists &&
+                !emailChecking && (
+                  <p className="mt-1 text-xs text-green-600">
+                    Email is available
+                  </p>
+                )}
             </FormField>
           </div>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -901,7 +1023,9 @@ function CustomerDetailsResidential({
                   if (submitted) setPhoneError(null);
                 }}
               />
-              {phoneError && <p className="mt-1 text-xs text-red-600">{phoneError}</p>}
+              {phoneError && (
+                <p className="mt-1 text-xs text-red-600">{phoneError}</p>
+              )}
             </FormField>
             <FormField label="Date of Birth">
               <input
@@ -914,7 +1038,9 @@ function CustomerDetailsResidential({
                 }}
                 max={new Date().toISOString().split("T")[0]}
               />
-              {dobError && <p className="mt-1 text-xs text-red-600">{dobError}</p>}
+              {dobError && (
+                <p className="mt-1 text-xs text-red-600">{dobError}</p>
+              )}
             </FormField>
           </div>
           <div className="mt-4">
@@ -929,7 +1055,9 @@ function CustomerDetailsResidential({
                 }}
               />
               {serviceAddressError && (
-                <p className="mt-1 text-xs text-red-600">{serviceAddressError}</p>
+                <p className="mt-1 text-xs text-red-600">
+                  {serviceAddressError}
+                </p>
               )}
             </FormField>
           </div>
@@ -944,7 +1072,9 @@ function CustomerDetailsResidential({
                   if (submitted) setPasswordError(null);
                 }}
               />
-              {passwordError && <p className="mt-1 text-xs text-red-600">{passwordError}</p>}
+              {passwordError && (
+                <p className="mt-1 text-xs text-red-600">{passwordError}</p>
+              )}
             </FormField>
           </div>
 
@@ -976,7 +1106,9 @@ function CustomerDetailsResidential({
                     }}
                   />
                   {billingAddressError && (
-                    <p className="mt-1 text-xs text-red-600">{billingAddressError}</p>
+                    <p className="mt-1 text-xs text-red-600">
+                      {billingAddressError}
+                    </p>
                   )}
                 </FormField>
               </div>
@@ -1029,11 +1161,19 @@ function CustomerDetailsBusiness({
   const [emailError, setEmailError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const [businessNameError, setBusinessNameError] = useState<string | null>(null);
+  const [businessNameError, setBusinessNameError] = useState<string | null>(
+    null,
+  );
   const [abnError, setAbnError] = useState<string | null>(null);
-  const [primaryFirstNameError, setPrimaryFirstNameError] = useState<string | null>(null);
-  const [primaryLastNameError, setPrimaryLastNameError] = useState<string | null>(null);
-  const [primaryPhoneError, setPrimaryPhoneError] = useState<string | null>(null);
+  const [primaryFirstNameError, setPrimaryFirstNameError] = useState<
+    string | null
+  >(null);
+  const [primaryLastNameError, setPrimaryLastNameError] = useState<
+    string | null
+  >(null);
+  const [primaryPhoneError, setPrimaryPhoneError] = useState<string | null>(
+    null,
+  );
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const isValidEmail = (email: string) => {
@@ -1041,7 +1181,8 @@ function CustomerDetailsBusiness({
     return emailRegex.test(email);
   };
 
-  const isValidName = (value: string) => /^[a-zA-Z\s'-]{2,}$/.test(value.trim());
+  const isValidName = (value: string) =>
+    /^[a-zA-Z\s'-]{2,}$/.test(value.trim());
   const isValidPhone = (value: string) => {
     const digits = value.replace(/[^\d+]/g, "");
     return digits.length >= 8;
@@ -1110,7 +1251,9 @@ function CustomerDetailsBusiness({
     setPasswordError(pwErr);
     setEmailError(emErr);
 
-    return !bnErr && !abnErr && !pfnErr && !plnErr && !pphErr && !pwErr && !emErr;
+    return (
+      !bnErr && !abnErr && !pfnErr && !plnErr && !pphErr && !pwErr && !emErr
+    );
   };
 
   useEffect(() => {
@@ -1147,7 +1290,11 @@ function CustomerDetailsBusiness({
                 stroke="white"
                 strokeWidth="1.5"
               />
-              <path d="M4 19.8c0-3.3 4-5.8 8-5.8s8 2.5 8 5.8" stroke="white" strokeWidth="1.5" />
+              <path
+                d="M4 19.8c0-3.3 4-5.8 8-5.8s8 2.5 8 5.8"
+                stroke="white"
+                strokeWidth="1.5"
+              />
             </svg>
           </div>
           <h2 className="modal-h1 mt-4">Business Details</h2>
@@ -1192,7 +1339,9 @@ function CustomerDetailsBusiness({
                   }}
                   placeholder="Enter ABN"
                 />
-                {abnError && <p className="mt-1 text-xs text-red-600">{abnError}</p>}
+                {abnError && (
+                  <p className="mt-1 text-xs text-red-600">{abnError}</p>
+                )}
               </FormField>
             </div>
           </div>
@@ -1208,13 +1357,19 @@ function CustomerDetailsBusiness({
                 }}
                 placeholder="Enter ACN"
               />
-              <p className="mt-1 text-xs text-[#6F6C90]">Enter your ABN or ACN (at least one required)</p>
-              {abnError && <p className="mt-1 text-xs text-red-600">{abnError}</p>}
+              <p className="mt-1 text-xs text-[#6F6C90]">
+                Enter your ABN or ACN (at least one required)
+              </p>
+              {abnError && (
+                <p className="mt-1 text-xs text-red-600">{abnError}</p>
+              )}
             </FormField>
           </div>
 
           <div className="mt-6 border-t border-[#E9E3F2] pt-6">
-            <h3 className="text-[16px] font-semibold text-[#2E2745] mb-4">Primary Contact</h3>
+            <h3 className="text-[16px] font-semibold text-[#2E2745] mb-4">
+              Primary Contact
+            </h3>
             <div className="grid gap-4 md:grid-cols-2">
               <FormField label="First Name *">
                 <input
@@ -1226,7 +1381,9 @@ function CustomerDetailsBusiness({
                   }}
                 />
                 {primaryFirstNameError && (
-                  <p className="mt-1 text-xs text-red-600">{primaryFirstNameError}</p>
+                  <p className="mt-1 text-xs text-red-600">
+                    {primaryFirstNameError}
+                  </p>
                 )}
               </FormField>
               <FormField label="Last Name *">
@@ -1239,7 +1396,9 @@ function CustomerDetailsBusiness({
                   }}
                 />
                 {primaryLastNameError && (
-                  <p className="mt-1 text-xs text-red-600">{primaryLastNameError}</p>
+                  <p className="mt-1 text-xs text-red-600">
+                    {primaryLastNameError}
+                  </p>
                 )}
               </FormField>
             </div>
@@ -1247,25 +1406,40 @@ function CustomerDetailsBusiness({
               <FormField label="Business Email *">
                 <input
                   type="email"
-                  className={`input w-full ${emailError || emailExists || (primaryEmail && !isValidEmail(primaryEmail))
-                    ? "border-red-300 bg-red-50"
-                    : primaryEmail && isValidEmail(primaryEmail) && !emailChecking
-                      ? "border-green-300 bg-green-50"
-                      : ""
-                    }`}
+                  className={`input w-full ${
+                    emailError ||
+                    emailExists ||
+                    (primaryEmail && !isValidEmail(primaryEmail))
+                      ? "border-red-300 bg-red-50"
+                      : primaryEmail &&
+                          isValidEmail(primaryEmail) &&
+                          !emailChecking
+                        ? "border-green-300 bg-green-50"
+                        : ""
+                  }`}
                   value={primaryEmail}
                   onChange={(e) => {
                     onChangePrimaryEmail(e.target.value);
                     if (submitted) setEmailError(null);
                   }}
                 />
-                {emailChecking && <p className="mt-1 text-xs text-gray-500">Checking availability...</p>}
+                {emailChecking && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Checking availability...
+                  </p>
+                )}
                 {emailError && !emailChecking && (
                   <p className="mt-1 text-xs text-red-600">{emailError}</p>
                 )}
-                {!emailError && primaryEmail && isValidEmail(primaryEmail) && !emailExists && !emailChecking && (
-                  <p className="mt-1 text-xs text-green-600">Email is available</p>
-                )}
+                {!emailError &&
+                  primaryEmail &&
+                  isValidEmail(primaryEmail) &&
+                  !emailExists &&
+                  !emailChecking && (
+                    <p className="mt-1 text-xs text-green-600">
+                      Email is available
+                    </p>
+                  )}
               </FormField>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -1280,7 +1454,9 @@ function CustomerDetailsBusiness({
                   }}
                 />
                 {primaryPhoneError && (
-                  <p className="mt-1 text-xs text-red-600">{primaryPhoneError}</p>
+                  <p className="mt-1 text-xs text-red-600">
+                    {primaryPhoneError}
+                  </p>
                 )}
               </FormField>
               <FormField label="Account Password *">
@@ -1293,7 +1469,9 @@ function CustomerDetailsBusiness({
                     if (submitted) setPasswordError(null);
                   }}
                 />
-                {passwordError && <p className="mt-1 text-xs text-red-600">{passwordError}</p>}
+                {passwordError && (
+                  <p className="mt-1 text-xs text-red-600">{passwordError}</p>
+                )}
               </FormField>
             </div>
           </div>
@@ -1314,46 +1492,59 @@ function CustomerDetailsBusiness({
               )}
             </div>
 
-            {authorizedContacts.map((contact: AuthorizedContact, index: number) => (
-              <div key={index} className="mb-4 rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[14px] font-semibold text-[#2E2745]">
-                    Contact {index + 1}
-                  </span>
-                  {authorizedContacts.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => onRemoveAuthorizedContact(index)}
-                      className="text-[12px] text-red-600 hover:underline"
-                    >
-                      Remove
-                    </button>
-                  )}
+            {authorizedContacts.map(
+              (contact: AuthorizedContact, index: number) => (
+                <div
+                  key={index}
+                  className="mb-4 rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] p-4"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[14px] font-semibold text-[#2E2745]">
+                      Contact {index + 1}
+                    </span>
+                    {authorizedContacts.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => onRemoveAuthorizedContact(index)}
+                        className="text-[12px] text-red-600 hover:underline"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FormField label="First Name">
+                      <input
+                        className="input w-full"
+                        value={contact.firstName}
+                        onChange={(e) =>
+                          onUpdateAuthorizedContact(
+                            index,
+                            "firstName",
+                            e.target.value,
+                          )
+                        }
+                        placeholder="Enter first name"
+                      />
+                    </FormField>
+                    <FormField label="Last Name">
+                      <input
+                        className="input w-full"
+                        value={contact.lastName}
+                        onChange={(e) =>
+                          onUpdateAuthorizedContact(
+                            index,
+                            "lastName",
+                            e.target.value,
+                          )
+                        }
+                        placeholder="Enter last name"
+                      />
+                    </FormField>
+                  </div>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField label="First Name">
-                    <input
-                      className="input w-full"
-                      value={contact.firstName}
-                      onChange={(e) =>
-                        onUpdateAuthorizedContact(index, "firstName", e.target.value)
-                      }
-                      placeholder="Enter first name"
-                    />
-                  </FormField>
-                  <FormField label="Last Name">
-                    <input
-                      className="input w-full"
-                      value={contact.lastName}
-                      onChange={(e) =>
-                        onUpdateAuthorizedContact(index, "lastName", e.target.value)
-                      }
-                      placeholder="Enter last name"
-                    />
-                  </FormField>
-                </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         </div>
       </SectionPanel>
@@ -1368,4 +1559,3 @@ function CustomerDetailsBusiness({
     </ModalShell>
   );
 }
-

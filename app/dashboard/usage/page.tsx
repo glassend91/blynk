@@ -105,7 +105,7 @@ export default function DataUsage() {
       // Call the select API with required fields
       await apiClient.post(`/packages/${planId}/select`, {
         customerNumber: userData?.user.phone || "",
-        paymentMethod: "credit_card"
+        paymentMethod: "credit_card",
       });
 
       alert("Plan selected successfully!");
@@ -133,17 +133,29 @@ export default function DataUsage() {
   };
 
   const getUsageStatus = (percentageUsed: number) => {
-    if (percentageUsed >= 90) return { label: "High Usage", color: "bg-red-100 text-red-700" };
-    if (percentageUsed >= 70) return { label: "Moderate Usage", color: "bg-yellow-100 text-yellow-700" };
+    if (percentageUsed >= 90)
+      return { label: "High Usage", color: "bg-red-100 text-red-700" };
+    if (percentageUsed >= 70)
+      return {
+        label: "Moderate Usage",
+        color: "bg-yellow-100 text-yellow-700",
+      };
     return { label: "Normal Usage", color: "bg-[#EFE9F7] text-[#3F205F]" };
   };
 
   // Calculate combined usage
   const calculateCombinedUsage = () => {
-    if (!userData?.selectedPackages) return { used: 0, total: 0, remaining: 0, percentage: 0 };
+    if (!userData?.selectedPackages)
+      return { used: 0, total: 0, remaining: 0, percentage: 0 };
 
-    const used = userData.selectedPackages.reduce((sum, pkg) => sum + (pkg.usedData || 0), 0);
-    const total = userData.selectedPackages.reduce((sum, pkg) => sum + pkg.packageId.totalData, 0);
+    const used = userData.selectedPackages.reduce(
+      (sum, pkg) => sum + (pkg.usedData || 0),
+      0,
+    );
+    const total = userData.selectedPackages.reduce(
+      (sum, pkg) => sum + pkg.packageId.totalData,
+      0,
+    );
     const remaining = total - used;
     const percentage = total > 0 ? (used / total) * 100 : 0;
 
@@ -153,7 +165,9 @@ export default function DataUsage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="text-[16px] text-[#6F6C90]">Loading your data usage...</div>
+        <div className="text-[16px] text-[#6F6C90]">
+          Loading your data usage...
+        </div>
       </div>
     );
   }
@@ -191,7 +205,9 @@ export default function DataUsage() {
 
       {packages.length === 0 ? (
         <Panel className="p-8 text-center">
-          <div className="text-[16px] font-semibold text-[#0A0A0A]">No Active Packages</div>
+          <div className="text-[16px] font-semibold text-[#0A0A0A]">
+            No Active Packages
+          </div>
           <div className="mt-2 text-[14px] text-[#6F6C90]">
             You don't have any active packages yet. Add a plan to get started.
           </div>
@@ -202,14 +218,23 @@ export default function DataUsage() {
           <div className="col-span-2 space-y-6">
             <Panel className="p-6">
               <div className="flex items-center justify-between">
-                <div className="text-[16px] font-semibold text-[#0A0A0A]">Combined Data Usage</div>
-                <span className={`rounded-[8px] px-2.5 py-1 text-[12px] font-semibold ${combinedStatus.color}`}>
+                <div className="text-[16px] font-semibold text-[#0A0A0A]">
+                  Combined Data Usage
+                </div>
+                <span
+                  className={`rounded-[8px] px-2.5 py-1 text-[12px] font-semibold ${combinedStatus.color}`}
+                >
                   {combinedStatus.label}
                 </span>
               </div>
               <div className="mt-4 space-y-3">
-                <div className="text-[13px] text-[#0A0A0A]">{combinedUsage.used.toFixed(1)}GB used</div>
-                <Progress value={combinedUsage.used} max={combinedUsage.total} />
+                <div className="text-[13px] text-[#0A0A0A]">
+                  {combinedUsage.used.toFixed(1)}GB used
+                </div>
+                <Progress
+                  value={combinedUsage.used}
+                  max={combinedUsage.total}
+                />
                 <div className="flex items-center justify-between text-[12px] text-[#6F6C90]">
                   <span>{combinedUsage.remaining.toFixed(1)}GB remaining</span>
                   <span>{combinedUsage.total.toFixed(0)}GB total</span>
@@ -230,8 +255,21 @@ export default function DataUsage() {
                 <Panel key={pkg._id} className="p-6">
                   <div className="flex items-center gap-3">
                     <span className="grid h-9 w-9 place-items-center rounded-full bg-[#3F205F] text-white">
-                      <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
-                        <rect x="3" y="1.5" width="10" height="17" rx="3" stroke="white" strokeWidth="1.8" />
+                      <svg
+                        width="16"
+                        height="20"
+                        viewBox="0 0 16 20"
+                        fill="none"
+                      >
+                        <rect
+                          x="3"
+                          y="1.5"
+                          width="10"
+                          height="17"
+                          rx="3"
+                          stroke="white"
+                          strokeWidth="1.8"
+                        />
                         <circle cx="8" cy="15" r="1.4" fill="white" />
                       </svg>
                     </span>
@@ -245,10 +283,11 @@ export default function DataUsage() {
                     </div>
                     <div className="ml-auto">
                       <span
-                        className={`rounded-[6px] px-2 py-0.5 text-[11px] font-semibold ${pkg.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
-                          }`}
+                        className={`rounded-[6px] px-2 py-0.5 text-[11px] font-semibold ${
+                          pkg.status === "active"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
                       >
                         {pkg.status}
                       </span>
@@ -256,14 +295,18 @@ export default function DataUsage() {
                   </div>
 
                   <div className="mt-4">
-                    <div className="mb-2 text-[13px] text-[#0A0A0A]">{used.toFixed(1)}GB used</div>
+                    <div className="mb-2 text-[13px] text-[#0A0A0A]">
+                      {used.toFixed(1)}GB used
+                    </div>
                     <Progress value={used} max={total} />
                     <div className="mt-2 flex items-center justify-between text-[12px] text-[#6F6C90]">
                       <span>{remaining.toFixed(1)}GB remaining</span>
                       <span>{total}GB total</span>
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[12px] text-[#6F6C90]">
-                      <span>Resets on {formatDate(pkg.packageId.resetDate)}</span>
+                      <span>
+                        Resets on {formatDate(pkg.packageId.resetDate)}
+                      </span>
                       <span>{percentage.toFixed(1)}% used</span>
                     </div>
                   </div>
@@ -275,14 +318,27 @@ export default function DataUsage() {
           {/* Right column */}
           <div className="col-span-1 space-y-6">
             <Panel className="p-6">
-              <div className="text-[16px] font-semibold text-[#0A0A0A]">Daily Usage (Last 7 Days)</div>
+              <div className="text-[16px] font-semibold text-[#0A0A0A]">
+                Daily Usage (Last 7 Days)
+              </div>
               <div className="mt-4 space-y-3 text-[13px]">
-                {["29 Jan", "30 Jan", "31 Jan", "1 Feb", "2 Feb", "3 Feb", "4 Feb"].map((d, i) => (
+                {[
+                  "29 Jan",
+                  "30 Jan",
+                  "31 Jan",
+                  "1 Feb",
+                  "2 Feb",
+                  "3 Feb",
+                  "4 Feb",
+                ].map((d, i) => (
                   <div key={d} className="flex items-center gap-3">
                     <div className="w-16 text-[#6F6C90]">{d}</div>
                     <div className="flex-1">
                       <div className="h-2.5 w-full rounded-full bg-[#E9E6F0]">
-                        <div className="h-2.5 rounded-full bg-[#3F205F]" style={{ width: `${60 + i * 5}%` }} />
+                        <div
+                          className="h-2.5 rounded-full bg-[#3F205F]"
+                          style={{ width: `${60 + i * 5}%` }}
+                        />
                       </div>
                     </div>
                     <div className="w-10 text-right text-[#6F6C90]">2.1GB</div>
@@ -292,16 +348,26 @@ export default function DataUsage() {
             </Panel>
 
             <Panel className="p-6">
-              <div className="text-[16px] font-semibold text-[#0A0A0A]">Usage Tips</div>
+              <div className="text-[16px] font-semibold text-[#0A0A0A]">
+                Usage Tips
+              </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-[13px]">
                 {[
-                  ["WiFi Connection", "Connect to WiFi when available to save mobile data"],
-                  ["Data Saver Mode", "Enable data saver in your device settings"],
+                  [
+                    "WiFi Connection",
+                    "Connect to WiFi when available to save mobile data",
+                  ],
+                  [
+                    "Data Saver Mode",
+                    "Enable data saver in your device settings",
+                  ],
                   ["App Management", "Monitor which apps use the most data"],
                   ["Data Alerts", "Set up usage alerts to avoid overages"],
                 ].map(([t, d]) => (
                   <div key={t} className="rounded-[12px] bg-[#F7F7FA] p-3">
-                    <div className="text-[14px] font-semibold text-[#0A0A0A]">{t}</div>
+                    <div className="text-[14px] font-semibold text-[#0A0A0A]">
+                      {t}
+                    </div>
                     <div className="text-[#6F6C90]">{d}</div>
                   </div>
                 ))}
@@ -317,7 +383,9 @@ export default function DataUsage() {
           <div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[16px] bg-white">
             {/* Modal Header */}
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
-              <h2 className="text-[22px] font-bold text-[#0A0A0A]">Available Plans</h2>
+              <h2 className="text-[22px] font-bold text-[#0A0A0A]">
+                Available Plans
+              </h2>
               <button
                 onClick={() => setShowModal(false)}
                 className="grid h-8 w-8 place-items-center rounded-full text-[#6F6C90] transition-colors hover:bg-gray-100"
@@ -334,15 +402,22 @@ export default function DataUsage() {
             </div>
 
             {/* Modal Content */}
-            <div className="overflow-y-auto p-6" style={{ maxHeight: "calc(90vh - 80px)" }}>
+            <div
+              className="overflow-y-auto p-6"
+              style={{ maxHeight: "calc(90vh - 80px)" }}
+            >
               {loadingPlans ? (
                 <div className="flex h-64 items-center justify-center">
-                  <div className="text-[16px] text-[#6F6C90]">Loading plans...</div>
+                  <div className="text-[16px] text-[#6F6C90]">
+                    Loading plans...
+                  </div>
                 </div>
               ) : availablePlans.length === 0 ? (
                 <div className="flex h-64 items-center justify-center">
                   <div className="text-center">
-                    <div className="text-[16px] font-semibold text-[#0A0A0A]">No Plans Available</div>
+                    <div className="text-[16px] font-semibold text-[#0A0A0A]">
+                      No Plans Available
+                    </div>
                     <div className="mt-2 text-[14px] text-[#6F6C90]">
                       There are no plans available at the moment.
                     </div>
@@ -358,14 +433,20 @@ export default function DataUsage() {
                       {/* Plan Header */}
                       <div className="mb-4 flex items-start justify-between">
                         <div>
-                          <h3 className="text-[18px] font-bold text-[#0A0A0A]">{plan.planTitle}</h3>
-                          <p className="mt-1 text-[13px] text-[#6F6C90]">{plan.planType}</p>
+                          <h3 className="text-[18px] font-bold text-[#0A0A0A]">
+                            {plan.planTitle}
+                          </h3>
+                          <p className="mt-1 text-[13px] text-[#6F6C90]">
+                            {plan.planType}
+                          </p>
                         </div>
                         <div className="text-right">
                           <div className="text-[24px] font-bold text-[#3F205F]">
                             ${plan.price}
                           </div>
-                          <div className="text-[12px] text-[#6F6C90]">{plan.currency}</div>
+                          <div className="text-[12px] text-[#6F6C90]">
+                            {plan.currency}
+                          </div>
                         </div>
                       </div>
 
@@ -385,7 +466,9 @@ export default function DataUsage() {
                             />
                             <circle cx="10" cy="10" r="3" fill="currentColor" />
                           </svg>
-                          <span className="font-semibold text-[#0A0A0A]">{plan.totalData}GB</span>
+                          <span className="font-semibold text-[#0A0A0A]">
+                            {plan.totalData}GB
+                          </span>
                           <span className="text-[#6F6C90]">Total Data</span>
                         </div>
                         {/* <div className="flex items-center gap-2 text-[14px]">
@@ -415,19 +498,30 @@ export default function DataUsage() {
                               strokeWidth="1.5"
                               fill="none"
                             />
-                            <path d="M10 6v4l3 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                            <path
+                              d="M10 6v4l3 2"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                            />
                           </svg>
-                          <span className="text-[#6F6C90]">{plan.validityDays} days validity</span>
+                          <span className="text-[#6F6C90]">
+                            {plan.validityDays} days validity
+                          </span>
                         </div>
                       </div>
 
                       {/* Description */}
-                      <p className="mb-4 text-[13px] text-[#6F6C90]">{plan.description}</p>
+                      <p className="mb-4 text-[13px] text-[#6F6C90]">
+                        {plan.description}
+                      </p>
 
                       {/* Features */}
                       {plan.features && plan.features.length > 0 && (
                         <div className="mb-4">
-                          <div className="mb-2 text-[13px] font-semibold text-[#0A0A0A]">Features:</div>
+                          <div className="mb-2 text-[13px] font-semibold text-[#0A0A0A]">
+                            Features:
+                          </div>
                           <div className="flex flex-wrap gap-2">
                             {plan.features.map((feature, idx) => (
                               <span
@@ -447,7 +541,9 @@ export default function DataUsage() {
                         disabled={selectedPlanId === plan._id}
                         className="mt-4 w-full rounded-[10px] bg-[#3F205F] px-4 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#2F1547] disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {selectedPlanId === plan._id ? "Processing..." : "Select Plan"}
+                        {selectedPlanId === plan._id
+                          ? "Processing..."
+                          : "Select Plan"}
                       </button>
                     </div>
                   ))}

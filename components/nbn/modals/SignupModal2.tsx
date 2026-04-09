@@ -51,15 +51,23 @@ export default function SignupModal2({
     if (availablePlans && availablePlans.length > 0) {
       const mapped = availablePlans.map((p: any) => ({
         id: p.id,
-        name: p.label || p.name || 'NBN Plan',
+        name: p.label || p.name || "NBN Plan",
         price: parseFloat(p.fee) || parseFloat(p.price) || 0,
-        features: p.features || ["Unlimited Data", "24/7 Support", "No Lock-in Contract"],
-        speed: p.speed || ""
+        features: p.features || [
+          "Unlimited Data",
+          "24/7 Support",
+          "No Lock-in Contract",
+        ],
+        speed: p.speed || "",
       }));
       setPlans(mapped);
 
       if (initialSelectedPlan) {
-        const found = mapped.find((p: any) => p.id === initialSelectedPlan.id || p.name === initialSelectedPlan.name);
+        const found = mapped.find(
+          (p: any) =>
+            p.id === initialSelectedPlan.id ||
+            p.name === initialSelectedPlan.name,
+        );
         if (found) setSelectedPlan(found);
       }
     } else {
@@ -81,7 +89,14 @@ export default function SignupModal2({
       <SectionPanel>
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[var(--cl-brand-ink)] text-white">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 8c6-5 12-5 18 0M6 12c4-3 8-3 12 0M9 16c2-1.5 4-1.5 6 0" stroke="white" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M3 8c6-5 12-5 18 0M6 12c4-3 8-3 12 0M9 16c2-1.5 4-1.5 6 0"
+                stroke="white"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
           </div>
           <h2 className="modal-h1 mt-4">Choose Your NBN Plan</h2>
           <p className="modal-sub mt-1">Select the plan that suits you</p>
@@ -101,7 +116,9 @@ export default function SignupModal2({
                 </div>
               ))
             ) : loadError ? (
-              <div className="col-span-3 text-center text-red-600">Failed to load plans. Please try again later.</div>
+              <div className="col-span-3 text-center text-red-600">
+                Failed to load plans. Please try again later.
+              </div>
             ) : plans.length === 0 ? (
               <div className="col-span-3 text-center">No plans available</div>
             ) : (
@@ -122,20 +139,39 @@ export default function SignupModal2({
                     {isSelected && (
                       <div className="mb-3 flex items-center justify-end">
                         <div className="grid h-6 w-6 place-items-center rounded-full bg-[#5C3B86] text-white">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                            <path d="M20 6L9 17l-5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path
+                              d="M20 6L9 17l-5-5"
+                              stroke="white"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
                           </svg>
                         </div>
                       </div>
                     )}
-                    <div className={("text-[20px] font-semibold") + (isSelected ? " text-[#5C3B86]" : " text-[#7C7396]")}>
+                    <div
+                      className={
+                        "text-[20px] font-semibold" +
+                        (isSelected ? " text-[#5C3B86]" : " text-[#7C7396]")
+                      }
+                    >
                       {plan.name}
                     </div>
                     {plan.speed && (
-                      <div className="mt-1 text-[14px] text-[#6F6C90]">{plan.speed}</div>
+                      <div className="mt-1 text-[14px] text-[#6F6C90]">
+                        {plan.speed}
+                      </div>
                     )}
                     <div className="mt-3 text-[34px] font-extrabold text-[var(--cl-brand-ink)]">
-                      ${plan.price.toFixed(2)}<span className="text-[18px] font-semibold">/month</span>
+                      ${plan.price.toFixed(2)}
+                      <span className="text-[18px] font-semibold">/month</span>
                     </div>
                     <ul className="mt-4 space-y-2 text-[#5D5875]">
                       {plan.features.map((feature, idx) => (
@@ -150,7 +186,11 @@ export default function SignupModal2({
         </div>
       </SectionPanel>
 
-      <BarActions onBack={onBack} onNext={onNext} nextDisabled={!selectedPlan || loading || !!loadError} />
+      <BarActions
+        onBack={onBack}
+        onNext={onNext}
+        nextDisabled={!selectedPlan || loading || !!loadError}
+      />
     </ModalShell>
   );
 }

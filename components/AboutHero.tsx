@@ -10,7 +10,8 @@ export default function AboutHero() {
               We are not a big telco. That is our strength.
             </h1>
             <p className="text-[#6F6C90] text-[22px] leading-[33px]">
-              We saw a gap between complex products and the human support people need. So we built a telco that puts real connection first.
+              We saw a gap between complex products and the human support people
+              need. So we built a telco that puts real connection first.
             </p>
           </div>
 

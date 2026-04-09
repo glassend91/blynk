@@ -24,7 +24,10 @@ export default function Plans() {
             Simple Plans, Powerful Support
           </h2>
           <p className="text-white text-[16px] leading-[24px] md:text-[18px] md:leading-[27px] font-normal">
-            We’ve stripped away the confusing bundles and hidden fees. Just simple NBN and Mobile plans with the freedom of no lock-in contracts. It’s connectivity that’s easy to choose and even easier to use.
+            We’ve stripped away the confusing bundles and hidden fees. Just
+            simple NBN and Mobile plans with the freedom of no lock-in
+            contracts. It’s connectivity that’s easy to choose and even easier
+            to use.
           </p>
         </div>
 
@@ -107,22 +110,31 @@ function PlanCard({
 
       {/* Title + Desc */}
       <div className="flex flex-col items-center gap-[6px] text-center">
-        <h3 className="text-white text-[22px] leading-[32px] md:text-[32px] md:leading-[48px] font-bold">{title}</h3>
-        <p className="text-white text-[14px] leading-[22px] md:text-[16px] md:leading-[24px]">{desc}</p>
+        <h3 className="text-white text-[22px] leading-[32px] md:text-[32px] md:leading-[48px] font-bold">
+          {title}
+        </h3>
+        <p className="text-white text-[14px] leading-[22px] md:text-[16px] md:leading-[24px]">
+          {desc}
+        </p>
       </div>
 
       {/* Price */}
-      <div className="flex justify-start" >
+      <div className="flex justify-start">
         <p className="text-[32px] leading-[48px] font-bold text-white">
           {price.split(" ")[0]}{" "}
-          <span style={{ color: highlightColor }}>{price.split(" ").slice(1).join(" ")}</span>
+          <span style={{ color: highlightColor }}>
+            {price.split(" ").slice(1).join(" ")}
+          </span>
         </p>
       </div>
 
       {/* Features */}
       <ul className="flex flex-col items-start gap-3 md:gap-4 w-full">
         {features.map((feature, idx) => (
-          <li key={idx} className="flex items-center gap-2 text-white text-[14px] leading-[22px] md:text-[16px] md:leading-[24px]">
+          <li
+            key={idx}
+            className="flex items-center gap-2 text-white text-[14px] leading-[22px] md:text-[16px] md:leading-[24px]"
+          >
             <span className="h-[20px] w-[20px] flex-shrink-0 rounded-full bg-[#8B8B8B]" />
             {feature}
           </li>
@@ -139,7 +151,9 @@ function PlanCard({
         {tags.map((tag, idx) => (
           <div key={idx} className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-white" />
-            <span className="text-white text-[12px] leading-[18px] md:text-[14px] md:leading-[21px]">{tag}</span>
+            <span className="text-white text-[12px] leading-[18px] md:text-[14px] md:leading-[21px]">
+              {tag}
+            </span>
           </div>
         ))}
       </div>

@@ -17,14 +17,19 @@ export default function ManualOTPVerify({
 
   return (
     <div className="rounded-2xl border border-[#EEEAF4] bg-white p-5">
-      <h3 className="text-[18px] font-bold text-[#0A0A0A]">Manual Verification</h3>
+      <h3 className="text-[18px] font-bold text-[#0A0A0A]">
+        Manual Verification
+      </h3>
       <p className="mt-1 text-[14px] text-[#6F6C90]">
-        Ask the customer to read the OTP they received. Enter it below and click <b>Verify</b>.
+        Ask the customer to read the OTP they received. Enter it below and click{" "}
+        <b>Verify</b>.
       </p>
 
       <div className="mt-4 flex flex-wrap items-end gap-3">
         <div className="grow">
-          <label className="mb-1 block text-[13px] font-semibold text-[#6F6C90]">Enter OTP received by customer</label>
+          <label className="mb-1 block text-[13px] font-semibold text-[#6F6C90]">
+            Enter OTP received by customer
+          </label>
           <input
             inputMode="numeric"
             value={otp}
@@ -44,7 +49,9 @@ export default function ManualOTPVerify({
         </button>
       </div>
 
-      {error ? <p className="mt-2 text-[14px] font-medium text-[#C63D3D]">{error}</p> : null}
+      {error ? (
+        <p className="mt-2 text-[14px] font-medium text-[#C63D3D]">{error}</p>
+      ) : null}
 
       {success ? (
         <div className="mt-3 rounded-[10px] bg-[#ECFDF3] px-3 py-2 text-[14px] font-semibold text-[#05603A]">

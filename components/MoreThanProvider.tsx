@@ -2,15 +2,12 @@
 import Image from "next/image";
 import mapSrc from "@/app/assets/images/Morethanproviders.png";
 
-
 type Props = {
   /** High-res SVG/PNG of the Australia network map from your design */
   mapSrc?: string;
 };
 
-export default function MoreThanNeighbour({
-
-}: Props) {
+export default function MoreThanNeighbour({}: Props) {
   return (
     <section className="relative">
       {/* background wash */}
@@ -34,10 +31,13 @@ export default function MoreThanNeighbour({
             </h2>
 
             <p className="mt-5 max-w-[640px] text-[18px] leading-[30px] text-[#6F6C90]">
-              At Blynk, our commitment to local goes beyond just our support network. We believe in the power of
-              community. As we grow, our goal is to invest back into the neighbourhoods we serve, whether that&rsquo;s
-              by supporting local events, partnering with other small businesses, or simply being a friendly, familiar
-              face you can rely on. Because great service starts with being a great neighbour.
+              At Blynk, our commitment to local goes beyond just our support
+              network. We believe in the power of community. As we grow, our
+              goal is to invest back into the neighbourhoods we serve, whether
+              that&rsquo;s by supporting local events, partnering with other
+              small businesses, or simply being a friendly, familiar face you
+              can rely on. Because great service starts with being a great
+              neighbour.
             </p>
           </div>
 

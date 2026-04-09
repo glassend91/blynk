@@ -59,4 +59,9 @@ export const initialUsers: UserRow[] = [
 
 export const allRoles: Array<Role | "All Roles"> = ["All Roles"];
 
-export const allStatuses: Array<Status | "All Status"> = ["All Status", "Active", "Inactive", "Pending"];
+export const allStatuses: Array<Status | "All Status"> = [
+  "All Status",
+  "Active",
+  "Inactive",
+  "Pending",
+];

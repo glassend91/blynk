@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import apiClient from '@/lib/apiClient';
+import * as React from "react";
+import { useState, useEffect } from "react";
+import apiClient from "@/lib/apiClient";
 
 type Customer = {
   userId: string;
@@ -12,8 +12,15 @@ type Customer = {
   name: string;
 };
 
-const noteTypes = ['General', 'Billing', 'Technical', 'Account', 'Verification', 'Other'];
-const priorities = ['Low', 'Medium', 'High', 'Urgent'];
+const noteTypes = [
+  "General",
+  "Billing",
+  "Technical",
+  "Account",
+  "Verification",
+  "Other",
+];
+const priorities = ["Low", "Medium", "High", "Urgent"];
 
 export function AddNoteDialog({
   open,
@@ -24,14 +31,14 @@ export function AddNoteDialog({
   onOpenChange: (v: boolean) => void;
   onSuccess?: () => void;
 }) {
-  const [customerId, setCustomerId] = useState('');
-  const [noteType, setNoteType] = useState('');
-  const [priority, setPriority] = useState('');
-  const [content, setContent] = useState('');
-  const [tags, setTags] = useState('');
+  const [customerId, setCustomerId] = useState("");
+  const [noteType, setNoteType] = useState("");
+  const [priority, setPriority] = useState("");
+  const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
   const [isCritical, setIsCritical] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
@@ -41,13 +48,13 @@ export function AddNoteDialog({
       fetchCustomers();
     } else {
       // Reset form when closed
-      setCustomerId('');
-      setNoteType('');
-      setPriority('');
-      setContent('');
-      setTags('');
+      setCustomerId("");
+      setNoteType("");
+      setPriority("");
+      setContent("");
+      setTags("");
       setIsCritical(false);
-      setSearchQuery('');
+      setSearchQuery("");
       setError(null);
       setSubmitting(false);
     }
@@ -56,13 +63,16 @@ export function AddNoteDialog({
   const fetchCustomers = async () => {
     try {
       setLoadingCustomers(true);
-      const { data } = await apiClient.get<{ success: boolean; users: Customer[] }>('/auth/users');
+      const { data } = await apiClient.get<{
+        success: boolean;
+        users: Customer[];
+      }>("/auth/users");
 
       if (data?.success && data.users) {
         setCustomers(data.users);
       }
     } catch (err: any) {
-      console.error('Failed to fetch customers:', err);
+      console.error("Failed to fetch customers:", err);
       // Continue without customers list - user can enter ID manually
     } finally {
       setLoadingCustomers(false);
@@ -72,17 +82,19 @@ export function AddNoteDialog({
   const filteredCustomers = customers.filter(
     (c) =>
       c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      `${c.firstName} ${c.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
+      `${c.firstName} ${c.lastName}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()),
   );
 
   const handleSubmit = async () => {
     if (!customerId.trim()) {
-      setError('Customer is required');
+      setError("Customer is required");
       return;
     }
 
     if (!content.trim()) {
-      setError('Note content is required');
+      setError("Note content is required");
       return;
     }
 
@@ -91,30 +103,30 @@ export function AddNoteDialog({
       setError(null);
 
       const tagsArray = tags
-        .split(',')
+        .split(",")
         .map((t) => t.trim())
         .filter(Boolean);
 
-      const { data } = await apiClient.post<{ success: boolean; message: string }>(
-        '/customer-verification/notes',
-        {
-          customerId: customerId.trim(),
-          noteType: noteType || 'General',
-          priority: priority || 'Medium',
-          content: content.trim(),
-          tags: tagsArray.length > 0 ? tagsArray : undefined,
-          isCritical: isCritical,
-        }
-      );
+      const { data } = await apiClient.post<{
+        success: boolean;
+        message: string;
+      }>("/customer-verification/notes", {
+        customerId: customerId.trim(),
+        noteType: noteType || "General",
+        priority: priority || "Medium",
+        content: content.trim(),
+        tags: tagsArray.length > 0 ? tagsArray : undefined,
+        isCritical: isCritical,
+      });
 
       if (data?.success) {
         onSuccess?.();
         onOpenChange(false);
       } else {
-        setError('Failed to save note. Please try again.');
+        setError("Failed to save note. Please try again.");
       }
     } catch (err: any) {
-      setError(err?.message || 'Failed to save note. Please try again.');
+      setError(err?.message || "Failed to save note. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -126,15 +138,15 @@ export function AddNoteDialog({
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -150,12 +162,12 @@ export function AddNoteDialog({
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
       {/* Backdrop */}
@@ -170,9 +182,9 @@ export function AddNoteDialog({
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 80
+          width: "100vw",
+          height: "100vh",
+          zIndex: 80,
         }}
       />
 
@@ -181,15 +193,17 @@ export function AddNoteDialog({
         className="fixed z-[81] w-full max-w-[780px] rounded-2xl bg-white p-6 shadow-2xl mx-4"
         onClick={(e) => e.stopPropagation()}
         style={{
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          maxHeight: '90vh',
-          overflowY: 'auto'
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          maxHeight: "90vh",
+          overflowY: "auto",
         }}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-[22px] font-bold text-[#0A0A0A]">Add Customer Note</h3>
+          <h3 className="text-[22px] font-bold text-[#0A0A0A]">
+            Add Customer Note
+          </h3>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -200,7 +214,11 @@ export function AddNoteDialog({
             disabled={submitting}
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
-              <path d="m6 6 12 12M6 18 18 6" stroke="#DD3B3B" strokeWidth="1.7" />
+              <path
+                d="m6 6 12 12M6 18 18 6"
+                stroke="#DD3B3B"
+                strokeWidth="1.7"
+              />
             </svg>
           </button>
         </div>
@@ -222,7 +240,9 @@ export function AddNoteDialog({
             />
           </div>
           <div>
-            <label className="mb-2 block text-[13px] font-semibold text-[#6F6C90]">Note Type</label>
+            <label className="mb-2 block text-[13px] font-semibold text-[#6F6C90]">
+              Note Type
+            </label>
             <Select
               options={noteTypes}
               value={noteType}
@@ -232,7 +252,9 @@ export function AddNoteDialog({
             />
           </div>
           <div className="md:col-span-2">
-            <label className="mb-2 block text-[13px] font-semibold text-[#6F6C90]">Priority</label>
+            <label className="mb-2 block text-[13px] font-semibold text-[#6F6C90]">
+              Priority
+            </label>
             <Select
               options={priorities}
               value={priority}
@@ -275,7 +297,10 @@ export function AddNoteDialog({
               className="h-4 w-4 accent-[#401B60] mt-0.5 flex-shrink-0"
               disabled={submitting}
             />
-            <label htmlFor="isCriticalDialog" className="text-[13px] sm:text-[14px] text-[#0A0A0A] cursor-pointer leading-relaxed">
+            <label
+              htmlFor="isCriticalDialog"
+              className="text-[13px] sm:text-[14px] text-[#0A0A0A] cursor-pointer leading-relaxed"
+            >
               Critical Note (pinned to top, highlighted in red)
             </label>
           </div>
@@ -306,7 +331,7 @@ export function AddNoteDialog({
             }}
             disabled={submitting}
           >
-            {submitting ? 'Saving...' : 'Save Note'}
+            {submitting ? "Saving..." : "Save Note"}
           </button>
         </div>
       </div>
@@ -332,23 +357,27 @@ function CustomerSelect({
   disabled: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState('');
+  const [inputValue, setInputValue] = React.useState("");
 
   const selectedCustomer = customers.find((c) => c.userId === value);
 
   const filteredCustomers = customers.filter(
     (c) =>
       c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      `${c.name || (c.firstName + ' ' + c.lastName)}`.toLowerCase().includes(searchQuery.toLowerCase())
+      `${c.name || c.firstName + " " + c.lastName}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()),
   );
 
   useEffect(() => {
     if (selectedCustomer) {
-      setInputValue(`${selectedCustomer.name || (selectedCustomer.firstName + ' ' + selectedCustomer.lastName)} (${selectedCustomer.email})`);
+      setInputValue(
+        `${selectedCustomer.name || selectedCustomer.firstName + " " + selectedCustomer.lastName} (${selectedCustomer.email})`,
+      );
     } else if (value && !selectedCustomer) {
       setInputValue(value); // Allow manual entry of customer ID
     } else {
-      setInputValue('');
+      setInputValue("");
     }
   }, [value, selectedCustomer]);
 
@@ -381,10 +410,12 @@ function CustomerSelect({
             onClick={(e) => e.stopPropagation()}
           >
             {loading ? (
-              <div className="px-4 py-2 text-[14px] text-[#6F6C90]">Loading...</div>
+              <div className="px-4 py-2 text-[14px] text-[#6F6C90]">
+                Loading...
+              </div>
             ) : filteredCustomers.length === 0 ? (
               <div className="px-4 py-2 text-[14px] text-[#6F6C90]">
-                {searchQuery ? 'No customers found' : 'Start typing to search'}
+                {searchQuery ? "No customers found" : "Start typing to search"}
               </div>
             ) : (
               filteredCustomers.map((c) => (
@@ -394,11 +425,13 @@ function CustomerSelect({
                   onClick={() => {
                     onChange(c.userId);
                     setOpen(false);
-                    setInputValue(`${c.name || (c.firstName + ' ' + c.lastName)} (${c.email})`);
-                    onSearchChange('');
+                    setInputValue(
+                      `${c.name || c.firstName + " " + c.lastName} (${c.email})`,
+                    );
+                    onSearchChange("");
                   }}
                 >
-                  {c.name || (c.firstName + ' ' + c.lastName)} ({c.email})
+                  {c.name || c.firstName + " " + c.lastName} ({c.email})
                 </button>
               ))
             )}
@@ -431,11 +464,16 @@ function Select({
         disabled={disabled}
         className="flex w-full items-center justify-between rounded-lg border border-[#DFDBE3] bg-[#F8F8F8] px-4 py-3 text-left text-[14px] text-[#0A0A0A] outline-none disabled:opacity-50"
       >
-        <span className={value ? 'text-[#0A0A0A]' : 'text-[#A39FB8]'}>
+        <span className={value ? "text-[#0A0A0A]" : "text-[#A39FB8]"}>
           {value || placeholder}
         </span>
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-          <path d="m6 9 6 6 6-6" stroke="#6F6C90" strokeWidth="1.6" strokeLinecap="round" />
+          <path
+            d="m6 9 6 6 6-6"
+            stroke="#6F6C90"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
         </svg>
       </button>
       {open && (

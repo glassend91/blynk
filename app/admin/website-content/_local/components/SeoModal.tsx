@@ -16,9 +16,17 @@ type Props = {
 const fieldClass =
   "w-full rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3 text-[14px] outline-none placeholder-[#6F6C90] focus:border-[#6A1D99]";
 
-export default function SeoModal({ open, onClose, pageKey, initialValue, onSave }: Props) {
+export default function SeoModal({
+  open,
+  onClose,
+  pageKey,
+  initialValue,
+  onSave,
+}: Props) {
   const [metaTitle, setMetaTitle] = useState(initialValue.metaTitle || "");
-  const [metaDescription, setMetaDescription] = useState(initialValue.metaDescription || "");
+  const [metaDescription, setMetaDescription] = useState(
+    initialValue.metaDescription || "",
+  );
   const [keywords, setKeywords] = useState(initialValue.keywords || "");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -37,15 +45,15 @@ export default function SeoModal({ open, onClose, pageKey, initialValue, onSave 
   useEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -77,7 +85,7 @@ export default function SeoModal({ open, onClose, pageKey, initialValue, onSave 
 
       const { data } = await apiClient.patch<{ success: boolean; data: any }>(
         `/website-content/${pageKey}/seo`,
-        blockData
+        blockData,
       );
 
       if (data?.success) {
@@ -103,9 +111,9 @@ export default function SeoModal({ open, onClose, pageKey, initialValue, onSave 
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto'
+        width: "100vw",
+        height: "100vh",
+        overflow: "auto",
       }}
     >
       <div
@@ -116,9 +124,9 @@ export default function SeoModal({ open, onClose, pageKey, initialValue, onSave 
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 90
+          width: "100vw",
+          height: "100vh",
+          zIndex: 90,
         }}
       />
       <div
@@ -127,8 +135,12 @@ export default function SeoModal({ open, onClose, pageKey, initialValue, onSave 
       >
         <div className="mb-1 flex items-center justify-between">
           <div>
-            <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">Edit Content</p>
-            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">SEO Settings</h2>
+            <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">
+              Edit Content
+            </p>
+            <h2 className="text-[26px] font-extrabold text-[#0A0A0A]">
+              SEO Settings
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -225,4 +237,3 @@ function Field({
     </div>
   );
 }
-

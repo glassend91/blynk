@@ -2,8 +2,12 @@
 import ModalShell from "@/components/shared/ModalShell";
 
 export default function InfoStaticIpModal({
-  open, onClose,
-}: { open: boolean; onClose: () => void }) {
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
   if (!open) return null;
 
   return (

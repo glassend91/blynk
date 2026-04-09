@@ -68,15 +68,20 @@ export default function SignupModal4({
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [dobError, setDobError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [serviceAddressError, setServiceAddressError] = useState<string | null>(null);
-  const [billingAddressError, setBillingAddressError] = useState<string | null>(null);
+  const [serviceAddressError, setServiceAddressError] = useState<string | null>(
+    null,
+  );
+  const [billingAddressError, setBillingAddressError] = useState<string | null>(
+    null,
+  );
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const isValidName = (value: string) => /^[a-zA-Z\s'-]{2,}$/.test(value.trim());
+  const isValidName = (value: string) =>
+    /^[a-zA-Z\s'-]{2,}$/.test(value.trim());
 
   const isValidPhone = (value: string) => {
     const digits = value.replace(/[^\d+]/g, "");
@@ -97,14 +102,43 @@ export default function SignupModal4({
 
   // Validate function - runs on Next click
   const validate = (): boolean => {
-    const fnErr = !firstName ? "First name is required" : !isValidName(firstName) ? "Enter a valid first name" : null;
-    const lnErr = !lastName ? "Last name is required" : !isValidName(lastName) ? "Enter a valid last name" : null;
-    const phErr = !phone ? "Phone number is required" : !isValidPhone(phone) ? "Enter a valid phone number" : null;
-    const dbErr = !dateOfBirth ? "Date of birth is required" : !isAdult(dateOfBirth) ? "You must be at least 18 years old" : null;
-    const pwErr = !password ? "Password is required" : password.length < 6 ? "Password must be at least 6 characters" : null;
+    const fnErr = !firstName
+      ? "First name is required"
+      : !isValidName(firstName)
+        ? "Enter a valid first name"
+        : null;
+    const lnErr = !lastName
+      ? "Last name is required"
+      : !isValidName(lastName)
+        ? "Enter a valid last name"
+        : null;
+    const phErr = !phone
+      ? "Phone number is required"
+      : !isValidPhone(phone)
+        ? "Enter a valid phone number"
+        : null;
+    const dbErr = !dateOfBirth
+      ? "Date of birth is required"
+      : !isAdult(dateOfBirth)
+        ? "You must be at least 18 years old"
+        : null;
+    const pwErr = !password
+      ? "Password is required"
+      : password.length < 6
+        ? "Password must be at least 6 characters"
+        : null;
     const saErr = !serviceAddress ? "Service address is required" : null;
-    const baErr = !billingSameAsService && !billingAddress ? "Billing address is required" : null;
-    const emErr = !email ? "Email is required" : !isValidEmail(email) ? "Please enter a valid email address" : emailExists ? (emailError || "Email already registered") : null;
+    const baErr =
+      !billingSameAsService && !billingAddress
+        ? "Billing address is required"
+        : null;
+    const emErr = !email
+      ? "Email is required"
+      : !isValidEmail(email)
+        ? "Please enter a valid email address"
+        : emailExists
+          ? emailError || "Email already registered"
+          : null;
 
     setFirstNameError(fnErr);
     setLastNameError(lnErr);
@@ -115,7 +149,16 @@ export default function SignupModal4({
     setBillingAddressError(baErr);
     setEmailError(emErr);
 
-    return !fnErr && !lnErr && !phErr && !dbErr && !pwErr && !saErr && !baErr && !emErr;
+    return (
+      !fnErr &&
+      !lnErr &&
+      !phErr &&
+      !dbErr &&
+      !pwErr &&
+      !saErr &&
+      !baErr &&
+      !emErr
+    );
   };
 
   useEffect(() => {
@@ -151,7 +194,7 @@ export default function SignupModal4({
     password &&
     password.length >= 6 &&
     dateOfBirth &&
-    (billingSameAsService || billingAddress)
+    (billingSameAsService || billingAddress),
   );
 
   return (
@@ -161,10 +204,19 @@ export default function SignupModal4({
       <SectionPanel>
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[var(--cl-brand-ink)] text-white">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="white" strokeWidth="1.5" /><path d="M20 20c0-4-3.6-6-8-6s-8 2-8 6" stroke="white" strokeWidth="1.5" /></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="8" r="4" stroke="white" strokeWidth="1.5" />
+              <path
+                d="M20 20c0-4-3.6-6-8-6s-8 2-8 6"
+                stroke="white"
+                strokeWidth="1.5"
+              />
+            </svg>
           </div>
           <h2 className="modal-h1 mt-4">Customer Details</h2>
-          <p className="modal-sub mt-1">Please provide your contact information</p>
+          <p className="modal-sub mt-1">
+            Please provide your contact information
+          </p>
         </div>
 
         <div className="card mx-auto mt-8 max-w-[860px] p-6">
@@ -180,7 +232,9 @@ export default function SignupModal4({
                   if (submitted) setFirstNameError(null);
                 }}
               />
-              {firstNameError && <p className="mt-1 text-xs text-red-600">{firstNameError}</p>}
+              {firstNameError && (
+                <p className="mt-1 text-xs text-red-600">{firstNameError}</p>
+              )}
             </FormField>
             <FormField label="Last Name">
               <input
@@ -193,7 +247,9 @@ export default function SignupModal4({
                   if (submitted) setLastNameError(null);
                 }}
               />
-              {lastNameError && <p className="mt-1 text-xs text-red-600">{lastNameError}</p>}
+              {lastNameError && (
+                <p className="mt-1 text-xs text-red-600">{lastNameError}</p>
+              )}
             </FormField>
           </div>
           <div className="mt-4">
@@ -203,31 +259,49 @@ export default function SignupModal4({
                 name="email"
                 type="email"
                 autoComplete="email"
-                className={`input w-full ${emailError || emailExists || (email && !isValidEmail(email))
-                  ? 'border-red-300 bg-red-50'
-                  : email && isValidEmail(email) && !emailChecking
-                    ? 'border-green-300 bg-green-50'
-                    : ''
-                  }`}
+                className={`input w-full ${
+                  emailError || emailExists || (email && !isValidEmail(email))
+                    ? "border-red-300 bg-red-50"
+                    : email && isValidEmail(email) && !emailChecking
+                      ? "border-green-300 bg-green-50"
+                      : ""
+                }`}
                 value={email}
                 onChange={(e) => {
                   onChangeEmail(e.target.value);
                   if (submitted) setEmailError(null);
                 }}
               />
-              {emailChecking && <p className="mt-1 text-xs text-gray-500">Checking availability...</p>}
+              {emailChecking && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Checking availability...
+                </p>
+              )}
               {emailError && !emailChecking && (
                 <p className="mt-1 text-xs text-red-600">{emailError}</p>
               )}
-              {!emailError && email && !isValidEmail(email) && !emailChecking && (
-                <p className="mt-1 text-xs text-red-600">Please enter a valid email address</p>
-              )}
+              {!emailError &&
+                email &&
+                !isValidEmail(email) &&
+                !emailChecking && (
+                  <p className="mt-1 text-xs text-red-600">
+                    Please enter a valid email address
+                  </p>
+                )}
               {!emailError && emailExists && !emailChecking && (
-                <p className="mt-1 text-xs text-red-600">{emailError || "Email already registered"}</p>
+                <p className="mt-1 text-xs text-red-600">
+                  {emailError || "Email already registered"}
+                </p>
               )}
-              {!emailError && email && isValidEmail(email) && !emailExists && !emailChecking && (
-                <p className="mt-1 text-xs text-green-600">Email is available</p>
-              )}
+              {!emailError &&
+                email &&
+                isValidEmail(email) &&
+                !emailExists &&
+                !emailChecking && (
+                  <p className="mt-1 text-xs text-green-600">
+                    Email is available
+                  </p>
+                )}
             </FormField>
           </div>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -243,7 +317,9 @@ export default function SignupModal4({
                   if (submitted) setPhoneError(null);
                 }}
               />
-              {phoneError && <p className="mt-1 text-xs text-red-600">{phoneError}</p>}
+              {phoneError && (
+                <p className="mt-1 text-xs text-red-600">{phoneError}</p>
+              )}
             </FormField>
             <FormField label="Date of Birth">
               <input
@@ -256,9 +332,11 @@ export default function SignupModal4({
                   onChangeDateOfBirth(e.target.value);
                   if (submitted) setDobError(null);
                 }}
-                max={new Date().toISOString().split('T')[0]}
+                max={new Date().toISOString().split("T")[0]}
               />
-              {dobError && <p className="mt-1 text-xs text-red-600">{dobError}</p>}
+              {dobError && (
+                <p className="mt-1 text-xs text-red-600">{dobError}</p>
+              )}
             </FormField>
           </div>
           <div className="mt-4">
@@ -274,7 +352,11 @@ export default function SignupModal4({
                   if (submitted) setServiceAddressError(null);
                 }}
               />
-              {serviceAddressError && <p className="mt-1 text-xs text-red-600">{serviceAddressError}</p>}
+              {serviceAddressError && (
+                <p className="mt-1 text-xs text-red-600">
+                  {serviceAddressError}
+                </p>
+              )}
             </FormField>
           </div>
           <div className="mt-4">
@@ -290,7 +372,9 @@ export default function SignupModal4({
                   if (submitted) setPasswordError(null);
                 }}
               />
-              {passwordError && <p className="mt-1 text-xs text-red-600">{passwordError}</p>}
+              {passwordError && (
+                <p className="mt-1 text-xs text-red-600">{passwordError}</p>
+              )}
             </FormField>
           </div>
 
@@ -324,7 +408,11 @@ export default function SignupModal4({
                       if (submitted) setBillingAddressError(null);
                     }}
                   />
-                  {billingAddressError && <p className="mt-1 text-xs text-red-600">{billingAddressError}</p>}
+                  {billingAddressError && (
+                    <p className="mt-1 text-xs text-red-600">
+                      {billingAddressError}
+                    </p>
+                  )}
                 </FormField>
               </div>
             )}

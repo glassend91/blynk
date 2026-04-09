@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent } from "react";
 
 type Props = {
   value: string;
@@ -18,12 +18,20 @@ export default function SearchBar({ value, onChange, onSearch }: Props) {
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          <path d="M18.3346 18.8337L16.668 17.167" stroke="#292D32" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M18.3346 18.8337L16.668 17.167"
+            stroke="#292D32"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
 
         <input
           value={value}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            onChange(e.target.value)
+          }
           placeholder="Enter customer email or phone..."
           className="w-full bg-transparent text-[16px] leading-[28px] text-[#0A0A0A] outline-none placeholder:text-[#0A0A0A]"
         />

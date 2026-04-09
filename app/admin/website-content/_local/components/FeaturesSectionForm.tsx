@@ -38,7 +38,9 @@ export default function FeaturesSectionForm({
       <Field label="Subtitle" extraClass="mt-4">
         <input
           value={state.subtitle || ""}
-          onChange={(e) => setState((s) => ({ ...s, subtitle: e.target.value }))}
+          onChange={(e) =>
+            setState((s) => ({ ...s, subtitle: e.target.value }))
+          }
           placeholder="We provide comprehensive telecommunications solutions..."
           className="field"
         />
@@ -58,7 +60,9 @@ function Field({
 }) {
   return (
     <div className={extraClass}>
-      <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">{label}</label>
+      <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
+        {label}
+      </label>
       {children}
     </div>
   );

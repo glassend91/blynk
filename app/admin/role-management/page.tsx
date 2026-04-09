@@ -7,7 +7,12 @@ import PermissionMatrix from "./_local/components/PermissionMatrix";
 import CreateRoleModal from "./_local/components/CreateRoleModal";
 import { rolesSeed, permissionGroups } from "./_local/data";
 import type { Role } from "./_local/types";
-import { createRole, deleteRole, getRoles, updateRole } from "@/lib/services/roles";
+import {
+  createRole,
+  deleteRole,
+  getRoles,
+  updateRole,
+} from "@/lib/services/roles";
 import { refreshAuthUser } from "@/lib/auth";
 
 export default function RoleManagementPage() {
@@ -62,7 +67,11 @@ export default function RoleManagementPage() {
     }
   };
 
-  const handlePermissionToggle = async (roleId: string, permissionKey: string, value: boolean) => {
+  const handlePermissionToggle = async (
+    roleId: string,
+    permissionKey: string,
+    value: boolean,
+  ) => {
     try {
       // Find the role to update
       const role = roles.find((r) => r.id === roleId);
@@ -77,10 +86,8 @@ export default function RoleManagementPage() {
       // Optimistically update UI
       setRoles((prev) =>
         prev.map((r) =>
-          r.id === roleId
-            ? { ...r, permissions: updatedPermissions }
-            : r
-        )
+          r.id === roleId ? { ...r, permissions: updatedPermissions } : r,
+        ),
       );
 
       // Update on backend
@@ -91,9 +98,12 @@ export default function RoleManagementPage() {
       try {
         await refreshAuthUser();
         // Force a small delay to ensure localStorage is updated
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (refreshError) {
-        console.error("Failed to refresh user permissions after role update:", refreshError);
+        console.error(
+          "Failed to refresh user permissions after role update:",
+          refreshError,
+        );
       }
     } catch (e) {
       console.error("Failed to update permission", e);
@@ -112,7 +122,9 @@ export default function RoleManagementPage() {
   return (
     <section className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-[26px] font-bold leading-[28px] text-[#0A0A0A]">Roles & Permissions</h1>
+        <h1 className="text-[26px] font-bold leading-[28px] text-[#0A0A0A]">
+          Roles & Permissions
+        </h1>
         <p className="text-[16px] leading-[21px] text-[#6F6C90]">
           Manage user roles and their access permissions.
         </p>

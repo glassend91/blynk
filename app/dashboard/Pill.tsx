@@ -13,7 +13,9 @@ export function Pill({
     grey: "bg-[#EFF1F5] text-[#667085]",
   };
   return (
-    <span className={`inline-flex items-center gap-1 rounded-[8px] px-3 py-1 text-[12px] font-semibold ${tones[tone]}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-[8px] px-3 py-1 text-[12px] font-semibold ${tones[tone]}`}
+    >
       {children}
     </span>
   );

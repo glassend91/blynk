@@ -41,7 +41,10 @@ export default function UserManagementPage() {
           getRoles().catch(() => []),
         ]);
 
-        if (usersResponse.data?.success && Array.isArray(usersResponse.data.users)) {
+        if (
+          usersResponse.data?.success &&
+          Array.isArray(usersResponse.data.users)
+        ) {
           setRows(usersResponse.data.users);
         }
 
@@ -62,18 +65,19 @@ export default function UserManagementPage() {
 
   // Lock body scroll when any modal is open
   useEffect(() => {
-    const isModalOpen = viewUser || editUser || deleteUser || chargeUser || invoicesUser;
+    const isModalOpen =
+      viewUser || editUser || deleteUser || chargeUser || invoicesUser;
     if (isModalOpen) {
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
     }
@@ -101,7 +105,9 @@ export default function UserManagementPage() {
     <section className="space-y-6">
       {/* Page heading matches layout */}
       <header className="space-y-1">
-        <h1 className="text-[26px] font-bold leading-[28px] text-[#0A0A0A]">Customer Management</h1>
+        <h1 className="text-[26px] font-bold leading-[28px] text-[#0A0A0A]">
+          Customer Management
+        </h1>
         <p className="text-[16px] leading-[21px] text-[#6F6C90]">
           Manage customer accounts for your telecommunications platform.
         </p>
@@ -128,14 +134,22 @@ export default function UserManagementPage() {
         <UsersTable
           rows={filtered}
           onView={(u) => setViewUser(u)}
-          onEdit={canEdit ? (u) => {
-            setEditUser(u);
-            setEditName(u.name);
-            setEditStatus(u.status);
-          } : undefined}
-          onDelete={canDelete ? (u) => {
-            setDeleteUser(u);
-          } : undefined}
+          onEdit={
+            canEdit
+              ? (u) => {
+                  setEditUser(u);
+                  setEditName(u.name);
+                  setEditStatus(u.status);
+                }
+              : undefined
+          }
+          onDelete={
+            canDelete
+              ? (u) => {
+                  setDeleteUser(u);
+                }
+              : undefined
+          }
           onCharge={(u) => {
             setChargeUser(u);
             setChargeAmount("");
@@ -145,7 +159,9 @@ export default function UserManagementPage() {
             setInvoicesUser(u);
             setInvoicesLoading(true);
             try {
-              const { data } = await apiClient.get(`/billing/admin/customers/${u.userId}/invoices`);
+              const { data } = await apiClient.get(
+                `/billing/admin/customers/${u.userId}/invoices`,
+              );
               if (data?.success) {
                 setInvoices(data.data.invoices || []);
               }
@@ -169,8 +185,8 @@ export default function UserManagementPage() {
             bottom: 0,
             margin: 0,
             padding: 0,
-            width: '100vw',
-            height: '100vh'
+            width: "100vw",
+            height: "100vh",
           }}
         >
           <div
@@ -180,25 +196,27 @@ export default function UserManagementPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              width: '100vw',
-              height: '100vh',
-              zIndex: 40
+              width: "100vw",
+              height: "100vh",
+              zIndex: 40,
             }}
             onClick={() => setViewUser(null)}
           />
           <div
             className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 41
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 41,
             }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">User Details</h2>
+              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">
+                User Details
+              </h2>
               <button
                 type="button"
                 onClick={() => setViewUser(null)}
@@ -209,30 +227,42 @@ export default function UserManagementPage() {
             </div>
             <div className="space-y-3 text-[14px] text-[#0A0A0A]">
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Name</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Name
+                </div>
                 <div>{viewUser.name}</div>
               </div>
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Email</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Email
+                </div>
                 <div>{viewUser.email}</div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Role</div>
+                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                    Role
+                  </div>
                   <div>{viewUser.role}</div>
                 </div>
                 <div>
-                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Status</div>
+                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                    Status
+                  </div>
                   <div>{viewUser.status}</div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Last Login</div>
+                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                    Last Login
+                  </div>
                   <div>{viewUser.lastLogin}</div>
                 </div>
                 <div>
-                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Created</div>
+                  <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                    Created
+                  </div>
                   <div>{viewUser.created}</div>
                 </div>
               </div>
@@ -261,8 +291,8 @@ export default function UserManagementPage() {
             bottom: 0,
             margin: 0,
             padding: 0,
-            width: '100vw',
-            height: '100vh'
+            width: "100vw",
+            height: "100vh",
           }}
         >
           <div
@@ -272,25 +302,27 @@ export default function UserManagementPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              width: '100vw',
-              height: '100vh',
-              zIndex: 40
+              width: "100vw",
+              height: "100vh",
+              zIndex: 40,
             }}
             onClick={() => setEditUser(null)}
           />
           <div
             className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 41
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 41,
             }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">Edit User</h2>
+              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">
+                Edit User
+              </h2>
               <button
                 type="button"
                 onClick={() => setEditUser(null)}
@@ -321,7 +353,9 @@ export default function UserManagementPage() {
                     const updated = data.user;
                     setRows((prev) =>
                       prev.map((r) =>
-                        r.userId && updated.userId && r.userId === updated.userId
+                        r.userId &&
+                        updated.userId &&
+                        r.userId === updated.userId
                           ? { ...updated, id: r.id }
                           : r,
                       ),
@@ -336,7 +370,9 @@ export default function UserManagementPage() {
               }}
             >
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Name</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Name
+                </div>
                 <input
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
@@ -344,7 +380,9 @@ export default function UserManagementPage() {
                 />
               </div>
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Email</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Email
+                </div>
                 <input
                   value={editUser.email}
                   disabled
@@ -352,7 +390,9 @@ export default function UserManagementPage() {
                 />
               </div>
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Role</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Role
+                </div>
                 <input
                   value={editUser.role}
                   disabled
@@ -360,7 +400,9 @@ export default function UserManagementPage() {
                 />
               </div>
               <div>
-                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">Status</div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  Status
+                </div>
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value as Status)}
@@ -408,8 +450,8 @@ export default function UserManagementPage() {
             bottom: 0,
             margin: 0,
             padding: 0,
-            width: '100vw',
-            height: '100vh'
+            width: "100vw",
+            height: "100vh",
           }}
         >
           <div
@@ -419,25 +461,27 @@ export default function UserManagementPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              width: '100vw',
-              height: '100vh',
-              zIndex: 40
+              width: "100vw",
+              height: "100vh",
+              zIndex: 40,
             }}
             onClick={() => setDeleteUser(null)}
           />
           <div
             className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 41
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 41,
             }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">Delete User</h2>
+              <h2 className="text-[18px] font-semibold text-[#0A0A0A]">
+                Delete User
+              </h2>
               <button
                 type="button"
                 onClick={() => setDeleteUser(null)}
@@ -448,8 +492,11 @@ export default function UserManagementPage() {
             </div>
             <p className="text-[14px] text-[#6F6C90]">
               Are you sure you want to delete{" "}
-              <span className="font-semibold text-[#0A0A0A]">{deleteUser.name}</span>? This is a soft
-              delete and the user will no longer appear in this list.
+              <span className="font-semibold text-[#0A0A0A]">
+                {deleteUser.name}
+              </span>
+              ? This is a soft delete and the user will no longer appear in this
+              list.
             </p>
             <div className="mt-6 flex justify-end gap-2">
               <button
@@ -470,7 +517,9 @@ export default function UserManagementPage() {
                   try {
                     setDeleteLoading(true);
                     await apiClient.delete(`/auth/users/${deleteUser.userId}`);
-                    setRows((prev) => prev.filter((r) => r.userId !== deleteUser.userId));
+                    setRows((prev) =>
+                      prev.filter((r) => r.userId !== deleteUser.userId),
+                    );
                   } catch (err) {
                     console.error("Failed to delete user", err);
                   } finally {
@@ -498,8 +547,8 @@ export default function UserManagementPage() {
             bottom: 0,
             margin: 0,
             padding: 0,
-            width: '100vw',
-            height: '100vh'
+            width: "100vw",
+            height: "100vh",
           }}
         >
           <div
@@ -509,27 +558,31 @@ export default function UserManagementPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              width: '100vw',
-              height: '100vh',
-              zIndex: 40
+              width: "100vw",
+              height: "100vh",
+              zIndex: 40,
             }}
             onClick={() => !chargeLoading && setChargeUser(null)}
           />
           <div
             className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 41
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 41,
             }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
               <div className="flex flex-col">
-                <h2 className="text-[18px] font-bold text-[#0A0A0A]">Manual Charge</h2>
-                <p className="text-[13px] text-[#6F6C90]">Customer: {chargeUser.name}</p>
+                <h2 className="text-[18px] font-bold text-[#0A0A0A]">
+                  Manual Charge
+                </h2>
+                <p className="text-[13px] text-[#6F6C90]">
+                  Customer: {chargeUser.name}
+                </p>
               </div>
               <button
                 type="button"
@@ -544,7 +597,8 @@ export default function UserManagementPage() {
               className="space-y-4"
               onSubmit={async (e) => {
                 e.preventDefault();
-                if (!chargeUser?.userId || !chargeAmount || !chargeDescription) return;
+                if (!chargeUser?.userId || !chargeAmount || !chargeDescription)
+                  return;
 
                 const amountNum = parseFloat(chargeAmount);
                 if (isNaN(amountNum) || amountNum <= 0) {
@@ -554,10 +608,13 @@ export default function UserManagementPage() {
 
                 try {
                   setChargeLoading(true);
-                  const { data } = await apiClient.post(`/billing/admin/customers/${chargeUser.userId}/manual-charge`, {
-                    amount: amountNum,
-                    description: chargeDescription
-                  });
+                  const { data } = await apiClient.post(
+                    `/billing/admin/customers/${chargeUser.userId}/manual-charge`,
+                    {
+                      amount: amountNum,
+                      description: chargeDescription,
+                    },
+                  );
 
                   if (data?.success) {
                     alert("Charge processed successfully!");
@@ -567,7 +624,10 @@ export default function UserManagementPage() {
                   }
                 } catch (err: any) {
                   console.error("Manual charge failed", err);
-                  const msg = err.response?.data?.message || err.message || "An error occurred.";
+                  const msg =
+                    err.response?.data?.message ||
+                    err.message ||
+                    "An error occurred.";
                   alert(`Error: ${msg}`);
                 } finally {
                   setChargeLoading(false);
@@ -579,7 +639,9 @@ export default function UserManagementPage() {
                   Charge Amount (AUD)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6F6C90] font-medium">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6F6C90] font-medium">
+                    $
+                  </span>
                   <input
                     type="number"
                     step="0.01"
@@ -609,7 +671,11 @@ export default function UserManagementPage() {
               </div>
 
               <div className="bg-[#FBFAFD] rounded-[10px] p-4 text-[13px] text-[#6F6C90] border border-[#F0EEF3]">
-                <p><strong>Note:</strong> This will immediately charge the customer's default payment method on file and generate a paid invoice.</p>
+                <p>
+                  <strong>Note:</strong> This will immediately charge the
+                  customer's default payment method on file and generate a paid
+                  invoice.
+                </p>
               </div>
 
               <div className="mt-6 flex justify-end gap-2">
@@ -623,10 +689,14 @@ export default function UserManagementPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={chargeLoading || !chargeAmount || !chargeDescription}
+                  disabled={
+                    chargeLoading || !chargeAmount || !chargeDescription
+                  }
                   className="rounded-[10px] bg-[#19BF66] px-6 py-2 text-[14px] font-bold text-white shadow-md hover:bg-[#15A357] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {chargeLoading ? "Processing..." : `Charge $${parseFloat(chargeAmount || '0').toFixed(2)}`}
+                  {chargeLoading
+                    ? "Processing..."
+                    : `Charge $${parseFloat(chargeAmount || "0").toFixed(2)}`}
                 </button>
               </div>
             </form>
@@ -645,8 +715,8 @@ export default function UserManagementPage() {
             bottom: 0,
             margin: 0,
             padding: 0,
-            width: '100vw',
-            height: '100vh'
+            width: "100vw",
+            height: "100vh",
           }}
         >
           <div
@@ -656,27 +726,31 @@ export default function UserManagementPage() {
               left: 0,
               right: 0,
               bottom: 0,
-              width: '100vw',
-              height: '100vh',
-              zIndex: 40
+              width: "100vw",
+              height: "100vh",
+              zIndex: 40,
             }}
             onClick={() => setInvoicesUser(null)}
           />
           <div
             className="fixed w-full max-w-2xl rounded-[16px] bg-white p-6 shadow-xl"
             style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 41
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 41,
             }}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
               <div className="flex flex-col">
-                <h2 className="text-[18px] font-bold text-[#0A0A0A]">Customer Invoices</h2>
-                <p className="text-[13px] text-[#6F6C90]">User: {invoicesUser.name}</p>
+                <h2 className="text-[18px] font-bold text-[#0A0A0A]">
+                  Customer Invoices
+                </h2>
+                <p className="text-[13px] text-[#6F6C90]">
+                  User: {invoicesUser.name}
+                </p>
               </div>
               <button
                 type="button"
@@ -689,9 +763,13 @@ export default function UserManagementPage() {
 
             <div className="max-h-[60vh] overflow-y-auto">
               {invoicesLoading ? (
-                <div className="py-10 text-center text-[#6F6C90]">Loading invoices...</div>
+                <div className="py-10 text-center text-[#6F6C90]">
+                  Loading invoices...
+                </div>
               ) : invoices.length === 0 ? (
-                <div className="py-10 text-center text-[#6F6C90]">No invoices found for this customer.</div>
+                <div className="py-10 text-center text-[#6F6C90]">
+                  No invoices found for this customer.
+                </div>
               ) : (
                 <table className="w-full border-collapse">
                   <thead className="sticky top-0 bg-[#F8F8F8] text-[12px] text-[#6F6C90] uppercase tracking-wider">
@@ -705,37 +783,73 @@ export default function UserManagementPage() {
                   </thead>
                   <tbody className="divide-y divide-[#F0EEF3]">
                     {invoices.map((inv) => (
-                      <tr key={inv._id} className="hover:bg-[#FBFAFD] [&>td]:px-4 [&>td]:py-3">
-                        <td className="font-medium font-mono text-[13px]">{inv.invoiceNumber}</td>
-                        <td className="text-[#6F6C90]">{new Date(inv.billingPeriod?.startDate).toLocaleDateString()}</td>
-                        <td className="font-semibold text-[#0A0A0A]">${inv.total?.toFixed(2)}</td>
+                      <tr
+                        key={inv._id}
+                        className="hover:bg-[#FBFAFD] [&>td]:px-4 [&>td]:py-3"
+                      >
+                        <td className="font-medium font-mono text-[13px]">
+                          {inv.invoiceNumber}
+                        </td>
+                        <td className="text-[#6F6C90]">
+                          {new Date(
+                            inv.billingPeriod?.startDate,
+                          ).toLocaleDateString()}
+                        </td>
+                        <td className="font-semibold text-[#0A0A0A]">
+                          ${inv.total?.toFixed(2)}
+                        </td>
                         <td>
-                          <span className={`text-[12px] font-bold px-2 py-0.5 rounded-full ${inv.status === 'paid' ? 'bg-[#E7F9EF] text-[#19BF66]' :
-                            inv.status === 'refunded' ? 'bg-[#FEEBEB] text-[#E0342F]' :
-                              inv.status === 'cancelled' ? 'bg-[#F0EEF3] text-[#6F6C90]' :
-                                'bg-[#FEF3C7] text-[#D97706]'
-                            }`}>
+                          <span
+                            className={`text-[12px] font-bold px-2 py-0.5 rounded-full ${
+                              inv.status === "paid"
+                                ? "bg-[#E7F9EF] text-[#19BF66]"
+                                : inv.status === "refunded"
+                                  ? "bg-[#FEEBEB] text-[#E0342F]"
+                                  : inv.status === "cancelled"
+                                    ? "bg-[#F0EEF3] text-[#6F6C90]"
+                                    : "bg-[#FEF3C7] text-[#D97706]"
+                            }`}
+                          >
                             {inv.status.toUpperCase()}
                           </span>
                         </td>
                         <td className="text-right">
-                          {inv.status === 'paid' && (
+                          {inv.status === "paid" && (
                             <button
                               onClick={async () => {
-                                if (!confirm(`Are you sure you want to refund invoice ${inv.invoiceNumber}?`)) return;
+                                if (
+                                  !confirm(
+                                    `Are you sure you want to refund invoice ${inv.invoiceNumber}?`,
+                                  )
+                                )
+                                  return;
                                 try {
                                   setInvoicesLoading(true);
-                                  const { data } = await apiClient.post(`/billing/admin/invoices/${inv._id}/refund`, {
-                                    reason: "Admin initiated refund from portal"
-                                  });
+                                  const { data } = await apiClient.post(
+                                    `/billing/admin/invoices/${inv._id}/refund`,
+                                    {
+                                      reason:
+                                        "Admin initiated refund from portal",
+                                    },
+                                  );
                                   if (data?.success) {
                                     alert("Refund processed successfully!");
                                     // Refresh invoices
-                                    const { data: refreshData } = await apiClient.get(`/billing/admin/customers/${invoicesUser.userId}/invoices`);
-                                    if (refreshData?.success) setInvoices(refreshData.data.invoices || []);
+                                    const { data: refreshData } =
+                                      await apiClient.get(
+                                        `/billing/admin/customers/${invoicesUser.userId}/invoices`,
+                                      );
+                                    if (refreshData?.success)
+                                      setInvoices(
+                                        refreshData.data.invoices || [],
+                                      );
                                   }
                                 } catch (err: any) {
-                                  alert("Refund failed: " + (err.response?.data?.message || err.message));
+                                  alert(
+                                    "Refund failed: " +
+                                      (err.response?.data?.message ||
+                                        err.message),
+                                  );
                                 } finally {
                                   setInvoicesLoading(false);
                                 }

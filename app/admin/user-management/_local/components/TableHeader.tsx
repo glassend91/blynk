@@ -67,14 +67,20 @@ export function Select({
           fill="none"
           className={`text-[#6F6C90] transition-transform ${open && openUp ? "rotate-180" : ""}`}
         >
-          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          <path
+            d="M6 9l6 6 6-6"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
         </svg>
       </button>
 
       {open && (
         <div
-          className={`absolute z-20 w-full rounded-[10px] border border-[#DFDBE3] bg-white p-2 shadow-[0_10px_24px_rgba(17,24,39,0.06)] ${openUp ? "bottom-full mb-2" : "top-full mt-2"
-            }`}
+          className={`absolute z-20 w-full rounded-[10px] border border-[#DFDBE3] bg-white p-2 shadow-[0_10px_24px_rgba(17,24,39,0.06)] ${
+            openUp ? "bottom-full mb-2" : "top-full mt-2"
+          }`}
           role="listbox"
         >
           {options.map((opt) => (
@@ -87,7 +93,9 @@ export function Select({
               }}
               className={[
                 "block w-full rounded-[8px] px-3 py-2 text-left text-[14px]",
-                opt === value ? "bg-[#19BF66] font-semibold text-white" : "text-[#0A0A0A] hover:bg-[#F7F6FB]",
+                opt === value
+                  ? "bg-[#19BF66] font-semibold text-white"
+                  : "text-[#0A0A0A] hover:bg-[#F7F6FB]",
               ].join(" ")}
               role="option"
               aria-selected={opt === value}
@@ -113,15 +121,27 @@ export default function TableHeader({
   isCustomerOnly,
 }: Props) {
   // Combine "All Roles" with available roles for the dropdown
-  const roleOptions: Array<Role | "All Roles"> = ["All Roles", ...availableRoles];
+  const roleOptions: Array<Role | "All Roles"> = [
+    "All Roles",
+    ...availableRoles,
+  ];
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex flex-1 flex-wrap items-center gap-4">
         <div className="flex w-full max-w-[380px] items-center gap-3 rounded-[10px] border border-[#DFDBE3] bg-white px-4 py-3">
           <svg width="18" height="18" viewBox="0 0 20 21" fill="none">
-            <path d="M9.6 18c4.4 0 8-3.6 8-8s-3.6-8-8-8-8 3.6-8 8 3.6 8 8 8Z" stroke="#292D32" strokeWidth="1.5" />
-            <path d="m18.3 18.8-1.7-1.7" stroke="#292D32" strokeWidth="1.5" strokeLinecap="round" />
+            <path
+              d="M9.6 18c4.4 0 8-3.6 8-8s-3.6-8-8-8-8 3.6-8 8 3.6 8 8 8Z"
+              stroke="#292D32"
+              strokeWidth="1.5"
+            />
+            <path
+              d="m18.3 18.8-1.7-1.7"
+              stroke="#292D32"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
           </svg>
           <input
             value={query}
@@ -131,12 +151,14 @@ export default function TableHeader({
           />
         </div>
 
-        {!isCustomerOnly && <Select
-          label={role === "All Roles" ? "Filter by role" : role}
-          value={role}
-          onChange={(v) => onRole(v as Role | "All Roles")}
-          options={roleOptions}
-        />}
+        {!isCustomerOnly && (
+          <Select
+            label={role === "All Roles" ? "Filter by role" : role}
+            value={role}
+            onChange={(v) => onRole(v as Role | "All Roles")}
+            options={roleOptions}
+          />
+        )}
 
         <Select
           label={status === "All Status" ? "Filter by status" : status}

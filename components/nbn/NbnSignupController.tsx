@@ -36,7 +36,11 @@ export default function NbnSignupController({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number; id?: string } | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<{
+    name: string;
+    price: number;
+    id?: string;
+  } | null>(null);
   const [availablePlans, setAvailablePlans] = useState<any[]>([]);
   const [locId, setLocId] = useState<string>("");
   const [ntdId, setNtdId] = useState<string>("");
@@ -44,7 +48,8 @@ export default function NbnSignupController({
   const [serviceRef, setServiceRef] = useState<string>("");
   const [wantsStaticIp, setWantsStaticIp] = useState<boolean>(true); // Default checked as per original design
   const [dateOfBirth, setDateOfBirth] = useState<string>("");
-  const [billingSameAsService, setBillingSameAsService] = useState<boolean>(true);
+  const [billingSameAsService, setBillingSameAsService] =
+    useState<boolean>(true);
   const [billingAddress, setBillingAddress] = useState<string>("");
 
   const [maxReached, setMaxReached] = useState<number>(() => {
@@ -123,21 +128,40 @@ export default function NbnSignupController({
     } finally {
       setApiLoading(false);
     }
-  }, [firstName, lastName, email, password, phone, serviceAddress, selectedPlan, locId, ntdId, port, serviceRef, wantsStaticIp, dateOfBirth, billingSameAsService, billingAddress]);
+  }, [
+    firstName,
+    lastName,
+    email,
+    password,
+    phone,
+    serviceAddress,
+    selectedPlan,
+    locId,
+    ntdId,
+    port,
+    serviceRef,
+    wantsStaticIp,
+    dateOfBirth,
+    billingSameAsService,
+    billingAddress,
+  ]);
 
   const goNext = useCallback(() => {
-    setStep((s: any) => Math.min(6, (s + 1)));
+    setStep((s: any) => Math.min(6, s + 1));
   }, []);
 
   const goBack = useCallback(() => {
-    setStep((s: any) => Math.max(1, (s - 1)));
+    setStep((s: any) => Math.max(1, s - 1));
   }, []);
 
-  const handleStepClick = useCallback((s: number) => {
-    if (s <= maxReached && s !== step) {
-      setStep(s);
-    }
-  }, [maxReached, step]);
+  const handleStepClick = useCallback(
+    (s: number) => {
+      if (s <= maxReached && s !== step) {
+        setStep(s);
+      }
+    },
+    [maxReached, step],
+  );
 
   if (!open) return null;
 
@@ -211,7 +235,15 @@ export default function NbnSignupController({
             maxReached={maxReached}
           />
         )}
-        {step === 5 && <SignupModal5 onNext={goNext} onBack={goBack} onClose={handleCloseClick} onStepClick={handleStepClick} maxReached={maxReached} />}
+        {step === 5 && (
+          <SignupModal5
+            onNext={goNext}
+            onBack={goBack}
+            onClose={handleCloseClick}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
+          />
+        )}
         {step === 6 && (
           <SignupModal6
             onNext={() => setShowSuccess(true)}
@@ -227,23 +259,44 @@ export default function NbnSignupController({
           />
         )}
 
-        {showStaticIpInfo && <StaticIPInfoModal onClose={() => setShowStaticIpInfo(false)} />}
+        {showStaticIpInfo && (
+          <StaticIPInfoModal onClose={() => setShowStaticIpInfo(false)} />
+        )}
 
         {showSuccess && (
           <ModalShell onClose={closeAll} size="default">
             <SectionPanel>
               <div className="text-center">
                 <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[var(--cl-brand-ink,#2F2151)] text-white">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <path d="M20 7 10 17 4 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden
+                  >
+                    <path
+                      d="M20 7 10 17 4 11"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </div>
                 <h2 className="modal-h1 mt-4">Thank You!</h2>
                 <p className="modal-sub mt-1">Your order is complete.</p>
                 <p className="mt-4 text-[15px] text-[#6A6486] max-w-md mx-auto">
-                  You will receive an email shortly with your new plan details and receipt.
+                  You will receive an email shortly with your new plan details
+                  and receipt.
                 </p>
-                <button type="button" onClick={closeAll} className="btn-primary mt-6">Close</button>
+                <button
+                  type="button"
+                  onClick={closeAll}
+                  className="btn-primary mt-6"
+                >
+                  Close
+                </button>
               </div>
             </SectionPanel>
           </ModalShell>

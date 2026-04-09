@@ -16,8 +16,13 @@ type Props = {
   onCreditRefundApplied?: () => void;
 };
 
-export default function FinancialOverview({ customerId, onCreditRefundApplied }: Props) {
-  const [financialData, setFinancialData] = useState<FinancialData | null>(null);
+export default function FinancialOverview({
+  customerId,
+  onCreditRefundApplied,
+}: Props) {
+  const [financialData, setFinancialData] = useState<FinancialData | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCreditRefundModal, setShowCreditRefundModal] = useState(false);
@@ -39,21 +44,27 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
       setError(null);
 
       // Fetch financial data from API
-      const { data } = await apiClient.get<{ success: boolean; data?: FinancialData; financial?: FinancialData }>(
-        `/customer-verification/financial/${customerId}`
-      ).catch(async () => {
-        // Fallback: try alternative endpoint
-        return await apiClient.get<{ success: boolean; data?: FinancialData; financial?: FinancialData }>(
-          `/customer-plans/financial/${customerId}`
-        );
-      });
+      const { data } = await apiClient
+        .get<{
+          success: boolean;
+          data?: FinancialData;
+          financial?: FinancialData;
+        }>(`/customer-verification/financial/${customerId}`)
+        .catch(async () => {
+          // Fallback: try alternative endpoint
+          return await apiClient.get<{
+            success: boolean;
+            data?: FinancialData;
+            financial?: FinancialData;
+          }>(`/customer-plans/financial/${customerId}`);
+        });
 
       if (data?.success) {
         let financial: FinancialData;
 
-        if ('data' in data) {
+        if ("data" in data) {
           financial = data.data;
-        } else if ('financial' in data) {
+        } else if ("financial" in data) {
           financial = data.financial;
         } else {
           financial = {
@@ -84,7 +95,9 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
   if (!customerId) {
     return (
       <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-6 shadow-[0_37px_37px_rgba(0,0,0,0.05)]">
-        <h2 className="text-[20px] font-semibold text-[#0A0A0A] mb-4">Financial Overview</h2>
+        <h2 className="text-[20px] font-semibold text-[#0A0A0A] mb-4">
+          Financial Overview
+        </h2>
         <div className="text-center py-8">
           <p className="text-[14px] text-[#6F6C90]">
             Select a customer to view their financial information
@@ -97,10 +110,14 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
   if (loading) {
     return (
       <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-6 shadow-[0_37px_37px_rgba(0,0,0,0.05)]">
-        <h2 className="text-[20px] font-semibold text-[#0A0A0A] mb-4">Financial Overview</h2>
+        <h2 className="text-[20px] font-semibold text-[#0A0A0A] mb-4">
+          Financial Overview
+        </h2>
         <div className="text-center py-8">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#401B60] border-r-transparent"></div>
-          <p className="mt-4 text-[14px] text-[#6F6C90]">Loading financial data...</p>
+          <p className="mt-4 text-[14px] text-[#6F6C90]">
+            Loading financial data...
+          </p>
         </div>
       </div>
     );
@@ -116,7 +133,9 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
     <>
       <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-6 shadow-[0_37px_37px_rgba(0,0,0,0.05)]">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[20px] font-semibold text-[#0A0A0A]">Financial Overview</h2>
+          <h2 className="text-[20px] font-semibold text-[#0A0A0A]">
+            Financial Overview
+          </h2>
           {canIssueCreditsRefunds && (
             <button
               onClick={() => setShowCreditRefundModal(true)}
@@ -138,7 +157,9 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
             <div className="text-[12px] uppercase tracking-wide text-[#6F6C90] mb-1">
               Current Account Balance
             </div>
-            <div className={`text-[18px] font-semibold ${isCredit ? "text-green-600" : "text-[#0A0A0A]"}`}>
+            <div
+              className={`text-[18px] font-semibold ${isCredit ? "text-green-600" : "text-[#0A0A0A]"}`}
+            >
               {balanceDisplay}
             </div>
           </div>
@@ -149,11 +170,14 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
                 Next Bill Due Date
               </div>
               <div className="text-[14px] text-[#0A0A0A]">
-                {new Date(financialData.nextBillDueDate).toLocaleDateString("en-AU", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })}
+                {new Date(financialData.nextBillDueDate).toLocaleDateString(
+                  "en-AU",
+                  {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  },
+                )}
               </div>
             </div>
           )}
@@ -164,10 +188,11 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
             </div>
             <div className="text-[14px] text-[#0A0A0A]">
               <span
-                className={`inline-block px-3 py-1 rounded-[6px] font-medium ${financialData?.autoPayStatus === "Active"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-700"
-                  }`}
+                className={`inline-block px-3 py-1 rounded-[6px] font-medium ${
+                  financialData?.autoPayStatus === "Active"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700"
+                }`}
               >
                 {financialData?.autoPayStatus || "Inactive"}
               </span>
@@ -179,7 +204,9 @@ export default function FinancialOverview({ customerId, onCreditRefundApplied }:
               <div className="text-[12px] uppercase tracking-wide text-[#6F6C90] mb-1">
                 Payment Method
               </div>
-              <div className="text-[14px] text-[#0A0A0A]">{financialData.paymentMethod}</div>
+              <div className="text-[14px] text-[#0A0A0A]">
+                {financialData.paymentMethod}
+              </div>
             </div>
           )}
         </div>
@@ -220,15 +247,15 @@ function CreditRefundModal({
   // Lock body scroll when modal is open
   useEffect(() => {
     const scrollY = window.scrollY;
-    document.body.style.position = 'fixed';
+    document.body.style.position = "fixed";
     document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-    document.body.style.overflow = 'hidden';
+    document.body.style.width = "100%";
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.body.style.overflow = "";
       window.scrollTo(0, scrollY);
     };
   }, []);
@@ -268,14 +295,14 @@ function CreditRefundModal({
 
       if (type === "credit") {
         // Apply credit via OneView API
-        const { data } = await apiClient.post<{ success: boolean; message?: string }>(
-          "/api/v1/customer/credit",
-          {
-            customerId,
-            amount: parseFloat(amount),
-            reasonCode,
-          }
-        );
+        const { data } = await apiClient.post<{
+          success: boolean;
+          message?: string;
+        }>("/api/v1/customer/credit", {
+          customerId,
+          amount: parseFloat(amount),
+          reasonCode,
+        });
 
         if (data?.success) {
           // Log to notes
@@ -284,7 +311,7 @@ function CreditRefundModal({
               customerId,
               noteType: "Billing",
               priority: "Normal",
-              content: `Credit of $${parseFloat(amount).toFixed(2)} applied. Reason: ${reasonCodes.find(r => r.value === reasonCode)?.label || reasonCode}`,
+              content: `Credit of $${parseFloat(amount).toFixed(2)} applied. Reason: ${reasonCodes.find((r) => r.value === reasonCode)?.label || reasonCode}`,
               tags: ["credit", "billing", reasonCode],
             });
           } catch (noteErr) {
@@ -301,7 +328,11 @@ function CreditRefundModal({
         setShowRefundInstructions(true);
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || "Failed to process request");
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to process request",
+      );
     } finally {
       setProcessing(false);
     }
@@ -314,7 +345,7 @@ function CreditRefundModal({
         customerId,
         noteType: "Billing",
         priority: "High",
-        content: `Refund of $${parseFloat(amount).toFixed(2)} requested. Reason: ${reasonCodes.find(r => r.value === reasonCode)?.label || reasonCode}. ACTION REQUIRED: Process manually in Stripe Dashboard. Must be completed within 5 working days for compliance.`,
+        content: `Refund of $${parseFloat(amount).toFixed(2)} requested. Reason: ${reasonCodes.find((r) => r.value === reasonCode)?.label || reasonCode}. ACTION REQUIRED: Process manually in Stripe Dashboard. Must be completed within 5 working days for compliance.`,
         tags: ["refund", "billing", "stripe", reasonCode],
       });
 
@@ -336,8 +367,8 @@ function CreditRefundModal({
           bottom: 0,
           margin: 0,
           padding: 0,
-          width: '100vw',
-          height: '100vh'
+          width: "100vw",
+          height: "100vh",
         }}
       >
         <div
@@ -348,25 +379,27 @@ function CreditRefundModal({
             left: 0,
             right: 0,
             bottom: 0,
-            width: '100vw',
-            height: '100vh',
-            zIndex: 50
+            width: "100vw",
+            height: "100vh",
+            zIndex: 50,
           }}
         />
         <div
           className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-2xl"
           style={{
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            padding: '1.5rem',
-            zIndex: 51
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            padding: "1.5rem",
+            zIndex: 51,
           }}
           onClick={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">Manual Refund Required</h2>
+            <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">
+              Manual Refund Required
+            </h2>
             <button
               onClick={onClose}
               className="grid h-7 w-7 place-items-center rounded-full bg-[#FFF0F0] text-[#E0342F]"
@@ -381,21 +414,37 @@ function CreditRefundModal({
                 Process this refund manually in the Stripe Dashboard
               </p>
               <p className="text-[13px] text-amber-700">
-                Amount: <span className="font-semibold">${parseFloat(amount).toFixed(2)}</span>
+                Amount:{" "}
+                <span className="font-semibold">
+                  ${parseFloat(amount).toFixed(2)}
+                </span>
               </p>
               <p className="text-[13px] text-amber-700">
-                Reason: <span className="font-semibold">{reasonCodes.find(r => r.value === reasonCode)?.label || reasonCode}</span>
+                Reason:{" "}
+                <span className="font-semibold">
+                  {reasonCodes.find((r) => r.value === reasonCode)?.label ||
+                    reasonCode}
+                </span>
               </p>
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-[16px] font-semibold text-[#0A0A0A]">Verification Steps:</h3>
+              <h3 className="text-[16px] font-semibold text-[#0A0A0A]">
+                Verification Steps:
+              </h3>
               <ol className="list-decimal list-inside space-y-1 text-[14px] text-[#6F6C90]">
                 <li>Log in to Stripe Dashboard</li>
                 <li>Navigate to Payments section</li>
                 <li>Find the relevant payment transaction</li>
-                <li>Click "Refund" and enter the amount: ${parseFloat(amount).toFixed(2)}</li>
-                <li>Add reason code: {reasonCodes.find(r => r.value === reasonCode)?.label || reasonCode}</li>
+                <li>
+                  Click "Refund" and enter the amount: $
+                  {parseFloat(amount).toFixed(2)}
+                </li>
+                <li>
+                  Add reason code:{" "}
+                  {reasonCodes.find((r) => r.value === reasonCode)?.label ||
+                    reasonCode}
+                </li>
                 <li>Process the refund</li>
                 <li>Verify refund completion</li>
               </ol>
@@ -403,7 +452,9 @@ function CreditRefundModal({
 
             <div className="rounded-[10px] border border-blue-200 bg-blue-50 px-4 py-3">
               <p className="text-[13px] text-blue-800">
-                <span className="font-semibold">Compliance Note:</span> Refund must be processed within 5 working days. Customer will be notified via email/SMS upon completion.
+                <span className="font-semibold">Compliance Note:</span> Refund
+                must be processed within 5 working days. Customer will be
+                notified via email/SMS upon completion.
               </p>
             </div>
           </div>
@@ -437,8 +488,8 @@ function CreditRefundModal({
         bottom: 0,
         margin: 0,
         padding: 0,
-        width: '100vw',
-        height: '100vh'
+        width: "100vw",
+        height: "100vh",
       }}
     >
       <div
@@ -449,25 +500,27 @@ function CreditRefundModal({
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 50
+          width: "100vw",
+          height: "100vh",
+          zIndex: 50,
         }}
       />
       <div
         className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-2xl"
         style={{
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          padding: '1.5rem',
-          zIndex: 51
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          padding: "1.5rem",
+          zIndex: 51,
         }}
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">Apply Credit / Refund</h2>
+          <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">
+            Apply Credit / Refund
+          </h2>
           <button
             onClick={onClose}
             className="grid h-7 w-7 place-items-center rounded-full bg-[#FFF0F0] text-[#E0342F]"
@@ -499,8 +552,12 @@ function CreditRefundModal({
                   className="h-4 w-4 accent-[#401B60]"
                 />
                 <div>
-                  <div className="text-[14px] font-medium text-[#0A0A0A]">Credit</div>
-                  <div className="text-[12px] text-[#6F6C90]">Apply to account balance</div>
+                  <div className="text-[14px] font-medium text-[#0A0A0A]">
+                    Credit
+                  </div>
+                  <div className="text-[12px] text-[#6F6C90]">
+                    Apply to account balance
+                  </div>
                 </div>
               </label>
               <label className="flex items-center gap-3 p-3 rounded-[10px] border border-[#DFDBE3] cursor-pointer hover:bg-[#F8F8F8]">
@@ -513,8 +570,12 @@ function CreditRefundModal({
                   className="h-4 w-4 accent-[#401B60]"
                 />
                 <div>
-                  <div className="text-[14px] font-medium text-[#0A0A0A]">Refund</div>
-                  <div className="text-[12px] text-[#6F6C90]">Return to payment method</div>
+                  <div className="text-[14px] font-medium text-[#0A0A0A]">
+                    Refund
+                  </div>
+                  <div className="text-[12px] text-[#6F6C90]">
+                    Return to payment method
+                  </div>
                 </div>
               </label>
             </div>
@@ -526,7 +587,9 @@ function CreditRefundModal({
               Amount *
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-[#6F6C90]">$</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-[#6F6C90]">
+                $
+              </span>
               <input
                 type="number"
                 step="0.01"
@@ -542,7 +605,9 @@ function CreditRefundModal({
                 placeholder="0.00"
               />
             </div>
-            <p className="mt-1 text-[12px] text-[#6F6C90]">Enter positive numeric value only</p>
+            <p className="mt-1 text-[12px] text-[#6F6C90]">
+              Enter positive numeric value only
+            </p>
           </div>
 
           {/* Reason Code */}
@@ -584,4 +649,3 @@ function CreditRefundModal({
     </div>
   );
 }
-

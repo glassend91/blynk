@@ -29,7 +29,9 @@ export default function HeroSectionForm({
       <Field label="Main Headline">
         <input
           value={state.headline}
-          onChange={(e) => setState((s) => ({ ...s, headline: e.target.value }))}
+          onChange={(e) =>
+            setState((s) => ({ ...s, headline: e.target.value }))
+          }
           placeholder="Fast, Reliable Internet & Mobile Plans"
           className="field focus:border-[#6A1D99]"
         />
@@ -38,7 +40,9 @@ export default function HeroSectionForm({
       <Field label="Hero Subtitle" extraClass="mt-4">
         <input
           value={state.subtitle || ""}
-          onChange={(e) => setState((s) => ({ ...s, subtitle: e.target.value }))}
+          onChange={(e) =>
+            setState((s) => ({ ...s, subtitle: e.target.value }))
+          }
           placeholder="Supporting text for the hero section"
           className="field"
         />
@@ -58,7 +62,9 @@ function Field({
 }) {
   return (
     <div className={extraClass}>
-      <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">{label}</label>
+      <label className="mb-1 block text-[13px] font-medium text-[#0A0A0A]">
+        {label}
+      </label>
       {children}
     </div>
   );
