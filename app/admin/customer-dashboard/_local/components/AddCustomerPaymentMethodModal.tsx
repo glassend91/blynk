@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { stripePromise } from '@/lib/stripe';
 import { createCustomerSetupIntent, createCustomerPaymentMethod } from '@/lib/services/paymentMethods';
-
-const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY!);
 
 interface AddCustomerPaymentMethodModalProps {
     isOpen: boolean;
