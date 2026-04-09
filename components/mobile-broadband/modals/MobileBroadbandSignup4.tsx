@@ -7,8 +7,8 @@ import MbbStepper from "../MbbStepper";
 import DVSVerification, { DVSSubmitPayload } from "@/components/signup/DVSVerification";
 
 export default function MobileBroadbandSignup4({
-  onNext, onBack, onClose, onIdentityVerified, canProceed,
-}: { onNext: () => void; onBack: () => void; onClose: () => void; onIdentityVerified: (payload: any) => void; canProceed?: boolean; }) {
+  onNext, onBack, onClose, onIdentityVerified, canProceed, onStepClick, maxReached,
+}: { onNext: () => void; onBack: () => void; onClose: () => void; onIdentityVerified: (payload: any) => void; canProceed?: boolean; onStepClick?: (step: number) => void; maxReached?: number; }) {
   function handleVerify(payload: DVSSubmitPayload) {
     onIdentityVerified(payload);
     onNext();
@@ -22,7 +22,7 @@ export default function MobileBroadbandSignup4({
   return (
     <ModalShell onClose={onClose} size="wide">
       <MbbHeaderBanner />
-      <div className="mt-6"><MbbStepper active={4} /></div>
+      <div className="mt-6"><MbbStepper active={4} onStepClick={onStepClick} maxReached={maxReached} /></div>
 
       <SectionPanel>
         <div className="text-center">

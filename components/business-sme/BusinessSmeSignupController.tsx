@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { signup } from "@/lib/services/auth";
 import SectionPanel from "@/components/shared/SectionPanel";
 import ModalShell from "@/components/shared/ModalShell";
@@ -33,14 +33,33 @@ export default function BusinessSmeSignupController({
   const [businessName, setBusinessName] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [abn, setAbn] = useState("");
+  const [acn, setAcn] = useState("");
   const [primaryFirstName, setPrimaryFirstName] = useState("");
   const [primaryLastName, setPrimaryLastName] = useState("");
   const [primaryEmail, setPrimaryEmail] = useState("");
   const [primaryPhone, setPrimaryPhone] = useState("");
   const [password, setPassword] = useState("");
 
+  const [maxReached, setMaxReached] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("bsm_max_reached");
+      return saved ? parseInt(saved, 10) : 1;
+    }
+    return 1;
+  });
+
+  // Persist maxReached
+  useEffect(() => {
+    if (step > maxReached) {
+      setMaxReached(step);
+      sessionStorage.setItem("bsm_max_reached", step.toString());
+    }
+  }, [step, maxReached]);
+
   const closeAll = useCallback(() => {
     setStep(1);
+    setMaxReached(1);
+    sessionStorage.removeItem("bsm_max_reached");
     setLoading(false);
     setError(null);
     setShowSuccess(false);
@@ -49,6 +68,7 @@ export default function BusinessSmeSignupController({
     setBusinessName("");
     setBusinessType("");
     setAbn("");
+    setAcn("");
     setPrimaryFirstName("");
     setPrimaryLastName("");
     setPrimaryEmail("");
@@ -70,6 +90,12 @@ export default function BusinessSmeSignupController({
     setStep(order[Math.max(idx - 1, 0)]);
   }, [step]);
 
+  const handleStepClick = useCallback((s: number) => {
+    if (s <= maxReached && s !== step) {
+      setStep(s as Step);
+    }
+  }, [maxReached, step]);
+
   if (!open) return null;
 
   return (
@@ -79,22 +105,39 @@ export default function BusinessSmeSignupController({
           <div className="px-8 pt-8">
             <BsmHeaderBanner />
             <div className="pt-6">
-              <BsmStepper active={step} />
+              <BsmStepper active={step} onStepClick={handleStepClick} maxReached={maxReached} />
             </div>
           </div>
 
           <div className="px-8 pb-10">
-            {/* {step === 1 && <BusinessSmeSignup1 onNext={goNext} onBack={closeAll} onClose={handleCloseClick} address={address} onChangeAddress={setAddress} />} */}
-            {/* {step === 2 && <BusinessSmeSignup2 onNext={goNext} onBack={goBack} onClose={handleCloseClick} />} */}
-            {/* {step === 3 && <BusinessSmeSignup3 onNext={goNext} onBack={goBack} onClose={handleCloseClick} />} */}
+            {step === 1 && (
+              <BusinessSmeSignup1
+                onNext={goNext}
+                onBack={closeAll}
+                address={address}
+                onChangeAddress={setAddress}
+              />
+            )}
+            {step === 2 && (
+              <BusinessSmeSignup2
+                onNext={goNext}
+                onBack={goBack}
+              />
+            )}
+            {step === 3 && (
+              <BusinessSmeSignup3
+                onNext={goNext}
+                onBack={goBack}
+              />
+            )}
             {step === 4 && (
               <BusinessSmeSignup4
                 onNext={goNext}
                 onBack={goBack}
-                // onClose={handleCloseClick}
                 businessName={businessName}
                 businessType={businessType}
                 abn={abn}
+                acn={acn}
                 primaryFirstName={primaryFirstName}
                 primaryLastName={primaryLastName}
                 primaryEmail={primaryEmail}
@@ -103,6 +146,7 @@ export default function BusinessSmeSignupController({
                 onChangeBusinessName={setBusinessName}
                 onChangeBusinessType={setBusinessType}
                 onChangeAbn={setAbn}
+                onChangeAcn={setAcn}
                 onChangePrimaryFirstName={setPrimaryFirstName}
                 onChangePrimaryLastName={setPrimaryLastName}
                 onChangePrimaryEmail={setPrimaryEmail}
@@ -110,7 +154,12 @@ export default function BusinessSmeSignupController({
                 onChangePassword={setPassword}
               />
             )}
-            {/* {step === 5 && <BusinessSmeSignup5 onNext={goNext} onBack={goBack} onClose={handleCloseClick} />} */}
+            {step === 5 && (
+              <BusinessSmeSignup5
+                onNext={goNext}
+                onBack={goBack}
+              />
+            )}
             {step === 6 && (
               <BusinessSmeSignup6
                 onNext={async () => {
@@ -131,6 +180,7 @@ export default function BusinessSmeSignupController({
                         businessAddress: address,
                         businessType,
                         ABN: abn,
+                        ACN: acn,
                         primaryContact: {
                           firstName: primaryFirstName,
                           lastName: primaryLastName,

@@ -83,12 +83,65 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
     );
   }, [query]);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [open]);
+
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative mx-3 w-full max-w-[1120px] rounded-2xl bg-white shadow-xl h-[80vh] overflow-auto noscrollbar">
+    <div
+      className="fixed z-[100]"
+      style={{
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh',
+        overflow: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+    >
+      <div
+        className="fixed bg-black/50"
+        onClick={onClose}
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 100
+        }}
+      />
+      <div
+        className="fixed z-[101] mx-3 w-full max-w-[1120px] rounded-2xl bg-white shadow-xl h-[80vh] overflow-auto noscrollbar"
+        style={{
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between gap-4 border-b border-[#EEEAF4] px-6 py-5">
           <div className="flex items-center gap-3">
@@ -156,11 +209,10 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                   onClick={() => setFocused(l)}
                   onMouseEnter={() => setHoverId(l.id)}
                   onMouseLeave={() => setHoverId(null)}
-                  className={`flex w-full gap-3 rounded-xl border px-3 py-3 text-left transition ${
-                    focused?.id === l.id || hoverId === l.id
-                      ? "border-[#D7CCE8] bg-white shadow-sm"
-                      : "border-transparent bg-white"
-                  }`}
+                  className={`flex w-full gap-3 rounded-xl border px-3 py-3 text-left transition ${focused?.id === l.id || hoverId === l.id
+                    ? "border-[#D7CCE8] bg-white shadow-sm"
+                    : "border-transparent bg-white"
+                    }`}
                 >
                   <img
                     src={l.photo}
@@ -197,9 +249,8 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                   top: `${l.pinY * 100}%`,
                 }}
                 onClick={() => setFocused(l)}
-                className={`absolute -translate-x-1/2 -translate-y-full rounded-full border-2 px-2 py-1 text-white transition ${
-                  focused?.id === l.id ? "scale-110 border-white bg-[#2D0F4D]" : "bg-[#5E2B86]"
-                }`}
+                className={`absolute -translate-x-1/2 -translate-y-full rounded-full border-2 px-2 py-1 text-white transition ${focused?.id === l.id ? "scale-110 border-white bg-[#2D0F4D]" : "bg-[#5E2B86]"
+                  }`}
                 onMouseEnter={() => setHoverId(l.id)}
                 onMouseLeave={() => setHoverId(null)}
                 aria-label={`Marker for ${l.name}`}

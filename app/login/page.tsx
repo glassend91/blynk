@@ -25,7 +25,7 @@ export default function LoginPage() {
     if (token) {
       const user = getAuthUser<{ role?: string }>();
       const role = user?.role || "customer";
-      
+
       // Redirect based on role: admins and superAdmins go to /admin/dashboard, customers to /dashboard
       if (role === "admin" || role === "superAdmin") {
         router.replace("/admin/dashboard");
@@ -97,7 +97,10 @@ export default function LoginPage() {
       }
       setError(res?.message || "Login failed");
     } catch (err: any) {
-      setError(err?.message || "Login failed");
+      console.error("Login error:", err);
+      // Handle the 403 Pending status if embedded in the error object (from apiClient)
+      const message = err.response?.data?.message || err.message || "Login failed";
+      setError(message);
     } finally {
       setLoading(false);
     }

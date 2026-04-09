@@ -3,7 +3,7 @@ import apiClient from '../apiClient';
 export interface Service {
     _id: string;
     serviceName: string;
-    serviceType: 'NBN' | 'Mobile' | 'Data Only' | 'Voice Only';
+    serviceType: 'NBN' | 'Business NBN' | 'Mobile' | 'Data Only' | 'Voice Only';
     specifications: {
         downloadSpeed?: number;
         uploadSpeed?: number;
@@ -184,7 +184,7 @@ export const getServices = async (params?: {
 }): Promise<{ services: Service[] }> => {
     try {
         const response = await apiClient.get('/services', { params });
-        return response.data;
+        return {services: response.data};
     } catch (error) {
         console.error('Error fetching services:', error);
         throw error;

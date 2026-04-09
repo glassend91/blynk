@@ -11,8 +11,8 @@ type Props = {
   onCreate: (plan: PlanRow) => void;
 };
 
-const planTypeOptions: PlanType[] = ["NBN", "Mobile", "Data Only", "Voice Only"];
-const statusOptions: PlanStatus[] = ["Published", "Draft"];
+const planTypeOptions: PlanType[] = ["NBN", "Business NBN", "Mobile", "Data Only", "Voice Only"];
+const statusOptions: PlanStatus[] = ["Published", "Draft", "Staff-Only", "Hidden"];
 const billingCycleOptions = [
   { value: "monthly", label: "Monthly" },
   { value: "quarterly", label: "Quarterly" },
@@ -33,8 +33,12 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
   const [features, setFeatures] = useState("");
   const [desc, setDesc] = useState("");
   const [status, setStatus] = useState<PlanStatus>("Published");
+  const [staticIP, setStaticIP] = useState(false);
+  const [slaDetails, setSlaDetails] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [wholesalerOptions, setWholesalerOptions] = useState<any[]>([]);
+  const [wholesalerPlanLink, setWholesalerPlanLink] = useState("");
 
   useEffect(() => {
     if (!open) {
@@ -47,8 +51,56 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
       setFeatures("");
       setDesc("");
       setStatus("Published");
+      setStaticIP(false);
+      setSlaDetails("");
       setError(null);
       setSubmitting(false);
+      setWholesalerPlanLink("");
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      const fetchWholesalerPlans = async () => {
+        try {
+          const { data } = await apiClient.get("/wholesaler-plans");
+          if (data?.success) {
+            setWholesalerOptions(data.data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch wholesaler plans", err);
+        }
+      };
+      fetchWholesalerPlans();
+    }
+  }, [open]);
+
+  const filteredWholesalePlans = useMemo(() => {
+    // Map retail type to wholesale type enum
+    // NBN/Business NBN -> nbn
+    // Mobile/Data Only/Voice Only -> dataBankPlans or dataPoolPlans
+    const isNbn = type === "NBN" || type === "Business NBN";
+    return wholesalerOptions.filter((p: any) => {
+      if (isNbn) return p.type === "nbn";
+      return p.type === "dataBankPlans" || p.type === "dataPoolPlans";
+    });
+  }, [wholesalerOptions, type]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
     }
   }, [open]);
 
@@ -61,7 +113,7 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
 
   if (!open) return null;
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (publish: boolean = true) => {
     // Check permission before submitting
     if (!hasPermission("plans.create")) {
       setError("You do not have permission to create plans.");
@@ -92,6 +144,13 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
         description: desc.trim(),
         speedOrData: speed.trim(),
         features: featurePreview,
+        wholesalerPlanId: wholesalerPlanLink || undefined,
+        visibilityStatus: publish ? "public" : "internal",
+        isActive: true,
+        ...(type === "Business NBN" && {
+          staticIP,
+          slaDetails: slaDetails.trim(),
+        }),
       };
 
       const { data } = await apiClient.post<{ success: boolean; service: PlanRow }>("/services/admin", payload);
@@ -109,9 +168,37 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="absolute left-1/2 top-1/2 max-h-[95vh] w-[960px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white p-6 shadow-2xl">
+    <div
+      className="fixed z-[90]"
+      style={{
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh',
+        overflow: 'auto'
+      }}
+    >
+      <div
+        className="fixed bg-black/70"
+        onClick={onClose}
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 90
+        }}
+      />
+      <div
+        className="fixed left-1/2 top-1/2 max-h-[95vh] w-[960px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] bg-white p-6 shadow-2xl"
+        style={{ zIndex: 91 }}
+      >
         <div className="mb-1 flex items-center justify-between">
           <div>
             <p className="text-[12px] uppercase tracking-[2px] text-[#6F6C90]">Plan Builder</p>
@@ -164,7 +251,15 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                 <div className="relative">
                   <select
                     value={type}
-                    onChange={(e) => setType(e.target.value as PlanType)}
+                    onChange={(e) => {
+                      const newType = e.target.value as PlanType;
+                      setType(newType);
+                      // Reset business-specific fields if switching away from Business NBN
+                      if (newType !== "Business NBN") {
+                        setStaticIP(false);
+                        setSlaDetails("");
+                      }
+                    }}
                     className={`${fieldClass} appearance-none pr-9`}
                   >
                     {planTypeOptions.map((option) => (
@@ -220,15 +315,47 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                   </div>
                 </div>
               </Field>
+
+              <Field label="Backend Wholesale Reference" hint="Links this retail plan to a wholesale ID for ordering and billing.">
+                <div className="relative">
+                  <select
+                    value={wholesalerPlanLink}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setWholesalerPlanLink(selectedId);
+
+                      // Auto-fill price and speed if selected
+                      const selectedPlan = filteredWholesalePlans.find(p => p._id === selectedId);
+                      if (selectedPlan) {
+                        if (selectedPlan.custom_name && !name) setName(selectedPlan.custom_name);
+                        if (selectedPlan.price && (!price || price === "69.95")) setPrice(selectedPlan.price.toString());
+                        if (selectedPlan.speed && !speed) setSpeed(selectedPlan.speed);
+                        if (selectedPlan.features && selectedPlan.features.length > 0 && !features) {
+                          setFeatures(selectedPlan.features.join('\n'));
+                        }
+                      }
+                    }}
+                    className={`${fieldClass} appearance-none pr-9`}
+                  >
+                    <option value="">-- No Wholesale Link --</option>
+                    {filteredWholesalePlans.map((option) => (
+                      <option key={option._id} value={option._id}>
+                        {option.label} {option.speed ? `(${option.speed})` : ""} [{option.type === 'nbn' ? option.bandwidth_id : option.value}]
+                      </option>
+                    ))}
+                  </select>
+                  <Caret />
+                </div>
+              </Field>
             </div>
           </SectionCard>
 
           <SectionCard title="Plan experience" description="Highlight the performance headline and key callouts.">
             <div className="grid gap-4 md:grid-cols-2">
               <Field
-                label={type === "NBN" ? "Speed headline" : type === "Voice Only" ? "Voice minutes headline" : "Data headline"}
+                label={type === "NBN" || type === "Business NBN" ? "Speed headline" : type === "Voice Only" ? "Voice minutes headline" : "Data headline"}
                 hint={
-                  type === "NBN"
+                  type === "NBN" || type === "Business NBN"
                     ? "Examples: 100/20 Mbps, 50 Mbps"
                     : type === "Voice Only"
                       ? "Examples: Unlimited mins + SMS"
@@ -238,12 +365,12 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
                 <input
                   value={speed}
                   onChange={(e) => setSpeed(e.target.value)}
-                  placeholder={type === "NBN" ? "100/20 Mbps" : type === "Voice Only" ? "Unlimited mins" : "50GB + 5G"}
+                  placeholder={type === "NBN" || type === "Business NBN" ? "100/20 Mbps" : type === "Voice Only" ? "Unlimited mins" : "50GB + 5G"}
                   className={fieldClass}
                 />
               </Field>
 
-              <Field label="Feature highlights" hint="Separate by comma or new line.">
+              <Field label="Key Benefits" hint="Customer facing highlights. Separate by comma or new line.">
                 <textarea
                   value={features}
                   onChange={(e) => setFeatures(e.target.value)}
@@ -276,6 +403,39 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
               />
             </Field>
           </SectionCard>
+
+          {type === "Business NBN" && (
+            <SectionCard title="Business-specific options" description="Configure business features for this NBN plan.">
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Static IP Address">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="staticIP"
+                      checked={staticIP}
+                      onChange={(e) => setStaticIP(e.target.checked)}
+                      className="h-4 w-4 accent-[#401B60]"
+                    />
+                    <label htmlFor="staticIP" className="text-[14px] text-[#0A0A0A] cursor-pointer">
+                      Include static IP address
+                    </label>
+                  </div>
+                  <p className="mt-1 text-[12px] text-[#8E8CA2]">
+                    Business plans often require a static IP for hosting services or VPN access
+                  </p>
+                </Field>
+
+                <Field label="SLA Details" hint="Service Level Agreement details (e.g., 99.9% uptime, 4-hour response time)">
+                  <input
+                    value={slaDetails}
+                    onChange={(e) => setSlaDetails(e.target.value)}
+                    placeholder="e.g., 99.9% uptime guarantee, 4-hour response time"
+                    className={fieldClass}
+                  />
+                </Field>
+              </div>
+            </SectionCard>
+          )}
         </div>
 
         {error && (
@@ -293,11 +453,18 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
             Cancel
           </button>
           <button
-            onClick={handleSubmit}
+            onClick={() => handleSubmit(false)}
+            disabled={submitting}
+            className="h-[46px] flex-1 rounded-[10px] border border-[#401B60] text-[14px] font-semibold text-[#401B60] hover:bg-[#401B60]/5 disabled:opacity-60"
+          >
+            {submitting ? "Saving..." : "Save (CMS Only)"}
+          </button>
+          <button
+            onClick={() => handleSubmit(true)}
             disabled={submitting}
             className="h-[46px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Creating..." : "Create plan"}
+            {submitting ? "Publishing..." : "Save and Publish"}
           </button>
         </div>
       </div>

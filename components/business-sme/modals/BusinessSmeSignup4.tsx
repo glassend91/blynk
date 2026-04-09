@@ -6,15 +6,15 @@ import { checkEmail } from "@/lib/services/auth";
 
 export default function BusinessSmeSignup4({
   onNext, onBack,
-  businessName, businessType, abn,
+  businessName, businessType, abn, acn,
   primaryFirstName, primaryLastName, primaryEmail, primaryPhone, password,
-  onChangeBusinessName, onChangeBusinessType, onChangeAbn,
+  onChangeBusinessName, onChangeBusinessType, onChangeAbn, onChangeAcn,
   onChangePrimaryFirstName, onChangePrimaryLastName, onChangePrimaryEmail, onChangePrimaryPhone, onChangePassword,
 }: {
   onNext: () => void; onBack: () => void;
-  businessName: string; businessType: string; abn: string;
+  businessName: string; businessType: string; abn: string; acn: string;
   primaryFirstName: string; primaryLastName: string; primaryEmail: string; primaryPhone: string; password: string;
-  onChangeBusinessName: (v: string) => void; onChangeBusinessType: (v: string) => void; onChangeAbn: (v: string) => void;
+  onChangeBusinessName: (v: string) => void; onChangeBusinessType: (v: string) => void; onChangeAbn: (v: string) => void; onChangeAcn: (v: string) => void;
   onChangePrimaryFirstName: (v: string) => void; onChangePrimaryLastName: (v: string) => void; onChangePrimaryEmail: (v: string) => void; onChangePrimaryPhone: (v: string) => void; onChangePassword: (v: string) => void;
 }) {
   const [emailChecking, setEmailChecking] = useState(false);
@@ -48,7 +48,20 @@ export default function BusinessSmeSignup4({
     return () => clearTimeout(timeout);
   }, [primaryEmail]);
 
-  const canProceed = Boolean(businessName && abn && primaryFirstName && primaryLastName && primaryEmail && isValidEmail(primaryEmail) && !emailExists && password && password.length >= 6);
+  const isValidABN = (value: string) => {
+    const digits = value.replace(/\s/g, "");
+    return digits.length === 11; // ABN is 11 digits
+  };
+
+  const isValidACN = (value: string) => {
+    const digits = value.replace(/\s/g, "");
+    return digits.length === 9; // ACN is 9 digits
+  };
+
+  // Require at least one of ABN or ACN
+  const hasValidABNOrACN = (abn && isValidABN(abn)) || (acn && isValidACN(acn));
+
+  const canProceed = Boolean(businessName && hasValidABNOrACN && primaryFirstName && primaryLastName && primaryEmail && isValidEmail(primaryEmail) && !emailExists && password && password.length >= 6);
   return (
     <SectionPanel>
       <div className="text-center">
@@ -68,12 +81,19 @@ export default function BusinessSmeSignup4({
             <label className="mb-1 block text-sm text-[#6B6478]">Business Type</label>
             <input value={businessType} onChange={(e) => onChangeBusinessType(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3" placeholder="e.g., Pty Ltd, Sole Trader" />
           </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm text-[#6B6478]">ABN/ACN *</label>
-            <input value={abn} onChange={(e) => onChangeAbn(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3" placeholder="Enter ABN or ACN" />
-            <div className="mt-1 text-[11px] text-[#9A93B3]">Required for business verification</div>
+            <label className="mb-1 block text-sm text-[#6B6478]">ABN (11 digits)</label>
+            <input value={abn} onChange={(e) => onChangeAbn(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3" placeholder="Enter ABN" />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm text-[#6B6478]">ACN (9 digits)</label>
+            <input value={acn} onChange={(e) => onChangeAcn(e.target.value)} className="h-11 w-full rounded-[10px] border border-[#E7E4EC] bg-[#FBF9FF] px-3" placeholder="Enter ACN" />
           </div>
         </div>
+        <div className="mt-1 text-[11px] text-[#9A93B3]">Enter your ABN or ACN (at least one required)</div>
 
         <div className="mt-6 text-[14px] font-semibold text-[#2B1940]">Primary Contact</div>
         <div className="mt-3 grid gap-4 md:grid-cols-2">

@@ -24,6 +24,14 @@ export default function SignupModal4({
   onChangePhone,
   onChangeServiceAddress,
   onChangePassword,
+  dateOfBirth,
+  billingSameAsService,
+  billingAddress,
+  onChangeDateOfBirth,
+  onChangeBillingSameAsService,
+  onChangeBillingAddress,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
@@ -34,19 +42,24 @@ export default function SignupModal4({
   phone: string;
   serviceAddress: string;
   password: string;
+  dateOfBirth: string;
+  billingSameAsService: boolean;
+  billingAddress: string;
   onChangeFirstName: (v: string) => void;
   onChangeLastName: (v: string) => void;
   onChangeEmail: (v: string) => void;
   onChangePhone: (v: string) => void;
   onChangeServiceAddress: (v: string) => void;
   onChangePassword: (v: string) => void;
+  onChangeDateOfBirth: (v: string) => void;
+  onChangeBillingSameAsService: (v: boolean) => void;
+  onChangeBillingAddress: (v: string) => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [billingSameAsService, setBillingSameAsService] = useState(true);
-  const [billingAddress, setBillingAddress] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   // Validation error states
@@ -143,7 +156,7 @@ export default function SignupModal4({
 
   return (
     <ModalShell onClose={onClose} size="wide">
-      <Stepper active={4} />
+      <Stepper active={4} onStepClick={onStepClick} maxReached={maxReached} />
 
       <SectionPanel>
         <div className="text-center">
@@ -240,7 +253,7 @@ export default function SignupModal4({
                 className={`input w-full ${dobError ? "border-red-300 bg-red-50" : ""}`}
                 value={dateOfBirth}
                 onChange={(e) => {
-                  setDateOfBirth(e.target.value);
+                  onChangeDateOfBirth(e.target.value);
                   if (submitted) setDobError(null);
                 }}
                 max={new Date().toISOString().split('T')[0]}
@@ -289,7 +302,7 @@ export default function SignupModal4({
                 className="h-4 w-4 accent-[var(--cl-brand)]"
                 checked={billingSameAsService}
                 onChange={(e) => {
-                  setBillingSameAsService(e.target.checked);
+                  onChangeBillingSameAsService(e.target.checked);
                   if (submitted) setBillingAddressError(null);
                 }}
               />
@@ -307,7 +320,7 @@ export default function SignupModal4({
                     placeholder="Enter your billing address"
                     value={billingAddress}
                     onChange={(e) => {
-                      setBillingAddress(e.target.value);
+                      onChangeBillingAddress(e.target.value);
                       if (submitted) setBillingAddressError(null);
                     }}
                   />

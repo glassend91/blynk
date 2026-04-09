@@ -23,6 +23,8 @@ export type PermissionKey =
     | "tickets.manage"
     | "services.manage"
     | "sim.manage"
+    | "billing.credits_refunds"
+    | "can_manage_customer_payment_details"
     | "sys.settings"
     | "sys.logs";
 
@@ -85,6 +87,7 @@ export function hasAllPermissions(permissions: PermissionKey[]): boolean {
 export const MENU_PERMISSIONS: Record<string, PermissionKey | PermissionKey[]> = {
     "/admin/dashboard": "analytics.view", // Dashboard requires analytics.view permission
     "/admin/user-management": "user.view",
+    "/admin/staff-members": "user.view",
     "/admin/role-management": "roles.create",
     "/admin/service-plans": "plans.view",
     "/admin/website-content": "web.edit",

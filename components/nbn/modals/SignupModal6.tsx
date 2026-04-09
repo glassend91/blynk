@@ -5,29 +5,43 @@ import ModalShell from "@/components/shared/ModalShell";
 import Stepper from "@/components/shared/Stepper";
 import SectionPanel from "@/components/shared/SectionPanel";
 import BarActions from "@/components/shared/BarActions";
-import StripeProvider from "@/components/shared/StripeProvider";
-import StripeCardElement from "@/components/shared/StripeCardElement";
+import StripePaymentElement from "@/components/shared/StripePaymentElement";
 
 export default function SignupModal6({
   onNext,
   onBack,
   onClose,
   selectedPlan,
+  wantsStaticIp = true,
+  onStepClick,
+  maxReached,
+  onComplete,
+  apiError,
+  apiLoading,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
   selectedPlan?: { name: string; price: number } | null;
+  wantsStaticIp?: boolean;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
+  onComplete?: () => Promise<{ success: boolean; message?: string }>;
+  apiError?: string | null;
+  apiLoading?: boolean;
 }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [signupDone, setSignupDone] = useState(false);
   const [submitPaymentFn, setSubmitPaymentFn] = useState<(() => void) | null>(null);
 
   // Get payment amount from selected plan, default to 69.99 if no plan selected
-  const paymentAmount = selectedPlan?.price || 69.99;
   const planName = selectedPlan?.name || "NBN Plan";
+  const planPrice = selectedPlan?.price || 69.99;
+  const staticIpCost = wantsStaticIp ? 10 : 0;
+  const paymentAmount = planPrice + staticIpCost;
 
   const handlePaymentSuccess = (paymentIntent: any) => {
     console.log('Payment succeeded:', paymentIntent);
@@ -46,15 +60,32 @@ export default function SignupModal6({
     setIsProcessing(false);
   };
 
-  const handleProcessPayment = () => {
+  const handleProcessPayment = async () => {
     if (!agreeTerms || !submitPaymentFn) return;
+
     setIsProcessing(true);
+    setPaymentError(null);
+
+    // Step 1: Hit the backend API first (Wholesaler provisioning)
+    // Only call signup if not already successful
+    if (!signupDone && onComplete) {
+      const result = await onComplete();
+      if (result.success) {
+        setSignupDone(true);
+      } else {
+        // If API failed, stop here. The apiError will be displayed via props.
+        setIsProcessing(false);
+        return;
+      }
+    }
+
+    // Step 2: Trigger the Stripe payment
     submitPaymentFn();
   };
 
   return (
     <ModalShell onClose={onClose} size="wide">
-      <Stepper active={6} />
+      <Stepper active={6} onStepClick={onStepClick} maxReached={maxReached} />
 
       <SectionPanel>
         <div className="text-center">
@@ -84,12 +115,18 @@ export default function SignupModal6({
                 <div className="space-y-3 text-[15px]">
                   <div className="flex items-center justify-between border-b border-[#E9E3F2] pb-3">
                     <span className="text-[#6A6486]">{planName}:</span>
-                    <span className="font-semibold text-[#2E2745]">${paymentAmount.toFixed(2)}/mo</span>
+                    <span className="font-semibold text-[#2E2745]">${planPrice.toFixed(2)}/mo</span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  {wantsStaticIp && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#6A6486]">Static IP Add-on:</span>
+                      <span className="font-semibold text-[#2E2745]">${staticIpCost.toFixed(2)}/mo</span>
+                    </div>
+                  )}
+                  {/* <div className="flex items-center justify-between">
                     <span className="text-[#6A6486]">Setup Fee:</span>
                     <span className="font-semibold text-[#2E2745]">$0.00</span>
-                  </div>
+                  </div> */}
                   <div className="pt-3 border-t border-[#E9E3F2]">
                     <div className="flex items-center justify-between">
                       <span className="text-[16px] font-semibold text-[#2E2745]">Total:</span>
@@ -101,77 +138,61 @@ export default function SignupModal6({
 
               {/* Payment Form - Right Column */}
               <div className="card p-6">
-            <StripeProvider>
-              <div className="space-y-6">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-8 w-8 place-items-center rounded-full bg-blue-100">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-blue-800">Secure Payment</p>
-                      <p className="text-sm text-blue-600">Your payment information is encrypted and secure</p>
-                    </div>
-                  </div>
-                </div>
-
-                <StripeCardElement
+                <StripePaymentElement
                   onPaymentSuccess={handlePaymentSuccess}
                   onPaymentError={handlePaymentError}
                   amount={paymentAmount}
                   currency="aud"
-                      hideButton={true}
-                      onSubmitRef={(fn) => setSubmitPaymentFn(() => fn)}
-                      formId="payment-form-nbn"
+                  hideButton={true}
+                  onSubmitRef={(fn) => setSubmitPaymentFn(() => fn)}
+                  formId="payment-form-nbn"
+                />
+
+                {/* Agreement Checkbox - EXACT TEXT AS REQUIRED */}
+                <div className="rounded-[12px] border border-[#EEE8F6] bg-[#FBF8FF] p-4">
+                  <label className="flex items-start gap-3 text-[14px] text-[#3B3551] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 h-4 w-4 accent-[#401B60] flex-shrink-0"
+                      checked={agreeTerms}
+                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      required
                     />
+                    <span className="leading-relaxed">
+                      I agree to the{" "}
+                      <a
+                        href="/terms-and-conditions"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#401B60] underline hover:text-[#3F205F]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Terms and Conditions
+                      </a>
+                      {" "}and{" "}
+                      <a
+                        href="/privacy-policy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#401B60] underline hover:text-[#3F205F]"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Privacy Policy
+                      </a>
+                      , and I confirm I am 18 years of age or older.
+                    </span>
+                  </label>
+                </div>
 
-                    {/* Agreement Checkbox - EXACT TEXT AS REQUIRED */}
-                    <div className="rounded-[12px] border border-[#EEE8F6] bg-[#FBF8FF] p-4">
-                      <label className="flex items-start gap-3 text-[14px] text-[#3B3551] cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="mt-0.5 h-4 w-4 accent-[#401B60] flex-shrink-0"
-                          checked={agreeTerms}
-                          onChange={(e) => setAgreeTerms(e.target.checked)}
-                          required
-                        />
-                        <span className="leading-relaxed">
-                          I agree to the{" "}
-                          <a
-                            href="/terms-and-conditions"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#401B60] underline hover:text-[#3F205F]"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            Terms and Conditions
-                          </a>
-                          {" "}and{" "}
-                          <a
-                            href="/privacy-policy"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#401B60] underline hover:text-[#3F205F]"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            Privacy Policy
-                          </a>
-                          , and I confirm I am 18 years of age or older.
-                        </span>
-                      </label>
-                    </div>
-
-                    {/* Process Payment Button - Disabled by default, enabled only after checkbox */}
-                    <button
-                      type="button"
-                      onClick={handleProcessPayment}
-                      disabled={!agreeTerms || isProcessing || !submitPaymentFn}
-                      className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isProcessing ? "Processing Payment..." : "Process Payment"}
-                    </button>
+                {/* Process Payment Button - Disabled by default, enabled only after checkbox */}
+                <button
+                  type="button"
+                  onClick={handleProcessPayment}
+                  disabled={!agreeTerms || isProcessing || apiLoading || !submitPaymentFn}
+                  className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isProcessing ? (apiLoading ? "Provisioning..." : "Processing Payment...") : "Confirm & Pay"}
+                </button>
 
                 {paymentError && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -182,14 +203,28 @@ export default function SignupModal6({
                         </svg>
                       </div>
                       <div>
-                        <p className="font-semibold text-red-800">Payment Error</p>
+                        <p className="font-semibold text-red-800">Error</p>
                         <p className="text-sm text-red-600">{paymentError}</p>
                       </div>
                     </div>
                   </div>
                 )}
-              </div>
-            </StripeProvider>
+
+                {apiError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-8 w-8 place-items-center rounded-full bg-red-100">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-red-800">Signup Error</p>
+                        <p className="text-sm text-red-600">{apiError}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

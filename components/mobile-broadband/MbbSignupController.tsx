@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { signup } from "@/lib/services/auth";
 import ModalShell from "@/components/shared/ModalShell";
 import SectionPanel from "@/components/shared/SectionPanel";
-import HelpBanner from "@/components/shared/HelpBanner";
 import MbbStepper from "@/components/mobile-broadband/MbbStepper";
 import ExitConfirmationDialog from "@/components/shared/ExitConfirmationDialog";
 
@@ -31,7 +30,7 @@ export default function MbbSignupController({
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
 
   // State across steps
-  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number } | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<{ id?: string | number; name: string; price: number } | null>(null);
   const [simType, setSimType] = useState<"eSim" | "physical">("eSim");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -42,9 +41,29 @@ export default function MbbSignupController({
   const [billingAddress, setBillingAddress] = useState("");
   const [serviceAddress, setServiceAddress] = useState("");
   const [identity, setIdentity] = useState<any>(null);
+  const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
+  const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
+
+  const [maxReached, setMaxReached] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("mbb_max_reached");
+      return saved ? parseInt(saved, 10) : 1;
+    }
+    return 1;
+  });
+
+  // Percist maxReached
+  useEffect(() => {
+    if (step > maxReached) {
+      setMaxReached(step);
+      sessionStorage.setItem("mbb_max_reached", step.toString());
+    }
+  }, [step, maxReached]);
 
   const closeAll = useCallback(() => {
     setStep(1);
+    setMaxReached(1);
+    sessionStorage.removeItem("mbb_max_reached");
     setLoading(false);
     setError(null);
     setShowSuccess(false);
@@ -60,6 +79,8 @@ export default function MbbSignupController({
     setBillingAddress("");
     setServiceAddress("");
     setIdentity(null);
+    setSimNumber("");
+    setEsimNotificationEmail("");
     onClose();
   }, [onClose]);
 
@@ -71,9 +92,9 @@ export default function MbbSignupController({
     try {
       setLoading(true);
       setError(null);
-      
-      // Create user account after payment success
-      await signup({
+
+      // Create user account
+      const res = await signup({
         type: "MBB",
         firstName,
         lastName,
@@ -85,115 +106,126 @@ export default function MbbSignupController({
         serviceAddress,
         identity,
         simType,
+        simNumber: simType === "physical" ? simNumber : undefined,
+        esimNotificationEmail: simType === "eSim" ? (esimNotificationEmail || email) : undefined,
         selectedPlan: selectedPlan || undefined,
       });
-      
-      setShowSuccess(true);
+
+      return { success: true, data: res };
     } catch (e: any) {
-      setError(e?.message || "Signup failed");
+      const msg = e?.response?.data?.message || e?.message || "Signup failed";
+      setError(msg);
+      return { success: false, message: msg };
     } finally {
       setLoading(false);
     }
-  }, [firstName, lastName, email, password, phone, dateOfBirth, billingAddress, serviceAddress, identity, simType, selectedPlan]);
+  }, [firstName, lastName, email, password, phone, dateOfBirth, billingAddress, serviceAddress, identity, simType, simNumber, esimNotificationEmail, selectedPlan]);
 
   const goNext = useCallback(() => {
     if (step === 5) {
-      // After Payment & Agreement, go directly to completion (skip obsolete Confirmation step)
-      handleComplete();
+      setShowSuccess(true);
       return;
     }
     const idx = order.indexOf(step);
     setStep(order[Math.min(idx + 1, order.length - 1)]);
-  }, [step, handleComplete]);
+  }, [step, order]);
 
   const goBack = useCallback(() => {
     const idx = order.indexOf(step);
     setStep(order[Math.max(idx - 1, 0)]);
   }, [step]);
 
+  const handleStepClick = useCallback((s: number) => {
+    if (s <= maxReached && s !== step) {
+      setStep(s as Step);
+    }
+  }, [maxReached, step]);
+
   if (!open) return null;
 
   return (
     <>
-    <div className="fixed inset-0 z-[1000] flex items-start justify-center bg-black/70 p-6">
-        <ModalShell onClose={handleCloseClick}>
-        {/* Header inside the white modal */}
-        <div className="px-8 pt-8">
-          <HelpBanner />
-          <div className="pt-6">
-            <MbbStepper active={step} />
-          </div>
-        </div>
+      {/* Step 1: Plan Selection */}
+      {step === 1 && (
+        <MbbSignup1
+          onNext={goNext}
+          onBack={closeAll}
+          onClose={handleCloseClick}
+          selectedPlan={selectedPlan}
+          onPlanSelect={setSelectedPlan}
+          onStepClick={handleStepClick}
+          maxReached={maxReached}
+        />
+      )}
+      {/* Step 2: SIM Selection (eSIM only) */}
+      {step === 2 && (
+        <MbbSignup2
+          onNext={goNext}
+          onBack={goBack}
+          onClose={handleCloseClick}
+          type={simType}
+          onChangeType={setSimType}
+          onStepClick={handleStepClick}
+          maxReached={maxReached}
+        />
+      )}
+      {/* Step 3: Customer Details */}
+      {step === 3 && (
+        <MbbSignup3
+          onNext={goNext}
+          onBack={goBack}
+          onClose={handleCloseClick}
+          firstName={firstName}
+          lastName={lastName}
+          email={email}
+          phone={phone}
+          dateOfBirth={dateOfBirth}
+          password={password}
+          billingAddress={billingAddress}
+          serviceAddress={serviceAddress}
+          simType={simType}
+          identity={identity}
+          simNumber={simNumber}
+          esimNotificationEmail={esimNotificationEmail}
+          onChangeFirstName={setFirstName}
+          onChangeLastName={setLastName}
+          onChangeEmail={setEmail}
+          onChangePhone={setPhone}
+          onChangeDateOfBirth={setDateOfBirth}
+          onChangePassword={setPassword}
+          onChangeBillingAddress={setBillingAddress}
+          onChangeServiceAddress={setServiceAddress}
+          onChangeSimNumber={setSimNumber}
+          onChangeEsimNotificationEmail={setEsimNotificationEmail}
+          onStepClick={handleStepClick}
+          maxReached={maxReached}
+        />
+      )}
+      {/* Step 4: ID Verification */}
+      {step === 4 && (
+        <MbbSignup4
+          onNext={goNext}
+          onBack={goBack}
+          onClose={handleCloseClick}
+          onIdentityVerified={setIdentity}
+          canProceed={!!identity}
+          onStepClick={handleStepClick}
+          maxReached={maxReached}
+        />
+      )}
+      {/* Step 5: Payment & Agreement */}
+      {step === 5 && (
+        <MbbSignup5
+          onNext={goNext}
+          onBack={goBack}
+          onClose={handleCloseClick}
+          selectedPlan={selectedPlan}
+          onStepClick={handleStepClick}
+          maxReached={maxReached}
+          onComplete={handleComplete}
+        />
+      )}
 
-        {/* Content area */}
-        <div className="px-8 pb-10">
-          {/* Step 1: Plan Selection */}
-          {step === 1 && (
-            <MbbSignup1
-              onNext={goNext}
-              onBack={closeAll}
-              onClose={handleCloseClick}
-              selectedPlan={selectedPlan}
-              onPlanSelect={setSelectedPlan}
-            />
-          )}
-          {/* Step 2: SIM Selection (eSIM only) */}
-          {step === 2 && (
-            <MbbSignup2
-              onNext={goNext}
-              onBack={goBack}
-              onClose={handleCloseClick}
-              type={simType}
-              onChangeType={setSimType}
-            />
-          )}
-          {/* Step 3: Customer Details */}
-          {step === 3 && (
-            <MbbSignup3
-              onNext={goNext}
-              onBack={goBack}
-              onClose={handleCloseClick}
-              firstName={firstName}
-              lastName={lastName}
-              email={email}
-              phone={phone}
-              dateOfBirth={dateOfBirth}
-              password={password}
-              billingAddress={billingAddress}
-              serviceAddress={serviceAddress}
-              simType={simType}
-              identity={identity}
-              onChangeFirstName={setFirstName}
-              onChangeLastName={setLastName}
-              onChangeEmail={setEmail}
-              onChangePhone={setPhone}
-              onChangeDateOfBirth={setDateOfBirth}
-              onChangePassword={setPassword}
-              onChangeBillingAddress={setBillingAddress}
-              onChangeServiceAddress={setServiceAddress}
-            />
-          )}
-          {/* Step 4: ID Verification */}
-          {step === 4 && (
-            <MbbSignup4
-              onNext={goNext}
-              onBack={goBack}
-              onClose={handleCloseClick}
-              onIdentityVerified={setIdentity}
-              canProceed={!!identity}
-            />
-          )}
-          {/* Step 5: Payment & Agreement */}
-          {step === 5 && (
-            <MbbSignup5
-              onNext={goNext}
-              onBack={goBack}
-              onClose={handleCloseClick}
-              selectedPlan={selectedPlan}
-            />
-          )}
-        </div>
-      </ModalShell>
       {showSuccess && (
         <div className="fixed inset-0 z-[1001] grid place-items-center bg-black/55 p-4">
           <ModalShell onClose={closeAll} size="default">
@@ -215,7 +247,7 @@ export default function MbbSignupController({
           </ModalShell>
         </div>
       )}
-    </div>
+
       <ExitConfirmationDialog
         open={showExitConfirmation}
         onStay={() => setShowExitConfirmation(false)}

@@ -13,15 +13,17 @@ export interface BillingSummary {
 }
 
 export interface Invoice {
-    _id: string;
+    id: string;
+    _id?: string;
     invoiceNumber: string;
     customerId: string;
-    billingPeriod: {
+    type?: 'invoice' | 'payment';
+    billingPeriod?: {
         startDate: string;
         endDate: string;
     };
     dueDate: string;
-    status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+    status: string; // Made status more flexible for Stripe statuses like 'succeeded' or 'open'
     subtotal: number;
     discount: number;
     tax: number;
@@ -229,7 +231,6 @@ export const createBillingAccount = async (data: {
     }
 };
 
-// Generate invoice for billing period
 export const generateInvoice = async (data: {
     billingPeriodStart: string;
     billingPeriodEnd: string;
@@ -239,6 +240,17 @@ export const generateInvoice = async (data: {
         return response.data.data;
     } catch (error) {
         console.error('Error generating invoice:', error);
+        throw error;
+    }
+};
+
+// Activate account after successful signup payment
+export const activateAccount = async (paymentIntentId: string): Promise<{ success: boolean; message: string; user?: any }> => {
+    try {
+        const response = await apiClient.post('/auth/activate-account', { paymentIntentId });
+        return response.data;
+    } catch (error) {
+        console.error('Error activating account:', error);
         throw error;
     }
 };

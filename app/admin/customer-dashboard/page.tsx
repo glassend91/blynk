@@ -8,6 +8,8 @@ import IdentityVerification from "./_local/components/IdentityVerification";
 import NotesHistory from "./_local/components/NotesHistory";
 import FinancialOverview from "./_local/components/FinancialOverview";
 import ActiveServicesList from "./_local/components/ActiveServicesList";
+import BillingHistory from "./_local/components/BillingHistory";
+import PaymentDetails from "./_local/components/PaymentDetails";
 
 type Customer = {
   id: string;
@@ -118,11 +120,17 @@ export default function CustomerDashboardPage() {
               // Refresh notes if needed
             }}
           />
+          <PaymentDetails
+            customerId={customerIdFromUrl || selectedCustomer?.id}
+          />
           <ActiveServicesList
             customerId={customerIdFromUrl || selectedCustomer?.id}
             onServiceCancelled={() => {
               // Refresh if needed
             }}
+          />
+          <BillingHistory
+            customerId={customerIdFromUrl || selectedCustomer?.id}
           />
         </div>
       </div>

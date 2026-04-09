@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import ModalShell from "@/components/shared/ModalShell";
 import SectionPanel from "@/components/shared/SectionPanel";
 import ExitConfirmationDialog from "@/components/shared/ExitConfirmationDialog";
@@ -36,11 +36,38 @@ export default function NbnSignupController({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number } | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number; id?: string } | null>(null);
+  const [availablePlans, setAvailablePlans] = useState<any[]>([]);
+  const [locId, setLocId] = useState<string>("");
+  const [ntdId, setNtdId] = useState<string>("");
+  const [port, setPort] = useState<string>("");
+  const [serviceRef, setServiceRef] = useState<string>("");
+  const [wantsStaticIp, setWantsStaticIp] = useState<boolean>(true); // Default checked as per original design
+  const [dateOfBirth, setDateOfBirth] = useState<string>("");
+  const [billingSameAsService, setBillingSameAsService] = useState<boolean>(true);
+  const [billingAddress, setBillingAddress] = useState<string>("");
+
+  const [maxReached, setMaxReached] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("nbn_max_reached");
+      return saved ? parseInt(saved, 10) : 1;
+    }
+    return 1;
+  });
+
+  // Persist maxReached
+  useEffect(() => {
+    if (step > maxReached) {
+      setMaxReached(step);
+      sessionStorage.setItem("nbn_max_reached", step.toString());
+    }
+  }, [step, maxReached]);
 
   const closeAll = useCallback(() => {
     setShowStaticIpInfo(false);
     setStep(1);
+    setMaxReached(1);
+    sessionStorage.removeItem("nbn_max_reached");
     setApiLoading(false);
     setApiError(null);
     setShowSuccess(false);
@@ -52,6 +79,15 @@ export default function NbnSignupController({
     setPhone("");
     setPassword("");
     setSelectedPlan(null);
+    setAvailablePlans([]);
+    setLocId("");
+    setNtdId("");
+    setPort("");
+    setServiceRef("");
+    setWantsStaticIp(true);
+    setDateOfBirth("");
+    setBillingSameAsService(true);
+    setBillingAddress("");
     onClose();
   }, [onClose]);
 
@@ -63,7 +99,7 @@ export default function NbnSignupController({
     try {
       setApiLoading(true);
       setApiError(null);
-      await signup({
+      const res = await signup({
         type: "NBN",
         firstName,
         lastName,
@@ -72,27 +108,36 @@ export default function NbnSignupController({
         phone,
         serviceAddress,
         selectedPlan: selectedPlan || undefined,
+        locId,
+        ntdId,
+        port,
+        serviceRef,
+        wantsStaticIp,
+        dateOfBirth,
+        billingAddress: billingSameAsService ? serviceAddress : billingAddress,
       });
-      setShowSuccess(true);
+      return { success: true, data: res };
     } catch (err: any) {
       setApiError(err?.message || "Signup failed");
+      return { success: false, message: err?.message || "Signup failed" };
     } finally {
       setApiLoading(false);
     }
-  }, [firstName, lastName, email, password, phone, serviceAddress, selectedPlan]);
+  }, [firstName, lastName, email, password, phone, serviceAddress, selectedPlan, locId, ntdId, port, serviceRef, wantsStaticIp, dateOfBirth, billingSameAsService, billingAddress]);
 
   const goNext = useCallback(() => {
-    if (step === 6) {
-      // After Payment & Agreement, go directly to completion (skip obsolete Agreements step)
-      handleComplete();
-      return;
-    }
     setStep((s: any) => Math.min(6, (s + 1)));
-  }, [step, handleComplete]);
+  }, []);
 
   const goBack = useCallback(() => {
     setStep((s: any) => Math.max(1, (s - 1)));
   }, []);
+
+  const handleStepClick = useCallback((s: number) => {
+    if (s <= maxReached && s !== step) {
+      setStep(s);
+    }
+  }, [maxReached, step]);
 
   if (!open) return null;
 
@@ -106,6 +151,13 @@ export default function NbnSignupController({
             onClose={handleCloseClick}
             address={serviceAddress}
             onChangeAddress={setServiceAddress}
+            onAvailablePlans={setAvailablePlans}
+            onLocId={setLocId}
+            onNtdId={setNtdId}
+            onPort={setPort}
+            onServiceRef={setServiceRef}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
         {step === 2 && (
@@ -115,6 +167,9 @@ export default function NbnSignupController({
             onClose={handleCloseClick}
             selectedPlan={selectedPlan}
             onPlanSelect={setSelectedPlan}
+            availablePlans={availablePlans}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
         {step === 3 && (
@@ -123,6 +178,10 @@ export default function NbnSignupController({
             onBack={goBack}
             onClose={handleCloseClick}
             onOpenStaticIp={() => setShowStaticIpInfo(true)}
+            wantsStaticIp={wantsStaticIp}
+            onChangeWantsStaticIp={setWantsStaticIp}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
         {step === 4 && (
@@ -136,21 +195,35 @@ export default function NbnSignupController({
             phone={phone}
             serviceAddress={serviceAddress}
             password={password}
+            dateOfBirth={dateOfBirth}
+            billingSameAsService={billingSameAsService}
+            billingAddress={billingAddress}
             onChangeFirstName={setFirstName}
             onChangeLastName={setLastName}
             onChangeEmail={setEmail}
             onChangePhone={setPhone}
             onChangeServiceAddress={setServiceAddress}
             onChangePassword={setPassword}
+            onChangeDateOfBirth={setDateOfBirth}
+            onChangeBillingSameAsService={setBillingSameAsService}
+            onChangeBillingAddress={setBillingAddress}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
           />
         )}
-        {step === 5 && <SignupModal5 onNext={goNext} onBack={goBack} onClose={handleCloseClick} />}
+        {step === 5 && <SignupModal5 onNext={goNext} onBack={goBack} onClose={handleCloseClick} onStepClick={handleStepClick} maxReached={maxReached} />}
         {step === 6 && (
           <SignupModal6
-            onNext={goNext}
+            onNext={() => setShowSuccess(true)}
             onBack={goBack}
             onClose={handleCloseClick}
             selectedPlan={selectedPlan}
+            wantsStaticIp={wantsStaticIp}
+            onStepClick={handleStepClick}
+            maxReached={maxReached}
+            onComplete={handleComplete}
+            apiError={apiError}
+            apiLoading={apiLoading}
           />
         )}
 

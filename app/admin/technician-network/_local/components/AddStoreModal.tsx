@@ -251,8 +251,42 @@ export default function AddStoreWizard({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 p-2 sm:p-4">
-      <div className="w-full max-w-[820px] max-h-[95vh] sm:max-h-[90vh] rounded-[10px] sm:rounded-[14px] bg-white shadow-2xl flex flex-col">
+    <div
+      className="fixed z-[100] flex items-center justify-center"
+      style={{
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh'
+      }}
+    >
+      <div
+        className="fixed bg-black/30"
+        onClick={onClose}
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 100
+        }}
+      />
+      <div
+        className="fixed z-[101] w-full max-w-[820px] max-h-[95vh] sm:max-h-[90vh] rounded-[10px] sm:rounded-[14px] bg-white shadow-2xl flex flex-col"
+        style={{
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         {/* Header with tabs */}
         <div className="flex items-center justify-between border-b border-[#EEEAF4] px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-5 flex-shrink-0">
           <h2 className="text-[16px] sm:text-[18px] md:text-[20px] font-bold text-[#0A0A0A] pr-2">

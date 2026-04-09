@@ -11,17 +11,21 @@ export default function MobileVoiceSignup3NumberChoice({
   onClose,
   numberChoice,
   onChangeNumberChoice,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
   numberChoice: "keep" | "new" | null;
   onChangeNumberChoice: (choice: "keep" | "new") => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   return (
     <ModalShell onClose={onClose} size="wide">
       <MVHeaderBanner />
-      <div className="mt-6"><MVStepper active={3} /></div>
+      <div className="mt-6"><MVStepper active={3} onStepClick={onStepClick} maxReached={maxReached} /></div>
 
       <SectionPanel>
         <div className="text-center">

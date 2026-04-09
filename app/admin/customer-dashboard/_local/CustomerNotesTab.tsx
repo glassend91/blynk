@@ -18,6 +18,7 @@ type Note = {
   priority: string;
   content: string;
   tags: string[];
+  isCritical?: boolean;
   createdBy: {
     id: string;
     firstName?: string;
@@ -87,7 +88,7 @@ export default function CustomerNotesTab({ initialQuery }: Props) {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Use global search to find customers
       const globalSearchResponse = await apiClient.get<{ success: boolean; data: any[]; count: number }>(
         `/customer-verification/global-search?query=${encodeURIComponent(value)}`
@@ -96,21 +97,21 @@ export default function CustomerNotesTab({ initialQuery }: Props) {
       if (globalSearchResponse.data?.success && globalSearchResponse.data.data && globalSearchResponse.data.data.length > 0) {
         // Get customer IDs from global search results
         const customerIds = globalSearchResponse.data.data.map((c: any) => c.id || c.userId);
-        
+
         // Fetch all notes and filter by customer IDs
         const allNotesResponse = await apiClient.get<{ success: boolean; data: Note[] }>(
           `/customer-verification/notes?limit=100`
         );
-        
+
         if (allNotesResponse.data?.success && allNotesResponse.data.data) {
           // Filter notes to only include those from found customers
           const filteredNotes = allNotesResponse.data.data.filter((note: Note) =>
             customerIds.includes(note.customerId)
           );
-          
+
           // Sort by most recent
           filteredNotes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          
+
           setNotes(filteredNotes);
           setSearchedCustomer(value);
         } else {

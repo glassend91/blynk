@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { getAuthUser } from "@/lib/auth";
 import apiClient from "@/lib/apiClient";
 import UnifiedCustomerSignupController from "@/components/admin/UnifiedCustomerSignupController";
-import { NBNServiceModal, MobileVoiceServiceModal, MobileBroadbandServiceModal } from "@/components/admin/AddServiceModals";
+import { NBNServiceModal, MobileVoiceServiceModal, MobileBroadbandServiceModal, BusinessNBNServiceModal } from "@/components/admin/AddServiceModals";
 
 type AuthUser = {
   firstName?: string;
@@ -343,15 +343,68 @@ function AddServiceSelectionModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const [selectedService, setSelectedService] = useState<"NBN" | "Mobile Voice" | "Mobile Broadband" | null>(null);
+  const [selectedService, setSelectedService] = useState<"NBN" | "Business NBN" | "Mobile Voice" | "Mobile Broadband" | null>(null);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [open]);
 
   if (!open) return null;
 
   return (
     <>
       {!selectedService ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-md rounded-[16px] bg-white p-6 shadow-2xl">
+        <div
+          className="fixed z-50 flex items-center justify-center"
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            margin: 0,
+            padding: 0,
+            width: '100vw',
+            height: '100vh'
+          }}
+        >
+          <div
+            className="fixed bg-black/70"
+            onClick={onClose}
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 50
+            }}
+          />
+          <div
+            className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-2xl"
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 51
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">Add New Service</h2>
               <button
@@ -376,6 +429,26 @@ function AddServiceSelectionModal({
                 <div className="flex-1 text-left">
                   <div className="text-[16px] font-semibold text-[#0A0A0A]">NBN</div>
                   <div className="text-[13px] text-[#6F6C90]">Broadband internet service</div>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#6F6C90]">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+
+              <button
+                onClick={() => setSelectedService("Business NBN")}
+                className="w-full flex items-center gap-4 p-4 rounded-[10px] border-2 border-[#DFDBE3] hover:border-[#401B60] hover:bg-[#F8F8F8] transition-all"
+              >
+                <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-indigo-600">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-[16px] font-semibold text-[#0A0A0A]">Business NBN</div>
+                  <div className="text-[13px] text-[#6F6C90]">Business broadband with static IP & SLA</div>
                 </div>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#6F6C90]">
                   <path d="M9 18l6-6-6-6" />
@@ -426,6 +499,15 @@ function AddServiceSelectionModal({
         <>
           {selectedService === "NBN" && (
             <NBNServiceModal
+              open={true}
+              onClose={() => {
+                setSelectedService(null);
+                onClose();
+              }}
+            />
+          )}
+          {selectedService === "Business NBN" && (
+            <BusinessNBNServiceModal
               open={true}
               onClose={() => {
                 setSelectedService(null);

@@ -86,9 +86,9 @@ export function NBNServiceModal({ open, onClose }: { open: boolean; onClose: () 
     const filteredCustomers = customers.filter(
         (c) =>
             !searchQuery ||
-            c.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.email.toLowerCase().includes(searchQuery.toLowerCase())
+            c.firstName?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+            c.lastName?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+            c.email?.toLowerCase()?.includes(searchQuery?.toLowerCase())
     );
 
     const handleSubmit = async () => {
@@ -418,6 +418,407 @@ export function NBNServiceModal({ open, onClose }: { open: boolean; onClose: () 
     );
 }
 
+// Business NBN Service Modal
+export function BusinessNBNServiceModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const customerIdFromUrl = searchParams.get("customerId");
+
+    const [step, setStep] = useState(1);
+    const [customerId, setCustomerId] = useState(customerIdFromUrl || "");
+    const [serviceAddress, setServiceAddress] = useState("");
+    const [selectedPlan, setSelectedPlan] = useState<{ id: string; name: string; price: number; serviceType: string } | null>(null);
+    const [staticIP, setStaticIP] = useState(false);
+    const [useCardOnFile, setUseCardOnFile] = useState(true);
+    const [termsVerified, setTermsVerified] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [customers, setCustomers] = useState<Customer[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [availableServices, setAvailableServices] = useState<Array<{ id: string; name: string; serviceType: string; originalPrice: number }>>([]);
+    const [loadingServices, setLoadingServices] = useState(false);
+
+    useEffect(() => {
+        if (customerIdFromUrl) {
+            setCustomerId(customerIdFromUrl);
+            setStep(2); // Skip customer selection if already on customer dashboard
+        }
+        fetchCustomers();
+        fetchAvailableServices();
+    }, [customerIdFromUrl]);
+
+    const fetchCustomers = async () => {
+        try {
+            const { data } = await apiClient.get<{ success: boolean; users?: Customer[]; data?: Customer[] }>(
+                "/auth/users?role=customer"
+            );
+            if (data?.success) {
+                setCustomers(data.users || data.data || []);
+            }
+        } catch (err) {
+            console.error("Failed to fetch customers:", err);
+        }
+    };
+
+    const fetchAvailableServices = async (): Promise<Array<{ id: string; name: string; serviceType: string; originalPrice: number }>> => {
+        try {
+            setLoadingServices(true);
+            const { data } = await apiClient.get<{ success: boolean; data?: Array<{ id: string; name: string; serviceType: string; originalPrice: number }> }>(
+                "/customer-plans/services"
+            );
+            if (data?.success && data.data) {
+                const businessNbnServices = data.data.filter(s => s.serviceType === "Business NBN");
+                setAvailableServices(businessNbnServices);
+                console.log("Fetched Business NBN services:", businessNbnServices);
+                return businessNbnServices;
+            } else {
+                console.warn("No services data returned from API");
+                return [];
+            }
+        } catch (err) {
+            console.error("Failed to fetch available services:", err);
+            setError("Failed to load available services. Please try again.");
+            return [];
+        } finally {
+            setLoadingServices(false);
+        }
+    };
+
+    const filteredCustomers = customers.filter(
+        (c) =>
+            !searchQuery ||
+            c.firstName?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+            c.lastName?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+            c.email?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+    );
+
+    const handleSubmit = async () => {
+        // Validate customerId - ensure it's the actual userId, not just "1"
+        const actualCustomerId = customerId && customerId !== "1"
+            ? customerId
+            : customers.find(c => (c.id || c.userId) === customerId)?.userId || customerId;
+
+        if (!actualCustomerId || actualCustomerId === "1") {
+            setError("Please select a valid customer");
+            return;
+        }
+
+        if (!serviceAddress || !selectedPlan || !termsVerified) {
+            setError("Please complete all required fields and verify terms");
+            return;
+        }
+
+        // Use the serviceId directly from selectedPlan (which now includes the id)
+        if (!selectedPlan?.id) {
+            setError("Service ID is missing. Please select a plan again.");
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Create service order
+            await apiClient.post("/customer-plans/add-service", {
+                customerId: actualCustomerId,
+                serviceId: selectedPlan.id,
+                assignedAddress: serviceAddress,
+                assignedNumber: undefined, // Business NBN doesn't need number
+            });
+
+            // Log to notes
+            const authUser = getAuthUser<{ firstName?: string; lastName?: string; email?: string }>();
+            const staffName = authUser
+                ? [authUser.firstName, authUser.lastName].filter(Boolean).join(" ") || authUser.email || "Staff Member"
+                : "Staff Member";
+
+            await apiClient.post("/customer-verification/notes", {
+                customerId: actualCustomerId,
+                noteType: "Service",
+                priority: "Normal",
+                content: `Business NBN service added: ${selectedPlan.name} at ${serviceAddress}. Static IP: ${staticIP ? "Yes" : "No"}. Added by ${staffName}.`,
+                tags: ["service", "business-nbn", "plan-added"],
+            });
+
+            onClose();
+            // Refresh customer dashboard if on customer page
+            if (customerIdFromUrl) {
+                router.refresh();
+            }
+        } catch (err: any) {
+            setError(err?.response?.data?.message || err?.message || "Failed to add service");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!open) return null;
+
+    return (
+        <ModalShell onClose={onClose} size="wide">
+            <SectionPanel>
+                <div className="mx-auto max-w-[760px]">
+                    <h2 className="text-[24px] font-bold text-[#0A0A0A] mb-6">Add Business NBN Service</h2>
+
+                    {error && (
+                        <div className="mb-4 rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
+                            {error}
+                        </div>
+                    )}
+
+                    {/* Step 1: Customer Selection (skip if customerIdFromUrl exists) */}
+                    {step === 1 && (
+                        <div className="space-y-4">
+                            <FormField label="Select Customer">
+                                <input
+                                    type="text"
+                                    placeholder="Search customers..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[14px] outline-none"
+                                />
+                            </FormField>
+                            <div className="max-h-[400px] overflow-y-auto space-y-2">
+                                {filteredCustomers.map((customer) => (
+                                    <button
+                                        key={customer.id || customer.userId}
+                                        onClick={() => {
+                                            // Always use userId if available, otherwise use id
+                                            const customerIdToUse = customer.userId || customer.id;
+                                            setCustomerId(customerIdToUse);
+                                            setStep(2);
+                                        }}
+                                        className="w-full text-left p-4 rounded-[10px] border border-[#DFDBE3] hover:border-[#401B60] hover:bg-[#F8F8F8] transition-all"
+                                    >
+                                        <div className="font-semibold text-[#0A0A0A]">
+                                            {customer.firstName} {customer.lastName}
+                                        </div>
+                                        <div className="text-[13px] text-[#6F6C90]">{customer.email}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 2: Address Check */}
+                    {step === 2 && (
+                        <div className="space-y-4">
+                            <FormField label="Service Address *">
+                                <input
+                                    type="text"
+                                    value={serviceAddress}
+                                    onChange={(e) => setServiceAddress(e.target.value)}
+                                    placeholder="Enter service address"
+                                    className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[14px] outline-none"
+                                />
+                            </FormField>
+                            <div className="flex items-center justify-between gap-3 mt-6">
+                                {!customerIdFromUrl && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setStep(1)}
+                                        className="rounded-[10px] border border-[#DFDBE3] px-4 py-2 text-[14px] font-semibold text-[#6F6C90] hover:bg-[#F8F8F8]"
+                                    >
+                                        ← Back
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        if (serviceAddress) {
+                                            // TODO: Call OneView API for serviceability check
+                                            // Fetch services from database when moving to plan selection step
+                                            await fetchAvailableServices();
+                                            setStep(3);
+                                        } else {
+                                            setError("Please enter a service address");
+                                        }
+                                    }}
+                                    className={`rounded-[10px] bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 ${!customerIdFromUrl ? "ml-auto" : "w-full"}`}
+                                >
+                                    Check Availability →
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 3: Plan Selection */}
+                    {step === 3 && (
+                        <div className="space-y-4">
+                            <FormField label="Select Plan *">
+                                {loadingServices ? (
+                                    <div className="text-center py-8 text-[#6F6C90]">
+                                        <svg className="animate-spin h-6 w-6 mx-auto mb-2 text-[#401B60]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Loading plans...
+                                    </div>
+                                ) : availableServices.length === 0 ? (
+                                    <div className="text-center py-8 text-[#6F6C90]">
+                                        No Business NBN plans available. Please contact support.
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {availableServices.map((service) => (
+                                            <button
+                                                key={service.id}
+                                                type="button"
+                                                onClick={() => setSelectedPlan({
+                                                    id: service.id,
+                                                    name: service.name,
+                                                    price: service.originalPrice,
+                                                    serviceType: service.serviceType
+                                                })}
+                                                className={`w-full text-left p-4 rounded-[10px] border-2 transition-all ${selectedPlan?.id === service.id
+                                                    ? "border-[#401B60] bg-[#F8F8F8]"
+                                                    : "border-[#DFDBE3] hover:border-[#401B60]"
+                                                    }`}
+                                            >
+                                                <div className="font-semibold text-[#0A0A0A]">{service.name}</div>
+                                                <div className="text-[14px] text-[#6F6C90]">${service.originalPrice}/month</div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </FormField>
+                            <div className="flex items-center justify-between gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setStep(2)}
+                                    className="rounded-[10px] border border-[#DFDBE3] px-4 py-2 text-[14px] font-semibold text-[#6F6C90] hover:bg-[#F8F8F8]"
+                                >
+                                    ← Back
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (selectedPlan) {
+                                            setStep(4);
+                                        } else {
+                                            setError("Please select a plan");
+                                        }
+                                    }}
+                                    disabled={!selectedPlan}
+                                    className="rounded-[10px] bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed ml-auto"
+                                >
+                                    Next →
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 4: Static IP */}
+                    {step === 4 && (
+                        <div className="space-y-4">
+                            <FormField label="Static IP">
+                                <div className="flex items-center gap-3">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="staticIP"
+                                            checked={!staticIP}
+                                            onChange={() => setStaticIP(false)}
+                                            className="h-4 w-4 accent-[#401B60]"
+                                        />
+                                        <span className="text-[14px] text-[#0A0A0A]">No</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="staticIP"
+                                            checked={staticIP}
+                                            onChange={() => setStaticIP(true)}
+                                            className="h-4 w-4 accent-[#401B60]"
+                                        />
+                                        <span className="text-[14px] text-[#0A0A0A]">Yes</span>
+                                    </label>
+                                </div>
+                            </FormField>
+                            <div className="flex items-center justify-between gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setStep(3)}
+                                    className="rounded-[10px] border border-[#DFDBE3] px-4 py-2 text-[14px] font-semibold text-[#6F6C90] hover:bg-[#F8F8F8]"
+                                >
+                                    ← Back
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setStep(5)}
+                                    className="rounded-[10px] bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 ml-auto"
+                                >
+                                    Next →
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 5: Payment & Agreements */}
+                    {step === 5 && (
+                        <div className="space-y-4">
+                            <FormField label="Payment Method">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="paymentMethod"
+                                        checked={useCardOnFile}
+                                        onChange={() => setUseCardOnFile(true)}
+                                        className="h-4 w-4 accent-[#401B60]"
+                                    />
+                                    <span className="text-[14px] text-[#0A0A0A]">Use card on file</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer mt-2">
+                                    <input
+                                        type="radio"
+                                        name="paymentMethod"
+                                        checked={!useCardOnFile}
+                                        onChange={() => setUseCardOnFile(false)}
+                                        className="h-4 w-4 accent-[#401B60]"
+                                    />
+                                    <span className="text-[14px] text-[#0A0A0A]">Add new payment method</span>
+                                </label>
+                            </FormField>
+
+                            <div className="rounded-[10px] border border-[#DFDBE3] bg-[#F8F8F8] p-4">
+                                <label className="flex items-start gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={termsVerified}
+                                        onChange={(e) => setTermsVerified(e.target.checked)}
+                                        className="mt-1 h-4 w-4 accent-[#401B60] flex-shrink-0"
+                                    />
+                                    <span className="text-[14px] text-[#0A0A0A]">
+                                        <span className="font-semibold text-red-600">*</span> Have you verified the plan details and price with the customer and directed them to our terms of service and terms of conditions?
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div className="flex items-center justify-between gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setStep(4)}
+                                    className="rounded-[10px] border border-[#DFDBE3] px-4 py-2 text-[14px] font-semibold text-[#6F6C90] hover:bg-[#F8F8F8]"
+                                >
+                                    ← Back
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleSubmit}
+                                    disabled={loading || !termsVerified}
+                                    className="rounded-[10px] bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed ml-auto"
+                                >
+                                    {loading ? "Processing..." : "Complete"}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </SectionPanel>
+        </ModalShell>
+    );
+}
+
 // Mobile Voice Service Modal
 export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onClose: () => void }) {
     const router = useRouter();
@@ -427,6 +828,8 @@ export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onCl
     const [step, setStep] = useState(1);
     const [customerId, setCustomerId] = useState(customerIdFromUrl || "");
     const [simType, setSimType] = useState<"eSim" | "physical">("eSim");
+    const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
+    const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
     const [numberChoice, setNumberChoice] = useState<"new" | "port">("new");
     const [selectedNumber, setSelectedNumber] = useState("");
     const [portingNumber, setPortingNumber] = useState("");
@@ -584,15 +987,41 @@ export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onCl
             return;
         }
 
+        // Validate conditional SIM fields
+        if (simType === "physical" && !simNumber?.trim()) {
+            setError("SIM Card Number (ICCID) is required for physical SIM");
+            return;
+        }
+
+        if (simType === "eSim") {
+            // Get customer email to default esimNotificationEmail if not provided
+            const customer = customers.find(c => (c.id || c.userId) === actualCustomerId);
+            const defaultEmail = customer?.email || "";
+            const finalEsimEmail = esimNotificationEmail?.trim() || defaultEmail;
+            
+            if (!finalEsimEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(finalEsimEmail)) {
+                setError("eSIM Notification Email is required and must be a valid email address");
+                return;
+            }
+        }
+
         try {
             setLoading(true);
             setError(null);
+
+            // Get customer email for eSIM notification email default
+            const customer = customers.find(c => (c.id || c.userId) === actualCustomerId);
+            const defaultEmail = customer?.email || "";
+            const finalEsimEmail = simType === "eSim" ? (esimNotificationEmail?.trim() || defaultEmail) : undefined;
 
             await apiClient.post("/customer-plans/add-service", {
                 customerId: actualCustomerId,
                 serviceId: selectedPlan.id,
                 assignedNumber: numberChoice === "new" ? selectedNumber : portingNumber,
                 assignedAddress: undefined, // Mobile Voice doesn't need address
+                simType: simType,
+                simNumber: simType === "physical" ? simNumber?.trim() : undefined, // Only include if physical SIM
+                esimNotificationEmail: finalEsimEmail, // Include if eSIM
             });
 
             const authUser = getAuthUser<{ firstName?: string; lastName?: string; email?: string }>();
@@ -650,9 +1079,9 @@ export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onCl
                                     .filter(
                                         (c) =>
                                             !searchQuery ||
-                                            c.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                            c.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                            c.email.toLowerCase().includes(searchQuery.toLowerCase())
+                                            c.firstName?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+                                            c.lastName?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+                                            c.email?.toLowerCase()?.includes(searchQuery?.toLowerCase())
                                     )
                                     .map((customer) => (
                                         <button
@@ -756,7 +1185,10 @@ export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onCl
                                             name="simType"
                                             value="eSim"
                                             checked={simType === "eSim"}
-                                            onChange={() => setSimType("eSim")}
+                                            onChange={() => {
+                                                setSimType("eSim");
+                                                setSimNumber(""); // Clear ICCID when switching to eSIM
+                                            }}
                                             className="h-4 w-4 accent-[#401B60]"
                                         />
                                         <span className="text-[14px] text-[#0A0A0A]">eSIM</span>
@@ -767,13 +1199,51 @@ export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onCl
                                             name="simType"
                                             value="physical"
                                             checked={simType === "physical"}
-                                            onChange={() => setSimType("physical")}
+                                            onChange={() => {
+                                                setSimType("physical");
+                                                setEsimNotificationEmail(""); // Clear eSIM email when switching to physical
+                                            }}
                                             className="h-4 w-4 accent-[#401B60]"
                                         />
                                         <span className="text-[14px] text-[#0A0A0A]">Physical SIM</span>
                                     </label>
                                 </div>
                             </FormField>
+
+                            {/* Conditional SIM Fields */}
+                            {simType === "physical" && (
+                                <FormField label="SIM Card Number (ICCID) *">
+                                    <input
+                                        type="text"
+                                        value={simNumber}
+                                        onChange={(e) => setSimNumber(e.target.value)}
+                                        className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                                        placeholder="Enter SIM Card Number (ICCID)"
+                                    />
+                                    <p className="mt-1 text-xs text-[#6F6C90]">
+                                        The ICCID is printed on the physical SIM card. This is required for physical SIM provisioning.
+                                    </p>
+                                </FormField>
+                            )}
+
+                            {simType === "eSim" && (
+                                <FormField label="eSIM Notification Email *">
+                                    <input
+                                        type="email"
+                                        value={esimNotificationEmail}
+                                        onChange={(e) => setEsimNotificationEmail(e.target.value)}
+                                        className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                                        placeholder={(() => {
+                                            const customer = customers.find(c => (c.id || c.userId) === customerId);
+                                            return customer?.email || "Enter email for eSIM notifications";
+                                        })()}
+                                    />
+                                    <p className="mt-1 text-xs text-[#6F6C90]">
+                                        This email will receive the eSIM activation QR code and instructions. Defaults to customer's account email but can be changed.
+                                    </p>
+                                </FormField>
+                            )}
+
                             <div className="flex items-center justify-between gap-3 mt-6">
                                 <button
                                     type="button"
@@ -784,7 +1254,24 @@ export function MobileVoiceServiceModal({ open, onClose }: { open: boolean; onCl
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setStep(4)}
+                                    onClick={() => {
+                                        // Validate SIM fields before proceeding
+                                        if (simType === "physical" && !simNumber?.trim()) {
+                                            setError("SIM Card Number (ICCID) is required for physical SIM");
+                                            return;
+                                        }
+                                        if (simType === "eSim") {
+                                            const customer = customers.find(c => (c.id || c.userId) === customerId);
+                                            const defaultEmail = customer?.email || "";
+                                            const finalEsimEmail = esimNotificationEmail?.trim() || defaultEmail;
+                                            if (!finalEsimEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(finalEsimEmail)) {
+                                                setError("eSIM Notification Email is required and must be a valid email address");
+                                                return;
+                                            }
+                                        }
+                                        setError(null);
+                                        setStep(4);
+                                    }}
                                     className="rounded-[10px] bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 ml-auto"
                                 >
                                     Next →
@@ -1077,6 +1564,9 @@ export function MobileBroadbandServiceModal({ open, onClose }: { open: boolean; 
     const [step, setStep] = useState(1);
     const [customerId, setCustomerId] = useState(customerIdFromUrl || "");
     const [selectedPlan, setSelectedPlan] = useState<{ id: string; name: string; price: number; serviceType: string } | null>(null);
+    const [simType, setSimType] = useState<"eSim" | "physical">("eSim");
+    const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
+    const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
     const [useCardOnFile, setUseCardOnFile] = useState(true);
     const [termsVerified, setTermsVerified] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -1159,15 +1649,41 @@ export function MobileBroadbandServiceModal({ open, onClose }: { open: boolean; 
             return;
         }
 
+        // Validate conditional SIM fields
+        if (simType === "physical" && !simNumber?.trim()) {
+            setError("SIM Card Number (ICCID) is required for physical SIM");
+            return;
+        }
+
+        if (simType === "eSim") {
+            // Get customer email to default esimNotificationEmail if not provided
+            const customer = customers.find(c => (c.id || c.userId) === actualCustomerId);
+            const defaultEmail = customer?.email || "";
+            const finalEsimEmail = esimNotificationEmail?.trim() || defaultEmail;
+            
+            if (!finalEsimEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(finalEsimEmail)) {
+                setError("eSIM Notification Email is required and must be a valid email address");
+                return;
+            }
+        }
+
         try {
             setLoading(true);
             setError(null);
+
+            // Get customer email for eSIM notification email default
+            const customer = customers.find(c => (c.id || c.userId) === actualCustomerId);
+            const defaultEmail = customer?.email || "";
+            const finalEsimEmail = simType === "eSim" ? (esimNotificationEmail?.trim() || defaultEmail) : undefined;
 
             await apiClient.post("/customer-plans/add-service", {
                 customerId: actualCustomerId,
                 serviceId: selectedPlan.id,
                 assignedAddress: undefined, // Mobile Broadband doesn't need address
                 assignedNumber: undefined, // Mobile Broadband doesn't need number
+                simType: simType,
+                simNumber: simType === "physical" ? simNumber?.trim() : undefined, // Only include if physical SIM
+                esimNotificationEmail: finalEsimEmail, // Include if eSIM
             });
 
             const authUser = getAuthUser<{ firstName?: string; lastName?: string; email?: string }>();
@@ -1225,9 +1741,9 @@ export function MobileBroadbandServiceModal({ open, onClose }: { open: boolean; 
                                     .filter(
                                         (c) =>
                                             !searchQuery ||
-                                            c.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                            c.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                            c.email.toLowerCase().includes(searchQuery.toLowerCase())
+                                            c.firstName?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+                                            c.lastName?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+                                            c.email?.toLowerCase()?.includes(searchQuery?.toLowerCase())
                                     )
                                     .map((customer) => (
                                         <button
@@ -1313,8 +1829,114 @@ export function MobileBroadbandServiceModal({ open, onClose }: { open: boolean; 
                         </div>
                     )}
 
-                    {/* Step 3: Payment & Agreements */}
+                    {/* Step 3: SIM Type */}
                     {step === 3 && (
+                        <div className="space-y-4">
+                            <FormField label="SIM Type *">
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="simType"
+                                            value="eSim"
+                                            checked={simType === "eSim"}
+                                            onChange={() => {
+                                                setSimType("eSim");
+                                                setSimNumber(""); // Clear ICCID when switching to eSIM
+                                            }}
+                                            className="h-4 w-4 accent-[#401B60]"
+                                        />
+                                        <span className="text-[14px] text-[#0A0A0A]">eSIM</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="simType"
+                                            value="physical"
+                                            checked={simType === "physical"}
+                                            onChange={() => {
+                                                setSimType("physical");
+                                                setEsimNotificationEmail(""); // Clear eSIM email when switching to physical
+                                            }}
+                                            className="h-4 w-4 accent-[#401B60]"
+                                        />
+                                        <span className="text-[14px] text-[#0A0A0A]">Physical SIM</span>
+                                    </label>
+                                </div>
+                            </FormField>
+
+                            {/* Conditional SIM Fields */}
+                            {simType === "physical" && (
+                                <FormField label="SIM Card Number (ICCID) *">
+                                    <input
+                                        type="text"
+                                        value={simNumber}
+                                        onChange={(e) => setSimNumber(e.target.value)}
+                                        className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                                        placeholder="Enter SIM Card Number (ICCID)"
+                                    />
+                                    <p className="mt-1 text-xs text-[#6F6C90]">
+                                        The ICCID is printed on the physical SIM card. This is required for physical SIM provisioning.
+                                    </p>
+                                </FormField>
+                            )}
+
+                            {simType === "eSim" && (
+                                <FormField label="eSIM Notification Email *">
+                                    <input
+                                        type="email"
+                                        value={esimNotificationEmail}
+                                        onChange={(e) => setEsimNotificationEmail(e.target.value)}
+                                        className="w-full rounded-[10px] border border-[#DFDBE3] px-4 py-3 text-[14px] outline-none focus:ring-2 focus:ring-[#401B60]/20"
+                                        placeholder={(() => {
+                                            const customer = customers.find(c => (c.id || c.userId) === customerId);
+                                            return customer?.email || "Enter email for eSIM notifications";
+                                        })()}
+                                    />
+                                    <p className="mt-1 text-xs text-[#6F6C90]">
+                                        This email will receive the eSIM activation QR code and instructions. Defaults to customer's account email but can be changed.
+                                    </p>
+                                </FormField>
+                            )}
+
+                            <div className="flex items-center justify-between gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setStep(2)}
+                                    className="rounded-[10px] border border-[#DFDBE3] px-4 py-2 text-[14px] font-semibold text-[#6F6C90] hover:bg-[#F8F8F8]"
+                                >
+                                    ← Back
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        // Validate SIM fields before proceeding
+                                        if (simType === "physical" && !simNumber?.trim()) {
+                                            setError("SIM Card Number (ICCID) is required for physical SIM");
+                                            return;
+                                        }
+                                        if (simType === "eSim") {
+                                            const customer = customers.find(c => (c.id || c.userId) === customerId);
+                                            const defaultEmail = customer?.email || "";
+                                            const finalEsimEmail = esimNotificationEmail?.trim() || defaultEmail;
+                                            if (!finalEsimEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(finalEsimEmail)) {
+                                                setError("eSIM Notification Email is required and must be a valid email address");
+                                                return;
+                                            }
+                                        }
+                                        setError(null);
+                                        setStep(4);
+                                    }}
+                                    className="rounded-[10px] bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 ml-auto"
+                                >
+                                    Next →
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 4: Payment & Agreements */}
+                    {step === 4 && (
                         <div className="space-y-4">
                             <FormField label="Payment Method">
                                 <label className="flex items-center gap-2 cursor-pointer">
@@ -1356,7 +1978,7 @@ export function MobileBroadbandServiceModal({ open, onClose }: { open: boolean; 
                             <div className="flex items-center justify-between gap-3 mt-6">
                                 <button
                                     type="button"
-                                    onClick={() => setStep(2)}
+                                    onClick={() => setStep(3)}
                                     className="rounded-[10px] border border-[#DFDBE3] px-4 py-2 text-[14px] font-semibold text-[#6F6C90] hover:bg-[#F8F8F8]"
                                 >
                                     ← Back

@@ -15,7 +15,10 @@ import SignupModal5 from "@/components/nbn/modals/SignupModal5";
 import SignupModal6 from "@/components/nbn/modals/SignupModal6";
 
 type CustomerType = "residential" | "business";
-type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+// NEW service category (NBN vs Mobile)
+type ServiceType = "NBN" | "MOBILE";
+// Extend wizard steps to include an initial Service-Type chooser (0)
+type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 type AuthorizedContact = {
   firstName: string;
@@ -29,7 +32,8 @@ export default function UnifiedCustomerSignupController({
   open: boolean;
   onClose: () => void;
 }) {
-  const [step, setStep] = useState<Step>(1);
+  const [step, setStep] = useState<Step>(0); // start wizard at Service-Type selector
+  const [serviceType, setServiceType] = useState<ServiceType | null>(null);
   const [customerType, setCustomerType] = useState<CustomerType | null>(null);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   const [apiLoading, setApiLoading] = useState(false);
@@ -40,6 +44,13 @@ export default function UnifiedCustomerSignupController({
   const [serviceAddress, setServiceAddress] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number } | null>(null);
   const [identity, setIdentity] = useState<any>(null);
+
+  // Mobile-only fields
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [isPortIn, setIsPortIn] = useState(false);
+  const [simType, setSimType] = useState<"eSim" | "physical">("eSim");
+  const [simNumber, setSimNumber] = useState<string>(""); // ICCID for physical SIM
+  const [esimNotificationEmail, setEsimNotificationEmail] = useState<string>(""); // Email for eSIM notifications
 
   // Residential fields
   const [firstName, setFirstName] = useState("");
@@ -66,7 +77,8 @@ export default function UnifiedCustomerSignupController({
   ]);
 
   const closeAll = useCallback(() => {
-    setStep(1);
+    setStep(0);
+    setServiceType(null);
     setCustomerType(null);
     setApiLoading(false);
     setApiError(null);
@@ -75,6 +87,11 @@ export default function UnifiedCustomerSignupController({
     setServiceAddress("");
     setSelectedPlan(null);
     setIdentity(null);
+    setMobileNumber("");
+    setIsPortIn(false);
+    setSimType("eSim");
+    setSimNumber("");
+    setEsimNotificationEmail("");
     setFirstName("");
     setLastName("");
     setEmail("");
@@ -104,6 +121,29 @@ export default function UnifiedCustomerSignupController({
     try {
       setApiLoading(true);
       setApiError(null);
+
+      // ----- MOBILE SERVICE SIGNUP -----
+      if (serviceType === "MOBILE") {
+        const customerEmail = customerType === "business" ? primaryEmail : email;
+        await signup({
+          type: "MBL",
+          mblSelectedNumber: !isPortIn ? mobileNumber : undefined,
+          mblKeepExistingNumber: isPortIn || undefined,
+          mblCurrentMobileNumber: isPortIn ? mobileNumber : undefined,
+          selectedPlan: selectedPlan || undefined,
+          customerType,
+          firstName: customerType === "business" ? primaryFirstName : firstName,
+          lastName: customerType === "business" ? primaryLastName : lastName,
+          email: customerEmail,
+          phone: customerType === "business" ? primaryPhone : phone,
+          password: customerType === "business" ? businessPassword : password,
+          simType: simType,
+          simNumber: simType === "physical" ? simNumber : undefined, // Only include if physical SIM
+          esimNotificationEmail: simType === "eSim" ? (esimNotificationEmail || customerEmail) : undefined, // Default to account email if not provided
+        });
+        setShowSuccess(true);
+        return;
+      }
 
       if (customerType === "residential") {
         await signup({
@@ -183,29 +223,67 @@ export default function UnifiedCustomerSignupController({
     primaryPhone,
     businessPassword,
     authorizedContacts,
+    serviceType,
+    mobileNumber,
+    isPortIn,
+    simType,
+    simNumber,
+    esimNotificationEmail,
   ]);
 
   const goNext = useCallback(() => {
+    // Final step triggers completion
     if (step === 6) {
       handleComplete();
       return;
     }
-    // For business customers, skip ID check step (step 5)
-    if (customerType === "business" && step === 4) {
-      setStep(6); // Skip to payment
+
+    // ----- SERVICE-TYPE SPECIFIC FLOW CONTROL -----
+    if (serviceType === "MOBILE") {
+      // After mobile plan (step 2) go straight to customer details (step 4)
+      if (step === 2) {
+        setStep(4);
+        return;
+      }
+      // After details jump straight to payment (step 6)
+      if (step === 4) {
+        setStep(6);
+        return;
+      }
+    }
+
+    // Existing business customer optimisation (NBN only)
+    if (serviceType === "NBN" && customerType === "business" && step === 4) {
+      setStep(6);
       return;
     }
+
+    // Default advance
     setStep((s) => Math.min(7, (s + 1)) as Step);
-  }, [step, handleComplete, customerType]);
+  }, [step, handleComplete, serviceType, customerType]);
 
   const goBack = useCallback(() => {
-    // For business customers, skip ID check step when going back
-    if (customerType === "business" && step === 6) {
-      setStep(4); // Go back to customer details
+    // ----- SERVICE-TYPE SPECIFIC FLOW CONTROL -----
+    if (serviceType === "MOBILE") {
+      if (step === 6) {
+        setStep(4); // back to customer details
+        return;
+      }
+      if (step === 4) {
+        setStep(2); // back to mobile plan selection
+        return;
+      }
+    }
+
+    // NBN business path skipping ID check
+    if (serviceType === "NBN" && customerType === "business" && step === 6) {
+      setStep(4);
       return;
     }
-    setStep((s) => Math.max(1, (s - 1)) as Step);
-  }, [step, customerType]);
+
+    // Default back (ensure we don't go below 0)
+    setStep((s) => Math.max(0, (s - 1)) as Step);
+  }, [step, serviceType, customerType]);
 
   const addAuthorizedContact = () => {
     if (authorizedContacts.length < 3) {
@@ -230,6 +308,46 @@ export default function UnifiedCustomerSignupController({
   return (
     <>
       <div className="fixed inset-0 z-[90] grid place-items-center bg-black/55 p-4">
+        {/* Step 0: Service Type Selection */}
+        {step === 0 && (
+          <ModalShell onClose={handleCloseClick} size="default">
+            <Stepper active={1} />
+            <SectionPanel>
+              <div className="text-center">
+                <h2 className="modal-h1">Select Service Type</h2>
+                <p className="modal-sub mt-1">Is this an NBN or a Mobile service?</p>
+              </div>
+
+              <div className="mx-auto mt-8 max-w-[600px] space-y-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setServiceType("NBN");
+                    setStep(1);
+                  }}
+                  className="w-full rounded-[12px] border-2 border-[#E7E4EC] bg-white p-6 text-left transition-all hover:border-[#401B60] hover:shadow-md"
+                >
+                  <h3 className="text-[18px] font-semibold text-[#0A0A0A]">NBN (Fixed-Line)</h3>
+                  <p className="mt-1 text-[14px] text-[#6F6C90]">Broadband & VOIP</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setServiceType("MOBILE");
+                    setStep(1);
+                  }}
+                  className="w-full rounded-[12px] border-2 border-[#E7E4EC] bg-white p-6 text-left transition-all hover:border-[#401B60] hover:shadow-md"
+                >
+                  <h3 className="text-[18px] font-semibold text-[#0A0A0A]">Mobile</h3>
+                  <p className="mt-1 text-[14px] text-[#6F6C90]">Voice + Data / Data-only</p>
+                </button>
+              </div>
+            </SectionPanel>
+            <BarActions onBack={closeAll} onNext={() => { }} nextDisabled={true} />
+          </ModalShell>
+        )}
+
         {/* Step 1: Customer Type Selection */}
         {step === 1 && (
           <ModalShell onClose={handleCloseClick} size="default">
@@ -311,7 +429,7 @@ export default function UnifiedCustomerSignupController({
         )}
 
         {/* Step 2: Address Check (same for both) */}
-        {step === 2 && customerType && (
+        {step === 2 && serviceType === "NBN" && customerType && (
           <SignupModal1
             onNext={goNext}
             onBack={goBack}
@@ -321,8 +439,136 @@ export default function UnifiedCustomerSignupController({
           />
         )}
 
+        {/* Step 2 (Mobile): Number & Plan */}
+        {step === 2 && serviceType === "MOBILE" && (
+          <ModalShell onClose={handleCloseClick} size="wide">
+            <Stepper active={2} />
+            <SectionPanel>
+              <div className="text-center">
+                <h2 className="modal-h1">Mobile Service Details</h2>
+                <p className="modal-sub mt-1">Choose a plan and supply the mobile number</p>
+              </div>
+
+              <div className="card mx-auto mt-8 max-w-[860px] p-6 space-y-6">
+                <FormField label="Port-in existing number?">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={isPortIn}
+                      onChange={(e) => setIsPortIn(e.target.checked)}
+                      className="accent-[var(--cl-brand)]"
+                    />
+                    Yes, customer is porting in
+                  </label>
+                </FormField>
+
+                <FormField label={isPortIn ? "Existing Mobile Number" : "Preferred New Number"}>
+                  <input
+                    className="input w-full"
+                    placeholder="04xxxxxxxx"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                  />
+                </FormField>
+
+                <FormField label="Mobile Plan">
+                  <select
+                    className="input w-full"
+                    value={selectedPlan?.name || ""}
+                    onChange={(e) =>
+                      setSelectedPlan(
+                        e.target.value
+                          ? { name: e.target.value, price: 0 }
+                          : null
+                      )
+                    }
+                  >
+                    <option value="">-- Choose plan --</option>
+                    <option value="VOICE_40">Voice + 40 GB</option>
+                    <option value="DATA_100">Data-only 100 GB</option>
+                  </select>
+                </FormField>
+
+                <FormField label="SIM Type *">
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="simType"
+                        value="eSim"
+                        checked={simType === "eSim"}
+                        onChange={() => {
+                          setSimType("eSim");
+                          setSimNumber(""); // Clear ICCID when switching to eSIM
+                        }}
+                        className="h-4 w-4 accent-[#401B60]"
+                      />
+                      <span className="text-[14px] text-[#0A0A0A]">eSIM</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="simType"
+                        value="physical"
+                        checked={simType === "physical"}
+                        onChange={() => {
+                          setSimType("physical");
+                          setEsimNotificationEmail(""); // Clear eSIM email when switching to physical
+                        }}
+                        className="h-4 w-4 accent-[#401B60]"
+                      />
+                      <span className="text-[14px] text-[#0A0A0A]">Physical SIM</span>
+                    </label>
+                  </div>
+                </FormField>
+
+                {/* Conditional SIM Fields */}
+                {simType === "physical" && (
+                  <FormField label="SIM Card Number (ICCID) *">
+                    <input
+                      type="text"
+                      className="input w-full"
+                      value={simNumber}
+                      onChange={(e) => setSimNumber(e.target.value)}
+                      placeholder="Enter SIM Card Number (ICCID)"
+                    />
+                    <p className="mt-1 text-xs text-[#6F6C90]">
+                      The ICCID is printed on the physical SIM card. This is required for physical SIM provisioning.
+                    </p>
+                  </FormField>
+                )}
+
+                {simType === "eSim" && (
+                  <FormField label="eSIM Notification Email *">
+                    <input
+                      type="email"
+                      className="input w-full"
+                      value={esimNotificationEmail}
+                      onChange={(e) => setEsimNotificationEmail(e.target.value)}
+                      placeholder="Enter email for eSIM notifications (defaults to customer email)"
+                    />
+                    <p className="mt-1 text-xs text-[#6F6C90]">
+                      This email will receive the eSIM activation QR code and instructions. Defaults to customer's account email but can be changed.
+                    </p>
+                  </FormField>
+                )}
+              </div>
+            </SectionPanel>
+            <BarActions 
+              onBack={goBack} 
+              onNext={goNext} 
+              nextDisabled={
+                !selectedPlan || 
+                !mobileNumber || 
+                (simType === "physical" && !simNumber?.trim()) ||
+                (simType === "eSim" && !esimNotificationEmail?.trim() && !email?.trim() && !primaryEmail?.trim())
+              } 
+            />
+          </ModalShell>
+        )}
+
         {/* Step 3: Plan Selection (same for both) */}
-        {step === 3 && customerType && (
+        {step === 3 && serviceType === "NBN" && customerType && (
           <SignupModal2
             onNext={goNext}
             onBack={goBack}
@@ -390,7 +636,7 @@ export default function UnifiedCustomerSignupController({
         )}
 
         {/* Step 5: ID Check (only for residential) */}
-        {step === 5 && customerType === "residential" && (
+        {step === 5 && serviceType === "NBN" && customerType === "residential" && (
           <SignupModal5 onNext={goNext} onBack={goBack} onClose={handleCloseClick} />
         )}
 
@@ -624,10 +870,10 @@ function CustomerDetailsResidential({
                 type="email"
                 autoComplete="email"
                 className={`input w-full ${emailError || emailExists || (email && !isValidEmail(email))
-                    ? "border-red-300 bg-red-50"
-                    : email && isValidEmail(email) && !emailChecking
-                      ? "border-green-300 bg-green-50"
-                      : ""
+                  ? "border-red-300 bg-red-50"
+                  : email && isValidEmail(email) && !emailChecking
+                    ? "border-green-300 bg-green-50"
+                    : ""
                   }`}
                 value={email}
                 onChange={(e) => {
@@ -803,16 +1049,31 @@ function CustomerDetailsBusiness({
 
   const isValidABN = (value: string) => {
     const digits = value.replace(/\s/g, "");
-    return digits.length === 11 || digits.length === 9; // ABN is 11 digits, ACN is 9 digits
+    return digits.length === 11; // ABN is 11 digits
+  };
+
+  const isValidACN = (value: string) => {
+    const digits = value.replace(/\s/g, "");
+    return digits.length === 9; // ACN is 9 digits
   };
 
   const validate = (): boolean => {
     const bnErr = !businessName ? "Business name is required" : null;
-    const abnErr = !abn && !acn
-      ? "ABN or ACN is required"
-      : abn && !isValidABN(abn) && acn && !isValidABN(acn)
-        ? "Please enter a valid ABN (11 digits) or ACN (9 digits)"
-        : null;
+
+    // Require at least one of ABN or ACN, and validate format if provided
+    let abnErr: string | null = null;
+    if (!abn && !acn) {
+      abnErr = "ABN or ACN is required (at least one)";
+    } else {
+      // If ABN is provided, it must be valid
+      if (abn && !isValidABN(abn)) {
+        abnErr = "ABN must be 11 digits";
+      }
+      // If ACN is provided, it must be valid
+      if (!abnErr && acn && !isValidACN(acn)) {
+        abnErr = "ACN must be 9 digits";
+      }
+    }
     const pfnErr = !primaryFirstName
       ? "First name is required"
       : !isValidName(primaryFirstName)
@@ -921,7 +1182,7 @@ function CustomerDetailsBusiness({
               />
             </FormField>
             <div>
-              <FormField label="ABN (11 digits) *">
+              <FormField label="ABN (11 digits)">
                 <input
                   className={`input w-full ${abnError ? "border-red-300 bg-red-50" : ""}`}
                   value={abn}
@@ -937,13 +1198,18 @@ function CustomerDetailsBusiness({
           </div>
 
           <div className="mt-4">
-            <FormField label="ACN (9 digits) - Optional">
+            <FormField label="ACN (9 digits)">
               <input
-                className="input w-full"
+                className={`input w-full ${abnError ? "border-red-300 bg-red-50" : ""}`}
                 value={acn}
-                onChange={(e) => onChangeAcn(e.target.value)}
-                placeholder="Enter ACN if applicable"
+                onChange={(e) => {
+                  onChangeAcn(e.target.value);
+                  if (submitted) setAbnError(null);
+                }}
+                placeholder="Enter ACN"
               />
+              <p className="mt-1 text-xs text-[#6F6C90]">Enter your ABN or ACN (at least one required)</p>
+              {abnError && <p className="mt-1 text-xs text-red-600">{abnError}</p>}
             </FormField>
           </div>
 
@@ -982,10 +1248,10 @@ function CustomerDetailsBusiness({
                 <input
                   type="email"
                   className={`input w-full ${emailError || emailExists || (primaryEmail && !isValidEmail(primaryEmail))
-                      ? "border-red-300 bg-red-50"
-                      : primaryEmail && isValidEmail(primaryEmail) && !emailChecking
-                        ? "border-green-300 bg-green-50"
-                        : ""
+                    ? "border-red-300 bg-red-50"
+                    : primaryEmail && isValidEmail(primaryEmail) && !emailChecking
+                      ? "border-green-300 bg-green-50"
+                      : ""
                     }`}
                   value={primaryEmail}
                   onChange={(e) => {

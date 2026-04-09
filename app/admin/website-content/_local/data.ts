@@ -22,6 +22,8 @@ export const seed: Record<CmsPageKey, CmsPageData> = {
       subtitle:
         "We provide comprehensive telecommunications solutions with exceptional customer service.",
     },
+    bodyContent: "",
+    pageTitle: "",
     seo: {
       metaTitle: "Why Choose Our Services?",
       metaDescription: "Page description for search engines (max 160 characters)",
@@ -29,70 +31,55 @@ export const seed: Record<CmsPageKey, CmsPageData> = {
     },
   },
   about: {
-    hero: {
-      headline: "Fast, Reliable Internet & Mobile Plans",
-      subtitle: "Supporting text for the hero section",
-    },
-    features: { title: "", subtitle: "" },
+    bodyContent: "",
+    pageTitle: "",
     seo: {
-      metaTitle: "Why Choose Our Services?",
-      metaDescription: "Page description for search engines (max 160 characters)",
-      keywords: "Main keywords for this page (comma separated)",
+      metaTitle: "About Us",
+      metaDescription: "Learn more about our company and mission",
+      keywords: "about, company, mission, team",
     },
   },
   service: {
-    hero: {
-      headline: "Fast, Reliable Internet & Mobile Plans",
-      subtitle: "Supporting text for the hero section",
-    },
-    features: { title: "", subtitle: "" },
+    bodyContent: "",
+    pageTitle: "",
     seo: {
-      metaTitle: "Why Choose Our Services?",
-      metaDescription: "Page description for search engines (max 160 characters)",
-      keywords: "Main keywords for this page (comma separated)",
+      metaTitle: "Our Services",
+      metaDescription: "Discover our range of internet and mobile services",
+      keywords: "services, internet, mobile, nbn",
     },
   },
   hardship: {
-    hero: {
-      headline: "Fast, Reliable Internet & Mobile Plans",
-      subtitle: "Supporting text for the hero section",
-    },
-    features: { title: "", subtitle: "" },
+    bodyContent: "",
+    pageTitle: "",
     seo: {
-      metaTitle: "Why Choose Our Services?",
-      metaDescription: "Page description for search engines (max 160 characters)",
-      keywords: "Main keywords for this page (comma separated)",
+      metaTitle: "Financial Hardship Support",
+      metaDescription: "We're here to help during difficult times",
+      keywords: "financial hardship, support, payment assistance",
     },
   },
   policies: {
-    hero: {
-      headline: "Fast, Reliable Internet & Mobile Plans",
-      subtitle: "Supporting text for the hero section",
-    },
-    features: { title: "", subtitle: "" },
+    bodyContent: "",
+    pageTitle: "",
     seo: {
-      metaTitle: "Why Choose Our Services?",
-      metaDescription: "Page description for search engines (max 160 characters)",
-      keywords: "Main keywords for this page (comma separated)",
+      metaTitle: "Policies",
+      metaDescription: "Read our terms, privacy policy, and refund policy",
+      keywords: "policies, terms, privacy, refund",
     },
   },
   help: {
-    hero: {
-      headline: "Fast, Reliable Internet & Mobile Plans",
-      subtitle: "Supporting text for the hero section",
-    },
-    features: { title: "", subtitle: "" },
+    bodyContent: "",
+    pageTitle: "",
     seo: {
-      metaTitle: "Why Choose Our Services?",
-      metaDescription: "Page description for search engines (max 160 characters)",
-      keywords: "Main keywords for this page (comma separated)",
+      metaTitle: "Help Center",
+      metaDescription: "Find answers to frequently asked questions",
+      keywords: "help, faq, support, questions",
     },
   },
   seo: {
-    hero: { headline: "", subtitle: "" },
-    features: { title: "", subtitle: "" },
+    bodyContent: "",
+    pageTitle: "",
     seo: {
-      metaTitle: "Why Choose Our Services?",
+      metaTitle: "SEO Settings",
       metaDescription: "Page description for search engines (max 160 characters)",
       keywords: "",
     },

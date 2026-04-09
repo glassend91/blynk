@@ -12,6 +12,7 @@ type Props = {
   onStatus: (v: Status | "All Status") => void;
   onInvite?: () => void;
   availableRoles: Role[];
+  isCustomerOnly: boolean;
 };
 
 export function Select({
@@ -109,6 +110,7 @@ export default function TableHeader({
   onStatus,
   onInvite,
   availableRoles,
+  isCustomerOnly,
 }: Props) {
   // Combine "All Roles" with available roles for the dropdown
   const roleOptions: Array<Role | "All Roles"> = ["All Roles", ...availableRoles];
@@ -129,12 +131,12 @@ export default function TableHeader({
           />
         </div>
 
-        <Select
+        {!isCustomerOnly && <Select
           label={role === "All Roles" ? "Filter by role" : role}
           value={role}
           onChange={(v) => onRole(v as Role | "All Roles")}
           options={roleOptions}
-        />
+        />}
 
         <Select
           label={status === "All Status" ? "Filter by status" : status}

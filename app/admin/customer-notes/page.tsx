@@ -18,6 +18,7 @@ type Note = {
   priority: string;
   content: string;
   tags: string[];
+  isCritical?: boolean;
   createdBy: {
     id: string;
     firstName?: string;

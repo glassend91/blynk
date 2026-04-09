@@ -11,10 +11,14 @@ export default function SignupModal5({
   onNext,
   onBack,
   onClose,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   const [verificationComplete, setVerificationComplete] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
@@ -42,7 +46,7 @@ export default function SignupModal5({
 
   return (
     <ModalShell onClose={onClose} size="wide">
-      <Stepper active={5} />
+      <Stepper active={5} onStepClick={onStepClick} maxReached={maxReached} />
 
       <SectionPanel>
         <div className="text-center">
@@ -54,8 +58,8 @@ export default function SignupModal5({
         </div>
 
         <div className="mx-auto mt-8 max-w-[720px]">
-          <DVSVerification 
-            onVerify={handleVerify} 
+          <DVSVerification
+            onVerify={handleVerify}
             onSkip={handleSkip}
             apiError={verificationError}
           />

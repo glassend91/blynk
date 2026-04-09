@@ -57,8 +57,10 @@ export default function Sidebar({ width = 234 }: { width?: number }) {
         const routes = [
           "/admin/dashboard",
           "/admin/user-management",
+          "/admin/staff-members",
           "/admin/role-management",
           "/admin/service-plans",
+          "/admin/wholesaler-plans",
           "/admin/website-content",
           "/admin/testimonials",
           "/admin/technician-network",
@@ -138,6 +140,11 @@ export default function Sidebar({ width = 234 }: { width?: number }) {
             show={mounted ? (routeAccess["/admin/user-management"] ?? true) : true}
           />
           <Item
+            label="Staff Members"
+            href="/admin/staff-members"
+            show={mounted ? (routeAccess["/admin/staff-members"] ?? true) : true}
+          />
+          <Item
             label="Role Management"
             href="/admin/role-management"
             show={mounted ? (routeAccess["/admin/role-management"] ?? true) : true}
@@ -146,6 +153,7 @@ export default function Sidebar({ width = 234 }: { width?: number }) {
 
         <Section title="Content">
           <Item label="Service Plan" href="/admin/service-plans" show={mounted ? (routeAccess["/admin/service-plans"] ?? true) : true} />
+          <Item label="Wholesaler Plans" href="/admin/wholesaler-plans" show={mounted ? (routeAccess["/admin/wholesaler-plans"] ?? true) : true} />
           <Item label="Website Content" href="/admin/website-content" show={mounted ? (routeAccess["/admin/website-content"] ?? true) : true} />
           <Item label="Testimonial" href="/admin/testimonials" show={mounted ? (routeAccess["/admin/testimonials"] ?? true) : true} />
         </Section>

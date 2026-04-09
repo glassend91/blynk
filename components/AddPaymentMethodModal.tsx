@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { createSetupIntent, createPaymentMethod, type CreatePaymentMethodRequest } from '../lib/services/paymentMethods';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -35,14 +35,36 @@ function PaymentForm({ onClose, onSuccess }: PaymentFormProps) {
         setError(null);
 
         try {
+            // Trigger form validation and wallet collection
+            const { error: submitError } = await elements.submit();
+            if (submitError) {
+                setError(submitError.message || 'Validation failed');
+                setLoading(false);
+                return;
+            }
+
             // Create setup intent
             const { clientSecret } = await createSetupIntent();
 
-            // Confirm the setup intent with the card element
-            const { error: stripeError, setupIntent } = await stripe.confirmCardSetup(clientSecret, {
-                payment_method: {
-                    card: elements.getElement(CardElement)!
-                }
+            // Confirm the setup intent with the payment element
+            const { error: stripeError, setupIntent } = await stripe.confirmSetup({
+                elements,
+                clientSecret,
+                confirmParams: {
+                    payment_method_data: {
+                        billing_details: {
+                            name: 'Blynk Customer',
+                            address: {
+                                line1: '123 Test Street',
+                                city: 'Sydney',
+                                state: 'NSW',
+                                country: 'AU',
+                                postal_code: '2000'
+                            }
+                        }
+                    }
+                },
+                redirect: 'if_required'
             });
 
             if (stripeError) {
@@ -92,11 +114,16 @@ function PaymentForm({ onClose, onSuccess }: PaymentFormProps) {
             )}
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Card Information
-                </label>
                 <div className="border border-gray-300 rounded-md p-3">
-                    <CardElement options={cardElementOptions} />
+                    <PaymentElement options={{
+                        layout: 'auto',
+                        fields: {
+                            billingDetails: {
+                                address: 'never',
+                                name: 'never'
+                            }
+                        }
+                    }} />
                 </div>
             </div>
 
@@ -139,7 +166,7 @@ export default function AddPaymentMethodModal({ isOpen, onClose, onSuccess }: Ad
                                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                                     Add Payment Method
                                 </h3>
-                                <Elements stripe={stripePromise}>
+                                <Elements stripe={stripePromise} options={{ mode: 'setup', currency: 'aud', paymentMethodTypes: ['card'] }}>
                                     <PaymentForm onClose={onClose} onSuccess={onSuccess} />
                                 </Elements>
                             </div>

@@ -11,12 +11,16 @@ export default function MobileVoiceSignup3({
   onClose,
   simType,
   onChangeSimType,
+  onStepClick,
+  maxReached,
 }: {
   onNext: () => void;
   onBack: () => void;
   onClose: () => void;
   simType: "ESIM" | "PHYSICAL";
   onChangeSimType: (v: "ESIM" | "PHYSICAL") => void;
+  onStepClick?: (step: number) => void;
+  maxReached?: number;
 }) {
   // Ensure eSIM is always selected (non-changeable)
   if (simType !== "ESIM") {
@@ -26,7 +30,7 @@ export default function MobileVoiceSignup3({
   return (
     <ModalShell onClose={onClose} size="wide">
       <MVHeaderBanner />
-      <div className="mt-6"><MVStepper active={2} /></div>
+      <div className="mt-6"><MVStepper active={2} onStepClick={onStepClick} maxReached={maxReached} /></div>
 
       <SectionPanel>
         <div className="text-center">
@@ -48,7 +52,7 @@ export default function MobileVoiceSignup3({
           <div className="rounded-[12px] border-2 border-[#5C3B86] bg-[#FBF8FF] px-5 py-4 shadow-[0_40px_60px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <span className="text-[16px] font-semibold text-[#2E2745]">eSIM</span>
                   <span className="rounded-[8px] bg-[#1C1232] px-2 py-[2px] text-[11px] font-semibold text-white">SELECTED</span>
                 </div>
@@ -68,7 +72,7 @@ export default function MobileVoiceSignup3({
           <div className="mt-6 rounded-[12px] border border-[#E9E3F2] bg-[#FBF8FF] p-5">
             <p className="text-[14px] leading-[22px] text-[#3B3551]">
               We're an eSIM-only provider for all online sign-ups! This means you get connected in minutes without waiting for a plastic SIM in the mail, and it's better for the planet. Before proceeding, please ensure your device is eSIM compatible. Simply confirm by clicking 'Next' to continue.
-          </p>
+            </p>
           </div>
         </div>
       </SectionPanel>

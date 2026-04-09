@@ -25,7 +25,7 @@ export default function AddTestimonialModal({
   editingTestimonial?: Testimonial | null;
 }) {
   const isEditMode = !!editingTestimonial;
-  
+
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [plan, setPlan] = useState<string>("");
@@ -59,6 +59,24 @@ export default function AddTestimonialModal({
       setSubmitting(false);
     }
   }, [open, isEditMode, editingTestimonial]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [open]);
 
   if (!open) return null;
 
@@ -123,9 +141,37 @@ export default function AddTestimonialModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="absolute left-1/2 top-1/2 max-h-[95vh] w-[880px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[14px] bg-white p-6 shadow-2xl">
+    <div
+      className="fixed z-[90]"
+      style={{
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        width: '100vw',
+        height: '100vh',
+        overflow: 'auto'
+      }}
+    >
+      <div
+        className="fixed bg-black/70"
+        onClick={onClose}
+        style={{
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 90
+        }}
+      />
+      <div
+        className="fixed left-1/2 top-1/2 max-h-[95vh] w-[880px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[14px] bg-white p-6 shadow-2xl"
+        style={{ zIndex: 91 }}
+      >
         <div className="mb-1 flex items-center justify-between">
           <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">
             {isEditMode ? "Edit Testimonial" : "Add New Testimonial"}

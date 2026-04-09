@@ -1,8 +1,7 @@
 import axios from "axios";
 
 export const apiClient = axios.create({
-    baseURL: "https://blynk-backend.onrender.com/api",
-    // baseURL: "http://localhost:5000/api",
+    baseURL: process.env.NEXT_PUBLIC_API_URL || "https://blynk-backend-aaek.onrender.com/api",
     headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
