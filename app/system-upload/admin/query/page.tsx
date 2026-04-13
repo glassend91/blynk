@@ -19,7 +19,7 @@ export default function AdminQueryPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const apiUrl = process.env.API_URL || "https://blynk-backend-aaek.onrender.com/api";
 
   const executeCommand = async (type: "query" | "ping" | "calc") => {
     setLoading(true);
