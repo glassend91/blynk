@@ -1,5 +1,20 @@
 import apiClient from "../apiClient";
 
+export interface WholesalerPlan {
+  _id: string;
+  value?: number;
+  bandwidth_id?: string;
+  label: string;
+  speed?: string;
+  connection_type_name?: string;
+  connection_type?: number;
+  type: "dataBankPlans" | "dataPoolPlans" | "nbn";
+  custom_name?: string;
+  price?: number;
+  features?: string[];
+  isPublish?: boolean;
+}
+
 export interface Service {
   _id: string;
   serviceName: string;
@@ -77,7 +92,8 @@ export interface Service {
 
 export interface ServiceSubscription {
   _id: string;
-  serviceId: Service;
+  serviceId?: Service;
+  wholesalerPlanId?: WholesalerPlan;
   userId: string;
   subscriptionStatus:
     | "active"

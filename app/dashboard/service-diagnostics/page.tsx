@@ -75,8 +75,15 @@ export default function Diagnostics() {
   };
 
   const getServiceDisplayName = (subscription: ServiceSubscription) => {
-    const service = subscription.serviceId;
-    return `${service.serviceType} - ${service.serviceName}`;
+    if (subscription.serviceId) {
+      const service = subscription.serviceId;
+      return `${service.serviceType} - ${service.serviceName}`;
+    }
+    if (subscription.wholesalerPlanId) {
+      const plan = subscription.wholesalerPlanId;
+      return `${plan.connection_type_name || "Mobile"} - ${plan.custom_name || plan.label}`;
+    }
+    return "Unknown Service";
   };
 
   if (loading) {
