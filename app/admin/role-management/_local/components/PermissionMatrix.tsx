@@ -47,6 +47,7 @@ export default function PermissionMatrix({
   groups,
   roles,
   onPermissionToggle,
+  onLimitChange,
 }: {
   groups: PermissionGroup[];
   roles: Role[];
@@ -55,6 +56,7 @@ export default function PermissionMatrix({
     permissionKey: string,
     value: boolean,
   ) => void;
+  onLimitChange?: (roleId: string, value: number) => void;
 }) {
   return (
     <div className="space-y-6">
@@ -101,17 +103,38 @@ export default function PermissionMatrix({
                     </td>
                     {roles.map((r) => (
                       <td key={r.id} className="text-center">
-                        <Tick
-                          on={!!r.permissions[it.key]}
-                          faint
-                          onClick={() =>
-                            onPermissionToggle?.(
-                              r.id,
-                              it.key,
-                              !r.permissions[it.key],
-                            )
-                          }
-                        />
+                        {it.type === "number" ? (
+                          <div className="flex justify-center">
+                            <div className="relative flex w-[100px] items-center rounded-[8px] border border-[#E7E4EC] bg-white px-2">
+                              <span className="text-[12px] text-[#6F6C90]">
+                                $
+                              </span>
+                              <input
+                                type="number"
+                                className="w-full bg-transparent p-1 text-center text-[13px] outline-none"
+                                value={r.monthlyCreditLimit || 0}
+                                onChange={(e) =>
+                                  onLimitChange?.(
+                                    r.id,
+                                    parseInt(e.target.value) || 0,
+                                  )
+                                }
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <Tick
+                            on={!!r.permissions[it.key]}
+                            faint
+                            onClick={() =>
+                              onPermissionToggle?.(
+                                r.id,
+                                it.key,
+                                !r.permissions[it.key],
+                              )
+                            }
+                          />
+                        )}
                       </td>
                     ))}
                   </tr>

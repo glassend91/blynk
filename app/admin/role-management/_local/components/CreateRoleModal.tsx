@@ -17,12 +17,14 @@ export default function CreateRoleModal({
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [limit, setLimit] = useState(0);
 
   useEffect(() => {
     if (!open) {
       setName("");
       setDesc("");
       setChecked({});
+      setLimit(0);
     }
   }, [open]);
 
@@ -185,12 +187,27 @@ export default function CreateRoleModal({
                           </div>
                         )}
                       </div>
-                      <input
-                        type="checkbox"
-                        checked={on}
-                        onChange={() => toggle(it.key)}
-                        className="mt-[2px] h-[18px] w-[18px] accent-[#401B60]"
-                      />
+                      {it.type === "number" ? (
+                        <div className="flex items-center rounded-[8px] border border-[#DFDBE3] bg-white px-2">
+                          <span className="text-[12px] text-[#6F6C90]">$</span>
+                          <input
+                            type="number"
+                            value={limit}
+                            onChange={(e) =>
+                              setLimit(parseInt(e.target.value) || 0)
+                            }
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-[80px] bg-transparent p-1 text-right text-[14px] outline-none"
+                          />
+                        </div>
+                      ) : (
+                        <input
+                          type="checkbox"
+                          checked={on}
+                          onChange={() => toggle(it.key)}
+                          className="mt-[2px] h-[18px] w-[18px] accent-[#401B60]"
+                        />
+                      )}
                     </label>
                   );
                 })}
@@ -215,6 +232,7 @@ export default function CreateRoleModal({
                 permissions: Object.fromEntries(
                   allKeys.map((k) => [k, !!checked[k]]),
                 ),
+                monthlyCreditLimit: limit,
               })
             }
             className="h-[44px] flex-1 rounded-[10px] bg-[#401B60] text-[14px] font-semibold text-white"

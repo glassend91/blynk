@@ -5,7 +5,8 @@ import Tabs from "./_local/components/Tabs";
 import RolesOverview from "./_local/components/RolesOverview";
 import PermissionMatrix from "./_local/components/PermissionMatrix";
 import CreateRoleModal from "./_local/components/CreateRoleModal";
-import { rolesSeed, permissionGroups } from "./_local/data";
+import ViewRoleUsersModal from "./_local/components/ViewRoleUsersModal";
+import { permissionGroups } from "./_local/data";
 import type { Role } from "./_local/types";
 import {
   createRole,
@@ -17,9 +18,15 @@ import { refreshAuthUser } from "@/lib/auth";
 
 export default function RoleManagementPage() {
   const [tab, setTab] = useState<"overview" | "matrix">("overview");
-  const [roles, setRoles] = useState<Role[]>(rolesSeed);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // View users modal state
+  const [openViewUsers, setOpenViewUsers] = useState(false);
+  const [viewRole, setViewRole] = useState<{ id: string; name: string } | null>(
+    null,
+  );
 
   const matrix = useMemo(() => permissionGroups, []);
 
@@ -119,6 +126,27 @@ export default function RoleManagementPage() {
     }
   };
 
+  const handleLimitChange = async (roleId: string, value: number) => {
+    try {
+      // Optimistically update UI
+      setRoles((prev) =>
+        prev.map((r) =>
+          r.id === roleId ? { ...r, monthlyCreditLimit: value } : r,
+        ),
+      );
+
+      // Update on backend
+      await updateRole(roleId, { monthlyCreditLimit: value });
+    } catch (e) {
+      console.error("Failed to update credit limit", e);
+      // Revert on error
+      const data = await getRoles();
+      if (Array.isArray(data) && data.length > 0) {
+        setRoles(data);
+      }
+    }
+  };
+
   return (
     <section className="space-y-6">
       <header className="space-y-1">
@@ -153,12 +181,17 @@ export default function RoleManagementPage() {
             roles={roles}
             onEdit={() => setTab("matrix")}
             onRemove={handleDelete}
+            onViewUsers={(id, name) => {
+              setViewRole({ id, name });
+              setOpenViewUsers(true);
+            }}
           />
         ) : (
           <PermissionMatrix
             roles={roles}
             groups={matrix}
             onPermissionToggle={handlePermissionToggle}
+            onLimitChange={handleLimitChange}
           />
         )}
       </div>
@@ -168,6 +201,13 @@ export default function RoleManagementPage() {
         onClose={() => setOpenCreate(false)}
         onCreate={handleCreate}
         groups={matrix}
+      />
+
+      <ViewRoleUsersModal
+        open={openViewUsers}
+        onClose={() => setOpenViewUsers(false)}
+        roleId={viewRole?.id || ""}
+        roleName={viewRole?.name || ""}
       />
     </section>
   );

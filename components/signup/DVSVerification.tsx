@@ -1056,7 +1056,7 @@ export default function DVSVerification({
           {loading || verifying ? "Verifying…" : "Verify ID"}
         </button>
 
-        {onSkip && (
+        {/* {onSkip && (
           <button
             type="button"
             onClick={onSkip}
@@ -1065,7 +1065,7 @@ export default function DVSVerification({
           >
             Skip ID Check
           </button>
-        )}
+        )} */}
       </div>
     </form>
   );

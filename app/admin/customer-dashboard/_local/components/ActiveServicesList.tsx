@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import apiClient from "@/lib/apiClient";
 import { getAuthUser } from "@/lib/auth";
+import { AddServiceSelectionModal } from "@/components/admin/AddServiceModals";
 
 type Service = {
   id: string;
@@ -30,6 +31,7 @@ export default function ActiveServicesList({
   const [changePlanServiceId, setChangePlanServiceId] = useState<string | null>(
     null,
   );
+  const [showAddService, setShowAddService] = useState(false);
 
   useEffect(() => {
     if (customerId) {
@@ -131,9 +133,17 @@ export default function ActiveServicesList({
   return (
     <>
       <div className="rounded-[14px] border border-[#DFDBE3] bg-white p-6 shadow-[0_37px_37px_rgba(0,0,0,0.05)]">
-        <h2 className="text-[20px] font-semibold text-[#0A0A0A] mb-4">
-          Active Services
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[20px] font-semibold text-[#0A0A0A]">
+            Active Services
+          </h2>
+          <button
+            onClick={() => setShowAddService(true)}
+            className="rounded-[8px] bg-[#401B60] px-4 py-2 text-[14px] font-semibold text-white hover:opacity-95 transition-opacity"
+          >
+            Add New Service
+          </button>
+        </div>
 
         {error && (
           <div className="mb-4 rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
@@ -225,6 +235,16 @@ export default function ActiveServicesList({
           onClose={() => setChangePlanServiceId(null)}
         />
       )}
+
+      {/* Add New Service Modal */}
+      <AddServiceSelectionModal
+        open={showAddService}
+        onClose={() => {
+          setShowAddService(false);
+          fetchServices(); // Refresh list after adding
+        }}
+        customerId={customerId}
+      />
     </>
   );
 }

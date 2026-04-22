@@ -187,12 +187,8 @@ export default function EditPlanModal({
   }, [open]);
 
   const filteredWholesalePlans = useMemo(() => {
-    const isNbn = type === "NBN" || type === "Business NBN";
-    return wholesalerOptions.filter((p: any) => {
-      if (isNbn) return p.type === "nbn";
-      return p.type === "dataBankPlans" || p.type === "dataPoolPlans";
-    });
-  }, [wholesalerOptions, type]);
+    return wholesalerOptions;
+  }, [wholesalerOptions]);
 
   useEffect(() => {
     if (!open) {

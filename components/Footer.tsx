@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import ContactUsModal from "@/components/ContactUsModal";
 import FindLocalSupportModal from "@/components/site/find-support/FindLocalSupportModal";
 
@@ -115,7 +116,11 @@ export default function Footer() {
             <div>
               <h4 className="text-[#170F49] text-[20px] font-bold">Support</h4>
               <ul className="mt-6 space-y-3 text-[18px] text-[#6F6C90]">
-                <li>Help Center</li>
+                <li>
+                  <Link href="/help-center" className="hover:text-[#401B60] transition-colors">
+                    Help Center
+                  </Link>
+                </li>
                 <li>
                   <button
                     type="button"
@@ -138,9 +143,21 @@ export default function Footer() {
                     Find Local Technician
                   </button>
                 </li>
-                <li>My Account</li>
-                <li>Financial Hardship</li>
-                <li>Policies</li>
+                <li>
+                  <Link href="/login" className="hover:text-[#401B60] transition-colors">
+                    My Account
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/financial-hardship" className="hover:text-[#401B60] transition-colors">
+                    Financial Hardship
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/policies" className="hover:text-[#401B60] transition-colors">
+                    Policies
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -148,17 +165,30 @@ export default function Footer() {
             <div>
               <h4 className="text-[#170F49] text-[20px] font-bold">Company</h4>
               <ul className="mt-6 space-y-3 text-[18px] text-[#6F6C90]">
-                <li>About us</li>
+                <li>
+                  <Link href="/about" className="hover:text-[#401B60] transition-colors">
+                    About us
+                  </Link>
+                </li>
                 <li>Careers</li>
                 <li>Blog</li>
                 <li>Legal</li>
-                <li>Privacy</li>
-                <li>Terms</li>
+                <li>
+                  <Link href="/privacy" className="hover:text-[#401B60] transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="hover:text-[#401B60] transition-colors">
+                    Terms & Conditions
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
         </div>
       </footer>
+
 
       {/* Modals (render outside the footer) */}
       <ContactUsModal

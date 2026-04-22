@@ -5,6 +5,8 @@ export type CmsPageKey =
   | "hardship"
   | "policies"
   | "help"
+  | "terms"
+  | "privacy"
   | "seo"; // dedicated SEO tab
 
 export type HeroBlock = {

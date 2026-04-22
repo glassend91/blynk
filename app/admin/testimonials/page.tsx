@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { servicePlans } from "./_local/data";
 import type { Testimonial } from "./_local/types";
 import TestimonialCard from "./_local/components/TestimonialCard";
 import AddTestimonialModal from "./_local/components/AddTestimonialModal";
@@ -9,6 +8,7 @@ import apiClient from "@/lib/apiClient";
 
 export default function TestimonialsPage() {
   const [rows, setRows] = useState<Testimonial[]>([]);
+  const [plans, setPlans] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] =
@@ -16,10 +16,26 @@ export default function TestimonialsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch testimonials on mount
+  // Fetch testimonials and plans on mount
   useEffect(() => {
     fetchTestimonials();
+    fetchPlans();
   }, []);
+
+  const fetchPlans = async () => {
+    try {
+      const { data } = await apiClient.get<{
+        success: boolean;
+        data: any[];
+      }>("/wholesaler-plans");
+      if (data?.success && data.data) {
+        const titles = data.data.map((p) => p.custom_name || p.label);
+        setPlans(Array.from(new Set(titles.filter(Boolean))));
+      }
+    } catch (err) {
+      console.error("Failed to fetch plans:", err);
+    }
+  };
 
   const fetchTestimonials = async () => {
     try {
@@ -192,7 +208,7 @@ export default function TestimonialsPage() {
 
       <AddTestimonialModal
         open={open}
-        plans={servicePlans}
+        plans={plans}
         onClose={handleCloseModal}
         onCreate={handleCreate}
         onUpdate={handleUpdate}

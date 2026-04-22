@@ -6,12 +6,14 @@ import { useState, useRef, useEffect } from "react";
 import MbbSignupController from "@/components/mobile-broadband/MbbSignupController";
 import NbnSignupController from "@/components/nbn/NbnSignupController";
 import MobileVoiceSignupController from "@/components/mobile-voice/MobileVoiceSignupController";
+import FindLocalSupportModal from "@/components/site/find-support/FindLocalSupportModal";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [openMbbFlow, setOpenMbbFlow] = useState(false);
   const [openNbnFlow, setOpenNbnFlow] = useState(false);
   const [openMobileFlow, setOpenMobileFlow] = useState(false);
+  const [openSupportModal, setOpenSupportModal] = useState(false);
   const [internetDropdownOpen, setInternetDropdownOpen] = useState(false);
   const internetDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -150,7 +152,10 @@ export default function Navbar() {
 
           {/* Right: CTAs */}
           <div className="hidden md:flex items-center gap-3">
-            <button className="inline-flex items-center gap-2 rounded-lg border border-[#401B60] bg-white px-4 py-2 text-[#401B60] font-bold">
+            <button 
+              onClick={() => setOpenSupportModal(true)}
+              className="inline-flex items-center gap-2 rounded-lg border border-[#401B60] bg-white px-4 py-2 text-[#401B60] font-bold"
+            >
               <svg
                 width="20"
                 height="20"
@@ -320,6 +325,10 @@ export default function Navbar() {
       <MobileVoiceSignupController
         open={openMobileFlow}
         onClose={() => setOpenMobileFlow(false)}
+      />
+      <FindLocalSupportModal
+        open={openSupportModal}
+        onClose={() => setOpenSupportModal(false)}
       />
     </>
   );

@@ -1,20 +1,71 @@
-// components/WhatOurCustomersSay.tsx
+"use client";
+
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import apiClient from "@/lib/apiClient";
+
+type Testimonial = {
+  id: string;
+  name: string;
+  location: string;
+  plan?: string;
+  rating: number;
+  avatarUrl?: string;
+  quote: string;
+  published: boolean;
+};
 
 export default function WhatOurCustomersSay() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        setLoading(true);
+        const { data } = await apiClient.get<{
+          success: boolean;
+          data: Testimonial[];
+        }>("/testimonials?published=true");
+        if (data?.success && data.data) {
+          setTestimonials(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch testimonials:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
+
+  // Automatic carousel effect
+  useEffect(() => {
+    if (testimonials.length <= 3) return;
+
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % (testimonials.length - 2));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [testimonials.length]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24 bg-[#401B60]/10">
+        <p className="text-[#6F6C90]">Loading testimonials...</p>
+      </div>
+    );
+  }
+
+  if (testimonials.length === 0) return null;
+
   return (
-    <section
-      className="bg-cover bg-center bg-[#401B60]/10"
-      // style={{
-      //   backgroundImage:
-      //     "linear-gradient(0deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.1) 100%), url(https://api.builder.io/api/v1/image/assets/TEMP/c1a89bf878f52350be0114a9f31a36f08f13ccac?width=3840)",
-      // }}
-    >
-      {/* Figma: padding 150px vertical, 243px horizontal. Keep canvas centered at 1434px. */}
+    <section className="bg-cover bg-center bg-[#401B60]/10 overflow-hidden">
       <div className="mx-auto max-w-[1434px] px-4 md:px-32 py-12 md:py-[150px]">
-        {/* Header row: left text (609px) + right rating (559px), gap 266px */}
         <div className="flex flex-col items-center gap-8 md:gap-12 md:flex-row md:items-center md:justify-center md:gap-[266px]">
-          {/* Left copy block */}
           <div className="w-full max-w-[609px]">
             <h2 className="text-black font-bold text-[28px] leading-[40px] md:text-[36px] md:leading-[72px]">
               What Our Customers Say
@@ -25,61 +76,39 @@ export default function WhatOurCustomersSay() {
             </p>
           </div>
 
-          {/* Right rating block */}
           <div className="w-full max-w-[559px] flex flex-col items-center gap-1">
-            <div className="md:hidden">
-              <Stars
-                width={180}
-                height={36}
-                fill="currentColor"
-                className="text-[#F9C01D]"
-              />
-            </div>
-            <div className="hidden md:block">
-              <Stars
-                width={263}
-                height={52}
-                fill="currentColor"
-                className="text-[#F9C01D]"
-              />
-            </div>
+            <Stars
+              width={263}
+              height={52}
+              fill="currentColor"
+              className="text-[#F9C01D]"
+            />
             <div className="text-black text-[16px] leading-[28px] md:text-[20px] md:leading-[46px] font-bold text-center">
               4.8 average rating from 1,000+ customers
             </div>
           </div>
         </div>
 
-        {/* Cards row: three cards 458x284, padding 44/30, radius 24, border rgba(64,27,96,0.05), gap 30 */}
-        <div className="mt-[50px] grid grid-cols-1 gap-[30px] md:grid-cols-3">
-          {/* Card 1 (light) */}
-          <TestimonialCard
-            variant="light"
-            quote={`"Finally, a telco that actually cares about their customers. Michael from the Sydney team was incredible - he not only fixed our internet but taught us how to get the best speeds throughout our home."`}
-            name="Sarah Johnson"
-            location="Sydney, NSW"
-            tag="NBN Installation"
-            avatar="https://api.builder.io/api/v1/image/assets/TEMP/0b2ead6403749147a735cc279d7d7cfad4e3f7a4?width=88"
-          />
-
-          {/* Card 2 (primary) */}
-          <TestimonialCard
-            variant="primary"
-            quote={`"Finally, a telco that actually cares about their customers. Michael from the Sydney team was incredible - he not only fixed our internet but taught us how to get the best speeds throughout our home."`}
-            name="David Chen"
-            location="Melbourne, VIC"
-            tag="Mobile & NBN Bundle"
-            avatar="https://api.builder.io/api/v1/image/assets/TEMP/0b2ead6403749147a735cc279d7d7cfad4e3f7a4?width=88"
-          />
-
-          {/* Card 3 (light) */}
-          <TestimonialCard
-            variant="light"
-            quote={`"Finally, a telco that actually cares about their customers. Michael from the Sydney team was incredible - he not only fixed our internet but taught us how to get the best speeds throughout our home."`}
-            name="Lisa Thompson"
-            location="Brisbane, QLD"
-            tag="Business NBN"
-            avatar="https://api.builder.io/api/v1/image/assets/TEMP/0b2ead6403749147a735cc279d7d7cfad4e3f7a4?width=88"
-          />
+        <div className="mt-[50px] relative overflow-hidden">
+          <div 
+            className="flex gap-[30px] transition-transform duration-500 ease-in-out"
+            style={{ 
+              transform: `translateX(-${activeIndex * (100 / 3 + 1)}%)` 
+            }}
+          >
+            {testimonials.map((t, idx) => (
+              <div key={t.id} className="w-full md:w-[calc(33.333%-20px)] flex-shrink-0">
+                <TestimonialCard
+                  variant={idx % 2 === 0 ? "light" : "primary"}
+                  quote={t.quote}
+                  name={t.name}
+                  location={t.location}
+                  tag={t.plan || "Customer"}
+                  avatar={t.avatarUrl || "https://api.builder.io/api/v1/image/assets/TEMP/0b2ead6403749147a735cc279d7d7cfad4e3f7a4?width=88"}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

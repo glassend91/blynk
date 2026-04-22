@@ -24,6 +24,8 @@ type StoreForm = {
   bannerUrl: string;
   pitch: string;
   status: "Active" | "Inactive";
+  lat: string;
+  lng: string;
   uploads: File[];
 };
 
@@ -37,6 +39,8 @@ type StoreRow = {
   bannerUrl?: string;
   pitch?: string;
   status: "Active" | "Inactive";
+  lat?: number;
+  lng?: number;
   technicians: Technician[];
 };
 
@@ -57,6 +61,8 @@ export default function AddStoreWizard({
   const [step, setStep] = useState<1 | 2>(1);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Step 1 state
   const [store, setStore] = useState<StoreForm>({
@@ -68,6 +74,8 @@ export default function AddStoreWizard({
     bannerUrl: "",
     pitch: "",
     status: "Active",
+    lat: "",
+    lng: "",
     uploads: [],
   });
 
@@ -97,6 +105,8 @@ export default function AddStoreWizard({
           bannerUrl: editingStore.bannerUrl || "",
           pitch: editingStore.pitch || "",
           status: editingStore.status || "Active",
+          lat: editingStore.lat?.toString() || "",
+          lng: editingStore.lng?.toString() || "",
           uploads: [],
         });
         setProfiles(
@@ -145,6 +155,8 @@ export default function AddStoreWizard({
       bannerUrl: "",
       pitch: "",
       status: "Active",
+      lat: "",
+      lng: "",
       uploads: [],
     });
     setProfiles([
@@ -166,6 +178,35 @@ export default function AddStoreWizard({
     onClose();
   };
 
+  const handleAddressSearch = async (val: string) => {
+    setStore(prev => ({ ...prev, address: val }));
+    if (val.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&limit=5&addressdetails=1&countrycodes=au`);
+      const data = await res.json();
+      setSuggestions(data);
+      setShowSuggestions(true);
+    } catch (err) {
+      console.error("Geocoding error:", err);
+    }
+  };
+
+  const handleSelectSuggestion = (s: any) => {
+    setStore(prev => ({
+      ...prev,
+      address: s.display_name,
+      lat: s.lat,
+      lng: s.lon
+    }));
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
   const handleSubmit = async () => {
     // Validate store fields
     if (!store.storeName.trim()) {
@@ -182,6 +223,14 @@ export default function AddStoreWizard({
     }
     if (!store.phone.trim()) {
       setError("Phone number is required.");
+      return;
+    }
+    if (!store.lat || isNaN(Number(store.lat))) {
+      setError("Latitude is required and must be a number.");
+      return;
+    }
+    if (!store.lng || isNaN(Number(store.lng))) {
+      setError("Longitude is required and must be a number.");
       return;
     }
 
@@ -205,6 +254,8 @@ export default function AddStoreWizard({
         bannerUrl: store.bannerUrl.trim() || undefined,
         pitch: store.pitch.trim() || undefined,
         status: store.status,
+        lat: store.lat ? Number(store.lat) : undefined,
+        lng: store.lng ? Number(store.lng) : undefined,
         technicians: validTechnicians.map((t) => ({
           fullName: t.fullName.trim(),
           roleTitle: t.roleTitle?.trim() || undefined,
@@ -340,6 +391,11 @@ export default function AddStoreWizard({
               store={store}
               setStore={setStore}
               submitting={submitting}
+              onAddressSearch={handleAddressSearch}
+              suggestions={suggestions}
+              showSuggestions={showSuggestions}
+              onSelectSuggestion={handleSelectSuggestion}
+              onHideSuggestions={() => setTimeout(() => setShowSuggestions(false), 200)}
             />
           ) : (
             <TechnicianDetails
@@ -402,10 +458,20 @@ function StoreDetails({
   store,
   setStore,
   submitting,
+  onAddressSearch,
+  suggestions,
+  showSuggestions,
+  onSelectSuggestion,
+  onHideSuggestions,
 }: {
   store: StoreForm;
   setStore: (s: StoreForm) => void;
   submitting: boolean;
+  onAddressSearch: (val: string) => void;
+  suggestions: any[];
+  showSuggestions: boolean;
+  onSelectSuggestion: (s: any) => void;
+  onHideSuggestions: () => void;
 }) {
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -419,13 +485,53 @@ function StoreDetails({
       </Field>
 
       <Field label="Address" required>
-        <Input
-          value={store.address}
-          onChange={(e) => setStore({ ...store, address: e.target.value })}
-          placeholder="123 Collins Street, Melbourne VIC 3000"
-          disabled={submitting}
-        />
+        <div className="relative">
+          <Input
+            value={store.address}
+            onChange={(e) => onAddressSearch(e.target.value)}
+            onBlur={onHideSuggestions}
+            placeholder="123 Collins Street, Melbourne VIC 3000"
+            disabled={submitting}
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute z-[110] mt-1 w-full overflow-hidden rounded-lg border border-[#EEEAF4] bg-white shadow-lg">
+              {suggestions.map((s, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => onSelectSuggestion(s)}
+                  className="block w-full px-4 py-2 text-left text-[13px] hover:bg-[#F4F1F9] border-b border-[#F0EDF5] last:border-0"
+                >
+                  {s.display_name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </Field>
+
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2">
+        <Field label="Latitude" required>
+          <Input
+            type="number"
+            step="any"
+            value={store.lat}
+            onChange={(e) => setStore({ ...store, lat: e.target.value })}
+            placeholder="-37.8136"
+            disabled={submitting}
+          />
+        </Field>
+        <Field label="Longitude" required>
+          <Input
+            type="number"
+            step="any"
+            value={store.lng}
+            onChange={(e) => setStore({ ...store, lng: e.target.value })}
+            placeholder="144.9631"
+            disabled={submitting}
+          />
+        </Field>
+      </div>
 
       <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2">
         <Field label="Operating Hours" required>

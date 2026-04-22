@@ -21,16 +21,18 @@ type Customer = {
 export function NBNServiceModal({
   open,
   onClose,
+  customerId: customerIdProp,
 }: {
   open: boolean;
   onClose: () => void;
+  customerId?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const customerIdFromUrl = searchParams.get("customerId");
 
   const [step, setStep] = useState(1);
-  const [customerId, setCustomerId] = useState(customerIdFromUrl || "");
+  const [customerId, setCustomerId] = useState(customerIdProp || customerIdFromUrl || "");
   const [serviceAddress, setServiceAddress] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<{
     id: string;
@@ -56,13 +58,16 @@ export function NBNServiceModal({
   const [loadingServices, setLoadingServices] = useState(false);
 
   useEffect(() => {
-    if (customerIdFromUrl) {
+    if (customerIdProp) {
+      setCustomerId(customerIdProp);
+      setStep(2);
+    } else if (customerIdFromUrl) {
       setCustomerId(customerIdFromUrl);
       setStep(2); // Skip customer selection if already on customer dashboard
     }
     fetchCustomers();
     fetchAvailableServices();
-  }, [customerIdFromUrl]);
+  }, [customerIdFromUrl, customerIdProp]);
 
   const fetchCustomers = async () => {
     try {
@@ -499,16 +504,18 @@ export function NBNServiceModal({
 export function BusinessNBNServiceModal({
   open,
   onClose,
+  customerId: customerIdProp,
 }: {
   open: boolean;
   onClose: () => void;
+  customerId?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const customerIdFromUrl = searchParams.get("customerId");
 
   const [step, setStep] = useState(1);
-  const [customerId, setCustomerId] = useState(customerIdFromUrl || "");
+  const [customerId, setCustomerId] = useState(customerIdProp || customerIdFromUrl || "");
   const [serviceAddress, setServiceAddress] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<{
     id: string;
@@ -534,13 +541,16 @@ export function BusinessNBNServiceModal({
   const [loadingServices, setLoadingServices] = useState(false);
 
   useEffect(() => {
-    if (customerIdFromUrl) {
+    if (customerIdProp) {
+        setCustomerId(customerIdProp);
+        setStep(2);
+    } else if (customerIdFromUrl) {
       setCustomerId(customerIdFromUrl);
       setStep(2); // Skip customer selection if already on customer dashboard
     }
     fetchCustomers();
     fetchAvailableServices();
-  }, [customerIdFromUrl]);
+  }, [customerIdFromUrl, customerIdProp]);
 
   const fetchCustomers = async () => {
     try {
@@ -979,9 +989,11 @@ export function BusinessNBNServiceModal({
 export function MobileVoiceServiceModal({
   open,
   onClose,
+  customerId: customerIdProp,
 }: {
   open: boolean;
   onClose: () => void;
+  customerId?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1024,13 +1036,17 @@ export function MobileVoiceServiceModal({
   const [loadingServices, setLoadingServices] = useState(false);
 
   useEffect(() => {
-    if (customerIdFromUrl) {
+    if (customerIdProp) {
+      setCustomerId(customerIdProp);
+      setStep(2);
+      fetchAvailableServices();
+    } else if (customerIdFromUrl) {
       setCustomerId(customerIdFromUrl);
       setStep(2); // Start at plan selection if customerId is provided
       fetchAvailableServices();
     }
     fetchCustomers();
-  }, [customerIdFromUrl]);
+  }, [customerIdFromUrl, customerIdProp]);
 
   const fetchCustomers = async () => {
     try {
@@ -1886,9 +1902,11 @@ export function MobileVoiceServiceModal({
 export function MobileBroadbandServiceModal({
   open,
   onClose,
+  customerId: customerIdProp,
 }: {
   open: boolean;
   onClose: () => void;
+  customerId?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1923,14 +1941,18 @@ export function MobileBroadbandServiceModal({
   const [loadingServices, setLoadingServices] = useState(false);
 
   useEffect(() => {
-    if (customerIdFromUrl) {
+    if (customerIdProp) {
+      setCustomerId(customerIdProp);
+      setStep(2);
+      fetchAvailableServices();
+    } else if (customerIdFromUrl) {
       setCustomerId(customerIdFromUrl);
       setStep(2);
       // Fetch services when opening with customerId from URL
       fetchAvailableServices();
     }
     fetchCustomers();
-  }, [customerIdFromUrl]);
+  }, [customerIdFromUrl, customerIdProp]);
 
   const fetchCustomers = async () => {
     try {
@@ -2443,5 +2465,306 @@ export function MobileBroadbandServiceModal({
         </div>
       </SectionPanel>
     </ModalShell>
+  );
+}
+
+// Add Service Selection Modal
+export function AddServiceSelectionModal({
+  open,
+  onClose,
+  customerId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  customerId?: string;
+}) {
+  const [selectedService, setSelectedService] = useState<
+    "NBN" | "Business NBN" | "Mobile Voice" | "Mobile Broadband" | null
+  >(null);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <>
+      {!selectedService ? (
+        <div
+          className="fixed z-50 flex items-center justify-center"
+          style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            margin: 0,
+            padding: 0,
+            width: "100vw",
+            height: "100vh",
+          }}
+        >
+          <div
+            className="fixed bg-black/70"
+            onClick={onClose}
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: "100vw",
+              height: "100vh",
+              zIndex: 50,
+            }}
+          />
+          <div
+            className="fixed w-full max-w-md rounded-[16px] bg-white p-6 shadow-2xl"
+            style={{
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 51,
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-[24px] font-extrabold text-[#0A0A0A]">
+                Add New Service
+              </h2>
+              <button
+                onClick={onClose}
+                className="grid h-7 w-7 place-items-center rounded-full bg-[#FFF0F0] text-[#E0342F]"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => setSelectedService("NBN")}
+                className="w-full flex items-center gap-4 p-4 rounded-[10px] border-2 border-[#DFDBE3] hover:border-[#401B60] hover:bg-[#F8F8F8] transition-all"
+              >
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="text-blue-600"
+                  >
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-[16px] font-semibold text-[#0A0A0A]">
+                    NBN
+                  </div>
+                  <div className="text-[13px] text-[#6F6C90]">
+                    Broadband internet service
+                  </div>
+                </div>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-[#6F6C90]"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+
+              <button
+                onClick={() => setSelectedService("Business NBN")}
+                className="w-full flex items-center gap-4 p-4 rounded-[10px] border-2 border-[#DFDBE3] hover:border-[#401B60] hover:bg-[#F8F8F8] transition-all"
+              >
+                <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="text-indigo-600"
+                  >
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-[16px] font-semibold text-[#0A0A0A]">
+                    Business NBN
+                  </div>
+                  <div className="text-[13px] text-[#6F6C90]">
+                    Business broadband with static IP & SLA
+                  </div>
+                </div>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-[#6F6C90]"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+
+              <button
+                onClick={() => setSelectedService("Mobile Voice")}
+                className="w-full flex items-center gap-4 p-4 rounded-[10px] border-2 border-[#DFDBE3] hover:border-[#401B60] hover:bg-[#F8F8F8] transition-all"
+              >
+                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="text-purple-600"
+                  >
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-[16px] font-semibold text-[#0A0A0A]">
+                    Mobile Voice
+                  </div>
+                  <div className="text-[13px] text-[#6F6C90]">
+                    Voice calling service
+                  </div>
+                </div>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-[#6F6C90]"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+
+              <button
+                onClick={() => setSelectedService("Mobile Broadband")}
+                className="w-full flex items-center gap-4 p-4 rounded-[10px] border-2 border-[#DFDBE3] hover:border-[#401B60] hover:bg-[#F8F8F8] transition-all"
+              >
+                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="text-green-600"
+                  >
+                    <rect
+                      x="2"
+                      y="2"
+                      width="20"
+                      height="20"
+                      rx="5"
+                      ry="5"
+                    ></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                  </svg>
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-[16px] font-semibold text-[#0A0A0A]">
+                    Mobile Broadband
+                  </div>
+                  <div className="text-[13px] text-[#6F6C90]">
+                    Mobile data service
+                  </div>
+                </div>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-[#6F6C90]"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          {selectedService === "NBN" && (
+            <NBNServiceModal
+              open={true}
+              customerId={customerId}
+              onClose={() => {
+                setSelectedService(null);
+                onClose();
+              }}
+            />
+          )}
+          {selectedService === "Business NBN" && (
+            <BusinessNBNServiceModal
+              open={true}
+              customerId={customerId}
+              onClose={() => {
+                setSelectedService(null);
+                onClose();
+              }}
+            />
+          )}
+          {selectedService === "Mobile Voice" && (
+            <MobileVoiceServiceModal
+              open={true}
+              customerId={customerId}
+              onClose={() => {
+                setSelectedService(null);
+                onClose();
+              }}
+            />
+          )}
+          {selectedService === "Mobile Broadband" && (
+            <MobileBroadbandServiceModal
+              open={true}
+              customerId={customerId}
+              onClose={() => {
+                setSelectedService(null);
+                onClose();
+              }}
+            />
+          )}
+        </>
+      )}
+    </>
   );
 }

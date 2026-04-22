@@ -44,7 +44,7 @@ export default function WebsiteContentPage() {
       setLoading(true);
       setError(null);
       const { data } = await apiClient.get<{ success: boolean; data: any[] }>(
-        "/website-content",
+        "website-content",
       );
 
       if (data?.success && data.data) {
@@ -151,6 +151,8 @@ export default function WebsiteContentPage() {
             { key: "hardship", label: "Financial Hardship" },
             { key: "policies", label: "Policies" },
             { key: "help", label: "Help Center" },
+            { key: "terms", label: "Terms & Conditions" },
+            { key: "privacy", label: "Privacy Policy" },
             { key: "seo", label: "SEO Settings" },
           ]}
         />
@@ -160,9 +162,9 @@ export default function WebsiteContentPage() {
           <StaticPageEditor
             pageKey={tab}
             initialData={{
-              bodyContent: content[tab].bodyContent,
-              pageTitle: content[tab].pageTitle,
-              seo: content[tab].seo,
+              bodyContent: content[tab]?.bodyContent,
+              pageTitle: content[tab]?.pageTitle,
+              seo: content[tab]?.seo,
             }}
             onSave={() => {
               fetchContent();

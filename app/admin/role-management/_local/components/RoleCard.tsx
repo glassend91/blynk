@@ -6,10 +6,12 @@ export default function RoleCard({
   role,
   onEdit,
   onRemove,
+  onViewUsers,
 }: {
   role: Role;
   onEdit: (id: string) => void;
   onRemove: (id: string) => void;
+  onViewUsers: (id: string, name: string) => void;
 }) {
   return (
     <div className="rounded-[12.75px] border border-[#DFDBE3] bg-white p-5 shadow-[0_10px_24px_rgba(17,24,39,0.06)]">
@@ -31,10 +33,43 @@ export default function RoleCard({
         <div className="text-[20px] font-extrabold text-[#0A0A0A]">
           {Object.values(role.permissions).filter(Boolean).length} permissions
         </div>
-        <div className="text-[12px] text-[#6F6C90]">
+        <button
+          onClick={() => onViewUsers(role.id, role.name)}
+          className="text-[12px] text-[#6F6C90] hover:text-[#401B60] hover:underline"
+          title="Click to view users"
+        >
           {role.usersCount} users
-        </div>
+        </button>
         <div className="flex gap-3">
+          <button
+            onClick={() => onViewUsers(role.id, role.name)}
+            className="grid h-[36px] w-[36px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white text-[#6F6C90] hover:bg-gray-50"
+            title="List Users"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M9 11a4 4 0 100-8 4 4 0 000 8z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M17 8h6M17 12h6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
           <button
             // onClick={() => onRemove(role.id)}
             className="grid h-[36px] w-[36px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white"

@@ -50,6 +50,11 @@ export const permissionGroups: PermissionGroup[] = [
         key: "billing.credits_refunds",
         title: "Can Issue Credits and Refunds",
       },
+      {
+        key: "billing.monthly_credit_limit",
+        title: "Maximum Monthly Credit Limit per Customer",
+        type: "number",
+      },
     ],
   },
   {
@@ -74,51 +79,51 @@ const allowSubset = (keys: string[]) =>
     ),
   );
 
-export const rolesSeed: Role[] = [
-  {
-    id: "1",
-    name: "Admin",
-    description: "Full access to all system features and settings",
-    usersCount: 2,
-    badge: "Default",
-    permissions: allowAll, // Admin gets all permissions including billing.credits_refunds
-  },
-  {
-    id: "2",
-    name: "Content Manager",
-    description: "Manage website content, service plans, and SEO settings",
-    usersCount: 7,
-    badge: "Default",
-    permissions: allowSubset([
-      "plans.view",
-      "plans.create",
-      "plans.publish",
-      "web.edit",
-      "seo.manage",
-      "analytics.view",
-      "testimonials.manage",
-    ]), // billing.credits_refunds disabled by default
-  },
-  {
-    id: "3",
-    name: "Support Agent",
-    description:
-      "Handle customer support tickets and manage customer interactions",
-    usersCount: 2,
-    badge: "Default",
-    permissions: allowSubset([
-      "profiles.view",
-      "notes.manage",
-      "tickets.manage",
-      "services.manage",
-    ]), // billing.credits_refunds disabled by default
-  },
-  {
-    id: "4",
-    name: "Technician Manager",
-    description: "Manage technician network and store locations",
-    usersCount: 5,
-    badge: "Medium",
-    permissions: allowSubset(["tech.manage", "plans.view", "sys.logs"]), // billing.credits_refunds disabled by default
-  },
-];
+// export const rolesSeed: Role[] = [
+//   {
+//     id: "1",
+//     name: "Admin",
+//     description: "Full access to all system features and settings",
+//     usersCount: 2,
+//     badge: "Default",
+//     permissions: allowAll, // Admin gets all permissions including billing.credits_refunds
+//   },
+//   {
+//     id: "2",
+//     name: "Content Manager",
+//     description: "Manage website content, service plans, and SEO settings",
+//     usersCount: 7,
+//     badge: "Default",
+//     permissions: allowSubset([
+//       "plans.view",
+//       "plans.create",
+//       "plans.publish",
+//       "web.edit",
+//       "seo.manage",
+//       "analytics.view",
+//       "testimonials.manage",
+//     ]), // billing.credits_refunds disabled by default
+//   },
+//   {
+//     id: "3",
+//     name: "Support Agent",
+//     description:
+//       "Handle customer support tickets and manage customer interactions",
+//     usersCount: 2,
+//     badge: "Default",
+//     permissions: allowSubset([
+//       "profiles.view",
+//       "notes.manage",
+//       "tickets.manage",
+//       "services.manage",
+//     ]), // billing.credits_refunds disabled by default
+//   },
+//   {
+//     id: "4",
+//     name: "Technician Manager",
+//     description: "Manage technician network and store locations",
+//     usersCount: 5,
+//     badge: "Medium",
+//     permissions: allowSubset(["tech.manage", "plans.view", "sys.logs"]), // billing.credits_refunds disabled by default
+//   },
+// ];

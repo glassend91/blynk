@@ -95,21 +95,8 @@ export default function IdentityVerification({
       </div>
     );
   }
-
   const handleSendCode = async () => {
     if (!customerId) return;
-
-    // Show alert if mobile channel is selected
-    if (channel === "mobile") {
-      setError("This is coming soon. Try with email.");
-      return;
-    }
-
-    // For email channel, use the correct API endpoint and payload
-    if (!email) {
-      setError("Email address is required");
-      return;
-    }
 
     try {
       setSending(true);
@@ -119,10 +106,16 @@ export default function IdentityVerification({
 
       const endpoint = "/customer-verification/send-otp";
       const payload = {
-        emailOrPhone: email,
-        channel: "email",
+        emailOrPhone: channel === "mobile" ? phone : email,
+        channel: channel === "mobile" ? "sms" : "email",
         purpose: "customer_verification",
       };
+
+      if (!payload.emailOrPhone) {
+        setError(`${channel === "mobile" ? "Phone number" : "Email address"} is required`);
+        setSending(false);
+        return;
+      }
 
       const { data } = await apiClient.post<{
         success: boolean;
@@ -170,38 +163,9 @@ export default function IdentityVerification({
         setVerified(true);
         setError(null);
         onVerificationComplete?.(true, channel);
-
-        // Auto-log to notes
-        try {
-          await apiClient.post("/customer-verification/notes", {
-            customerId,
-            noteType: "Verification",
-            priority: "Normal",
-            content: `Identity verification ${channel === "mobile" ? "via SMS" : "via Email"} successful.`,
-            tags: ["verification", "otp"],
-          });
-        } catch (noteErr) {
-          console.error("Failed to log verification to notes:", noteErr);
-        }
       } else {
         setError(data?.message || "Invalid verification code");
         onVerificationComplete?.(false, channel);
-
-        // Auto-log failure to notes
-        try {
-          await apiClient.post("/customer-verification/notes", {
-            customerId,
-            noteType: "Verification",
-            priority: "High",
-            content: `Identity verification ${channel === "mobile" ? "via SMS" : "via Email"} failed.`,
-            tags: ["verification", "otp", "failed"],
-          });
-        } catch (noteErr) {
-          console.error(
-            "Failed to log verification failure to notes:",
-            noteErr,
-          );
-        }
       }
     } catch (err: any) {
       setError(
