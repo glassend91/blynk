@@ -801,7 +801,7 @@ export default function MobileVoiceSignup4({
                     </button>
                   )}
 
-                  <button
+                  {/* <button
                     type="button"
                     onClick={() => {
                       setOtpVerified(true);
@@ -811,7 +811,7 @@ export default function MobileVoiceSignup4({
                     className="h-[48px] rounded-[10px] border border-dashed border-red-300 bg-red-50 px-4 text-[13px] font-semibold text-red-600 hover:bg-red-100"
                   >
                     Skip (Dev)
-                  </button>
+                  </button> */}
 
                   <button
                     type="button"

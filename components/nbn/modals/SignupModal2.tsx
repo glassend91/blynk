@@ -48,30 +48,34 @@ export default function SignupModal2({
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (availablePlans && availablePlans.length > 0) {
-      const mapped = availablePlans.map((p: any) => ({
-        id: p.id,
-        name: p.label || p.name || "NBN Plan",
-        price: parseFloat(p.fee) || parseFloat(p.price) || 0,
-        features: p.features || [
-          "Unlimited Data",
-          "24/7 Support",
-          "No Lock-in Contract",
-        ],
-        speed: p.speed || "",
-      }));
-      setPlans(mapped);
+    if (availablePlans) {
+      if (availablePlans.length > 0) {
+        const mapped = availablePlans.map((p: any) => ({
+          id: p.id,
+          name: p.label || p.name || "NBN Plan",
+          price: parseFloat(p.fee) || parseFloat(p.price) || 0,
+          features: p.features || [
+            "Unlimited Data",
+            "24/7 Support",
+            "No Lock-in Contract",
+          ],
+          speed: p.speed || "",
+        }));
+        setPlans(mapped);
+        setLoadError(null);
 
-      if (initialSelectedPlan) {
-        const found = mapped.find(
-          (p: any) =>
-            p.id === initialSelectedPlan.id ||
-            p.name === initialSelectedPlan.name,
-        );
-        if (found) setSelectedPlan(found);
+        if (initialSelectedPlan) {
+          const found = mapped.find(
+            (p: any) =>
+              p.id === initialSelectedPlan.id ||
+              p.name === initialSelectedPlan.name,
+          );
+          if (found) setSelectedPlan(found);
+        }
+      } else {
+        setPlans([]);
+        setLoadError(null);
       }
-    } else {
-      setLoadError("No plans available for this location.");
     }
   }, [availablePlans, initialSelectedPlan]);
 
@@ -116,11 +120,16 @@ export default function SignupModal2({
                 </div>
               ))
             ) : loadError ? (
-              <div className="col-span-3 text-center text-red-600">
-                Failed to load plans. Please try again later.
+              <div className="col-span-3 text-center p-8 rounded-xl border border-red-100 bg-red-50 text-red-600">
+                <p className="font-semibold">Failed to load plans</p>
+                <p className="text-sm mt-1">{loadError}</p>
               </div>
             ) : plans.length === 0 ? (
-              <div className="col-span-3 text-center">No plans available</div>
+              <div className="col-span-3 py-12 text-center rounded-[12px] bg-[#FBFAFD] border border-[#DFDBE3]">
+                <div className="text-4xl mb-4">🏠</div>
+                <h3 className="text-[18px] font-bold text-[#0A0A0A]">No plans found</h3>
+                <p className="text-[14px] text-[#6F6C90] mt-1">There are no NBN plans currently available for this location.</p>
+              </div>
             ) : (
               plans.map((plan) => {
                 const isSelected = selectedPlan?.name === plan.name;

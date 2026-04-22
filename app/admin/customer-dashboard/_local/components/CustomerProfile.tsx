@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import apiClient from "@/lib/apiClient";
 
 type Customer = {
@@ -265,7 +265,7 @@ export default function CustomerProfile({
       setCustomer(updatedCustomer);
       setEditModalOpen(false);
     } catch (err: any) {
-      setError(err?.message || "Failed to update customer");
+      // Error message is now handled within the modal for better UX
       throw err;
     } finally {
       setSaving(false);
@@ -531,6 +531,8 @@ function EditCustomerModal({
     ...customer,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState<string | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -586,13 +588,18 @@ function EditCustomerModal({
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      modalRef.current?.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
     try {
+      setApiError(null);
       await onSave(editedCustomer);
-    } catch (err) {
-      // Error handled in parent
+    } catch (err: any) {
+      setApiError(
+        err?.response?.data?.message || err?.message || "Failed to save changes",
+      );
+      modalRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -672,6 +679,7 @@ function EditCustomerModal({
         }}
       />
       <div
+        ref={modalRef}
         className="fixed w-full max-w-2xl rounded-[16px] bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
         style={{
           left: "50%",
@@ -694,6 +702,12 @@ function EditCustomerModal({
             ×
           </button>
         </div>
+
+        {apiError && (
+          <div className="mb-6 rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-700">
+            {apiError}
+          </div>
+        )}
 
         <div className="space-y-4">
           {editedCustomer.type === "business" &&

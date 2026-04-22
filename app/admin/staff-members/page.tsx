@@ -30,6 +30,9 @@ export default function StaffMembersPage() {
   const [editUser, setEditUser] = useState<UserRow | null>(null);
   const [editName, setEditName] = useState("");
   const [editStatus, setEditStatus] = useState<Status>("Active");
+  const [editEmail, setEditEmail] = useState("");
+  const [editRole, setEditRole] = useState<Role>("Support Manager");
+  const [editPassword, setEditPassword] = useState("");
   const [deleteUser, setDeleteUser] = useState<UserRow | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
@@ -139,7 +142,10 @@ export default function StaffMembersPage() {
               ? (u) => {
                   setEditUser(u);
                   setEditName(u.name);
+                  setEditEmail(u.email);
+                  setEditRole(u.role);
                   setEditStatus(u.status);
+                  setEditPassword(""); // Clear password field on edit open
                 }
               : undefined
           }
@@ -338,13 +344,20 @@ export default function StaffMembersPage() {
                 }
                 try {
                   setEditLoading(true);
+                  const payload: any = {
+                    name: editName,
+                    email: editEmail,
+                    role: editRole,
+                    status: editStatus,
+                  };
+                  if (editPassword) {
+                    payload.password = editPassword;
+                  }
+
                   const { data } = await apiClient.put<{
                     success: boolean;
                     user: UserRow;
-                  }>(`/auth/users/${editUser.userId}`, {
-                    name: editName,
-                    status: editStatus,
-                  });
+                  }>(`/auth/users/${editUser.userId}`, payload);
 
                   if (data?.success && data.user) {
                     const updated = data.user;
@@ -381,20 +394,26 @@ export default function StaffMembersPage() {
                   Email
                 </div>
                 <input
-                  value={editUser.email}
-                  disabled
-                  className="mt-1 w-full rounded-[10px] border border-[#DFDBE3] bg-[#F5F5F7] px-3 py-2 text-[14px] text-[#6F6C90] outline-none"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  className="mt-1 w-full rounded-[10px] border border-[#DFDBE3] px-3 py-2 text-[14px] outline-none"
                 />
               </div>
               <div>
                 <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
                   Role
                 </div>
-                <input
-                  value={editUser.role}
-                  disabled
-                  className="mt-1 w-full rounded-[10px] border border-[#DFDBE3] bg-[#F5F5F7] px-3 py-2 text-[14px] text-[#6F6C90] outline-none"
-                />
+                <select
+                  value={editRole}
+                  onChange={(e) => setEditRole(e.target.value as Role)}
+                  className="mt-1 w-full rounded-[10px] border border-[#DFDBE3] px-3 py-2 text-[14px] outline-none"
+                >
+                  {availableRoles.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
@@ -413,6 +432,19 @@ export default function StaffMembersPage() {
                       </option>
                     ))}
                 </select>
+              </div>
+
+              <div>
+                <div className="text-[12px] uppercase tracking-wide text-[#6F6C90]">
+                  New Password (optional)
+                </div>
+                <input
+                  type="password"
+                  value={editPassword}
+                  onChange={(e) => setEditPassword(e.target.value)}
+                  placeholder="Enter to change password"
+                  className="mt-1 w-full rounded-[10px] border border-[#DFDBE3] px-3 py-2 text-[14px] outline-none"
+                />
               </div>
 
               <div className="mt-6 flex justify-end gap-2">

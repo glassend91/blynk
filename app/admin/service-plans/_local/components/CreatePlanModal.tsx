@@ -89,15 +89,8 @@ export default function CreatePlanModal({ open, onClose, onCreate }: Props) {
   }, [open]);
 
   const filteredWholesalePlans = useMemo(() => {
-    // Map retail type to wholesale type enum
-    // NBN/Business NBN -> nbn
-    // Mobile/Data Only/Voice Only -> dataBankPlans or dataPoolPlans
-    const isNbn = type === "NBN" || type === "Business NBN";
-    return wholesalerOptions.filter((p: any) => {
-      if (isNbn) return p.type === "nbn";
-      return p.type === "dataBankPlans" || p.type === "dataPoolPlans";
-    });
-  }, [wholesalerOptions, type]);
+    return wholesalerOptions;
+  }, [wholesalerOptions]);
 
   // Lock body scroll when modal is open
   useEffect(() => {

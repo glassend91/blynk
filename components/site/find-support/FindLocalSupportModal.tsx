@@ -2,6 +2,10 @@
 
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
+import apiClient from "@/lib/apiClient";
+
+const LeafletMap = dynamic(() => import("./LeafletMap"), { ssr: false });
 
 type Location = {
   id: string;
@@ -11,77 +15,69 @@ type Location = {
   phone: string;
   rating: number;
   ratingCount: number;
-  // normalized 0..1 for demo pin positioning
-  pinX: number;
-  pinY: number;
+  lat?: number;
+  lng?: number;
   photo: string;
 };
-
-const MOCK_LOCATIONS: Location[] = [
-  {
-    id: "l1",
-    name: "ByteRight Services",
-    address: "210 Pitt St, Sydney NSW 2000",
-    hours: "Mon–Sat 9am–5pm",
-    phone: "(07) 8123 5678",
-    rating: 4.6,
-    ratingCount: 125,
-    pinX: 0.28,
-    pinY: 0.42,
-    photo:
-      "https://images.unsplash.com/photo-1529336953121-a0ce6242c85b?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: "l2",
-    name: "Austral South Wales",
-    address: "82 Oxford St, Darlinghurst NSW 2010",
-    hours: "Mon–Sat 9am–5pm",
-    phone: "(07) 8123 5678",
-    rating: 4.2,
-    ratingCount: 98,
-    pinX: 0.58,
-    pinY: 0.57,
-    photo:
-      "https://images.unsplash.com/photo-1526948128573-703ee1aeb6fa?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: "l3",
-    name: "NetFix Labs",
-    address: "12 George St, Chatswood NSW 2067",
-    hours: "Mon–Sat 9am–5pm",
-    phone: "(02) 9000 1234",
-    rating: 4.3,
-    ratingCount: 61,
-    pinX: 0.72,
-    pinY: 0.33,
-    photo:
-      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=800&auto=format&fit=crop",
-  },
-];
 
 type Props = { open: boolean; onClose: () => void };
 
 export default function FindLocalSupportModal({ open, onClose }: Props) {
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState<Location | null>(null);
   const [hoverId, setHoverId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      fetchLocations();
+    } else {
       setQuery("");
       setFocused(null);
       setHoverId(null);
+      setError(null);
     }
   }, [open]);
 
+  const fetchLocations = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await apiClient.get("stores");
+      if (data?.success && data.data) {
+        const mapped: Location[] = data.data.map((s: any) => ({
+          id: s.id,
+          name: s.name,
+          address: s.address,
+          hours: s.hours,
+          phone: s.phone,
+          rating: 5.0,
+          ratingCount: Math.floor(Math.random() * 50) + 10,
+          lat: s.lat,
+          lng: s.lng,
+          photo: s.bannerUrl || "https://images.unsplash.com/photo-1526948128573-703ee1aeb6fa?q=80&w=800&auto=format&fit=crop",
+        }));
+        setLocations(mapped);
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch locations:", err);
+      setError(err?.message || "Failed to load technicians. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filtered = useMemo(() => {
-    if (!query.trim()) return MOCK_LOCATIONS;
-    return MOCK_LOCATIONS.filter(
+    if (!query.trim()) return locations;
+    const q = query.toLowerCase();
+    return locations.filter(
       (l) =>
-        l.name.toLowerCase().includes(query.toLowerCase()) ||
-        l.address.toLowerCase().includes(query.toLowerCase()),
+        l.name.toLowerCase().includes(q) ||
+        l.address.toLowerCase().includes(q),
     );
-  }, [query]);
+  }, [query, locations]);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -170,42 +166,27 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full rounded-lg border border-[#E8E6ED] px-3 py-2 pl-9"
-              placeholder="Enter your address or postcode…"
+              placeholder="Enter store name, address or postcode…"
             />
             <span className="absolute left-3 top-2.5 text-[#8E8AA3]">🔎</span>
-
-            {/* Suggestions */}
-            {query && (
-              <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-[#EEEAF4] bg-white shadow-lg">
-                {[
-                  "82 Oxford St, Darlinghurst NSW 2010",
-                  "45 Oxford St…",
-                  "55 Oxford St…",
-                ].map((s, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setQuery(s)}
-                    className="block w-full px-3 py-2 text-left text-[14px] hover:bg-[#FBFAFD]"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
-
-          <button className="rounded-lg bg-[#3F205F] px-4 py-2 text-[14px] font-semibold text-white">
-            Search
-          </button>
         </div>
 
         {/* Body */}
         <div className="grid gap-6 px-6 pb-6 md:grid-cols-[360px,1fr] ">
           {/* Nearby list */}
-          <div className="rounded-xl border border-[#EEEAF4] bg-[#FBFAFD] p-4">
-            <div className="mb-3 text-[14px] font-semibold">
-              Nearby Technicians
+          <div className="rounded-xl border border-[#EEEAF4] bg-[#FBFAFD] p-4 h-[520px] overflow-y-auto noscrollbar">
+            <div className="mb-3 flex items-center justify-between text-[14px] font-semibold">
+              <span>{query ? `Search Results (${filtered.length})` : "Nearby Technicians"}</span>
+              <span className="text-[10px] text-[#8E8AA3]">Total: {locations.length}</span>
             </div>
+            
+            {error && (
+              <div className="mb-4 rounded-lg bg-red-50 p-3 text-xs text-red-600">
+                {error}
+              </div>
+            )}
+
             <div className="space-y-3">
               {filtered.map((l) => (
                 <button
@@ -237,77 +218,21 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                   </div>
                 </button>
               ))}
+              {filtered.length === 0 && (
+                <div className="text-center py-10 text-[#6F6C90] text-sm">
+                  No stores found.
+                </div>
+              )}
             </div>
           </div>
 
           {/* Map panel */}
-          <div className="relative overflow-hidden rounded-xl border border-[#EEEAF4]">
-            {/* Static map image placeholder */}
-            <img
-              src="https://images.unsplash.com/photo-1526779259212-939e64788e3c?q=80&w=1600&auto=format&fit=crop"
-              alt=""
-              className="h-[520px] w-full object-cover opacity-70"
+          <div className="relative overflow-hidden rounded-xl border border-[#EEEAF4] h-[520px] z-0">
+            <LeafletMap 
+              locations={filtered} 
+              focused={focused} 
+              onMarkerClick={(loc) => setFocused(loc)} 
             />
-
-            {/* Pins */}
-            {filtered.map((l) => (
-              <button
-                key={l.id}
-                style={{
-                  left: `${l.pinX * 100}%`,
-                  top: `${l.pinY * 100}%`,
-                }}
-                onClick={() => setFocused(l)}
-                className={`absolute -translate-x-1/2 -translate-y-full rounded-full border-2 px-2 py-1 text-white transition ${
-                  focused?.id === l.id
-                    ? "scale-110 border-white bg-[#2D0F4D]"
-                    : "bg-[#5E2B86]"
-                }`}
-                onMouseEnter={() => setHoverId(l.id)}
-                onMouseLeave={() => setHoverId(null)}
-                aria-label={`Marker for ${l.name}`}
-              >
-                📍
-              </button>
-            ))}
-
-            {/* Focused card overlay (like the callout on map) */}
-            {focused && (
-              <div className="pointer-events-auto absolute left-1/2 top-6 w-[360px] -translate-x-1/2 overflow-hidden rounded-xl border border-[#EEEAF4] bg-white shadow-xl">
-                <img
-                  src={focused.photo}
-                  className="h-[140px] w-full object-cover"
-                  alt=""
-                />
-                <div className="space-y-1 p-3">
-                  <div className="text-[14px] font-semibold">
-                    {focused.name}
-                  </div>
-                  <div className="text-[12px] text-[#6F6C90]">
-                    {focused.address}
-                  </div>
-                  <div className="text-[12px] text-[#6F6C90]">
-                    ⭐ {focused.rating}/5{" "}
-                    <span className="text-[#8E8AA3]">
-                      ({focused.ratingCount} reviews)
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Zoom & my-location UI dummies */}
-            <div className="absolute bottom-4 right-4 grid gap-2">
-              <button className="grid h-9 w-9 place-items-center rounded-full bg-white shadow">
-                ＋
-              </button>
-              <button className="grid h-9 w-9 place-items-center rounded-full bg-white shadow">
-                －
-              </button>
-              <button className="grid h-9 w-9 place-items-center rounded-full bg-[#3F205F] text-white shadow">
-                ⊙
-              </button>
-            </div>
           </div>
         </div>
 
@@ -336,9 +261,8 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                       Store Details
                     </div>
                     <p className="text-[13px] text-[#0A0A0A]">
-                      Expert technicians specialising in Blynk IoT solutions
-                      with 10+ years of experience. We provide comprehensive
-                      support for smart-home & industrial IoT needs.
+                      Expert technicians specialising in Blynk IoT solutions. 
+                      We provide comprehensive support for smart-home & industrial IoT needs.
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -349,51 +273,6 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                       ⭐ View Google reviews
                     </a>
                   </div>
-                </div>
-              </div>
-
-              {/* Approved technicians (sample) */}
-              <div className="mt-5">
-                <div className="mb-3 text-[14px] font-semibold">
-                  Meet Your Blynk Approved Technicians
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {["Catherine Deck", "Alex Marcus", "Lia Vance"].map(
-                    (n, i) => (
-                      <div
-                        key={i}
-                        className="rounded-xl border border-[#EEEAF4] p-3"
-                      >
-                        <div className="mb-2 flex items-center gap-3">
-                          <div className="grid h-10 w-10 place-items-center rounded-full bg-[#F1EAF8] text-[#3F205F]">
-                            👩‍🔧
-                          </div>
-                          <div>
-                            <div className="text-[14px] font-semibold">{n}</div>
-                            <div className="text-[12px] text-[#6F6C90]">
-                              5+ years • phone & data recovery
-                            </div>
-                          </div>
-                        </div>
-                        <div className="h-28 rounded-lg bg-[url('https://images.unsplash.com/photo-1587614382346-4ec70e388b28?q=80&w=800&auto=format&fit=crop')] bg-cover bg-center"></div>
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-
-              {/* Photo gallery */}
-              <div className="mt-5">
-                <div className="mb-3 text-[14px] font-semibold">
-                  Photo Gallery
-                </div>
-                <div className="grid grid-cols-3 gap-3 md:grid-cols-6">
-                  {Array.from({ length: 9 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-20 rounded-lg bg-[url('https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=600&auto=format&fit=crop')] bg-cover bg-center"
-                    />
-                  ))}
                 </div>
               </div>
             </div>

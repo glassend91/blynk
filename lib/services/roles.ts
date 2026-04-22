@@ -53,3 +53,26 @@ export async function updateRole(
   );
   return data.data;
 }
+
+export type RoleUser = {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+  role: string;
+  created: string;
+};
+
+export type GetRoleUsersResponse = {
+  success: boolean;
+  data: {
+    users: RoleUser[];
+  };
+};
+
+export async function getRoleUsers(id: string): Promise<RoleUser[]> {
+  const { data } = await apiClient.get<GetRoleUsersResponse>(
+    `/roles/${id}/users`,
+  );
+  return data.data.users;
+}

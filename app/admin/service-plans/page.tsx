@@ -16,6 +16,7 @@ export default function ServicePlansPage() {
   const [rows, setRows] = useState<PlanRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
   const [editPlan, setEditPlan] = useState<PlanRow | null>(null);
   const [deletePlan, setDeletePlan] = useState<PlanRow | null>(null);
@@ -55,6 +56,14 @@ export default function ServicePlansPage() {
       ignore = true;
     };
   }, []);
+
+  // Clear success message after 3 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   // Lock body scroll when delete modal is open
   useEffect(() => {
@@ -133,64 +142,78 @@ export default function ServicePlansPage() {
           <div className="rounded-[12px] border border-dashed border-[#E7E4EC] bg-[#FBFBFD] p-6 text-[14px] text-[#6F6C90]">
             Loading service plans...
           </div>
-        ) : error ? (
-          <div className="rounded-[12px] border border-[#FCD1D2] bg-[#FFF5F5] p-6 text-[14px] text-[#C53030]">
-            {error}
-          </div>
         ) : (
-          <PlansTable
+          <>
+            {error && (
+              <div className="mb-4 rounded-[12px] border border-[#FCD1D2] bg-[#FFF5F5] p-6 text-[14px] text-[#C53030]">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="mb-4 rounded-[12px] border border-[#D1F7E3] bg-[#F5FFF9] p-6 text-[14px] text-[#19BF66]">
+                {success}
+              </div>
+            )}
+            <PlansTable
             rows={filtered}
             onEdit={canEdit ? (plan) => setEditPlan(plan) : undefined}
-            onToggleActive={
-              canEdit
-                ? async (plan) => {
-                    if (!plan.serviceId) return;
-                    try {
-                      setToggleLoading(plan.serviceId);
-                      const newStatus =
-                        plan.status === "Published" ? "Draft" : "Published";
-                      const { data } = await apiClient.patch(
-                        `/services/admin/${plan.serviceId}/active`,
-                        {
-                          isActive: newStatus === "Published",
-                        },
-                      );
-                      // Update the row directly if response includes updated service
-                      if (data?.success && data.service) {
-                        setRows((prev) =>
-                          prev.map((r) =>
-                            r.serviceId === plan.serviceId
-                              ? { ...data.service, id: r.id }
-                              : r,
-                          ),
-                        );
-                      } else {
-                        // Fallback: reload all data
-                        const listResponse = await apiClient.get<{
-                          success: boolean;
-                          services: PlanRow[];
-                        }>("/services/admin/list");
-                        if (
-                          listResponse.data?.success &&
-                          Array.isArray(listResponse.data.services)
-                        ) {
-                          setRows(listResponse.data.services);
+                  onToggleActive={
+                    canEdit
+                      ? async (plan) => {
+                          if (!plan.serviceId) return;
+                          try {
+                            setToggleLoading(plan.serviceId);
+                            setError(null);
+                            setSuccess(null);
+                            const newStatus =
+                              plan.status === "Published" ? "Draft" : "Published";
+                            const { data } = await apiClient.patch(
+                              `/services/admin/${plan.serviceId}/active`,
+                              {
+                                isActive: newStatus === "Published",
+                              },
+                            );
+                            // Update the row directly if response includes updated service
+                            if (data?.success && data.service) {
+                              setRows((prev) =>
+                                prev.map((r) =>
+                                  r.serviceId === plan.serviceId
+                                    ? { ...data.service, id: r.id }
+                                    : r,
+                                ),
+                              );
+                              setSuccess(
+                                `Plan successfully ${newStatus === "Published" ? "shown" : "hidden"}.`,
+                              );
+                            } else {
+                              // Fallback: reload all data
+                              const listResponse = await apiClient.get<{
+                                success: boolean;
+                                services: PlanRow[];
+                              }>("/services/admin/list");
+                              if (
+                                listResponse.data?.success &&
+                                Array.isArray(listResponse.data.services)
+                              ) {
+                                setRows(listResponse.data.services);
+                                setSuccess("Plan status updated successfully.");
+                              }
+                            }
+                          } catch (err) {
+                            console.error("Failed to toggle plan status", err);
+                            setError(
+                              "Failed to update plan status. Please try again.",
+                            );
+                          } finally {
+                            setToggleLoading(null);
+                          }
                         }
-                      }
-                    } catch (err) {
-                      console.error("Failed to toggle plan status", err);
-                      setError(
-                        "Failed to update plan status. Please try again.",
-                      );
-                    } finally {
-                      setToggleLoading(null);
-                    }
+                      : undefined
                   }
-                : undefined
-            }
             onDelete={canDelete ? (plan) => setDeletePlan(plan) : undefined}
           />
-        )}
+        </>
+      )}
       </div>
 
       <OverviewStats {...stats} />

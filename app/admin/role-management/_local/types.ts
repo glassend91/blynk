@@ -4,6 +4,7 @@ export type PermissionItem = {
   key: PermissionKey;
   title: string;
   hint?: string;
+  type?: "boolean" | "number";
 };
 
 export type PermissionGroup = {
@@ -19,4 +20,5 @@ export type Role = {
   usersCount: number;
   badge?: "Default" | "Medium";
   permissions: Record<PermissionKey, boolean>;
+  monthlyCreditLimit: number;
 };

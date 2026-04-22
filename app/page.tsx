@@ -35,6 +35,7 @@ export default function Page() {
       <Navbar />
       <Hero />
       <Plans />
+      <SupportCTA />
       <TiredOfRunaround />
       <WhatOurCustomersSay />
       <StillHaveQuestion />

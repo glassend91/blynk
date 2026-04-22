@@ -97,6 +97,8 @@ export default function StaticPageEditor({
     hardship: "Financial Hardship",
     policies: "Policies",
     help: "Help Center",
+    terms: "Terms of Service",
+    privacy: "Privacy Policy",
     seo: "SEO Settings",
   };
 

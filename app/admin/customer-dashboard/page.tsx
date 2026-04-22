@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import CustomerList from "./_local/components/CustomerList";
 import CustomerProfile from "./_local/components/CustomerProfile";
 import IdentityVerification from "./_local/components/IdentityVerification";
+import AuthorisedRepresentatives from "./_local/components/AuthorisedRepresentatives";
 import NotesHistory from "./_local/components/NotesHistory";
 import FinancialOverview from "./_local/components/FinancialOverview";
 import ActiveServicesList from "./_local/components/ActiveServicesList";
@@ -13,6 +14,7 @@ import PaymentDetails from "./_local/components/PaymentDetails";
 
 type Customer = {
   id: string;
+  name?: string;
   email?: string;
   phone?: string;
 };
@@ -92,8 +94,15 @@ export default function CustomerDashboardPage() {
             searchQuery={customerIdFromUrl ? undefined : queryFromUrl}
             onCustomerLoaded={(customer) => {
               if (customer) {
+                const name =
+                  customer.type === "business" &&
+                  customer.businessDetails?.businessName
+                    ? customer.businessDetails.businessName
+                    : `${customer.firstName || ""} ${customer.lastName || ""}`.trim();
+
                 setSelectedCustomer({
                   id: customer.id,
+                  name: name,
                   email: customer.email,
                   phone: customer.phone,
                 });
@@ -110,9 +119,13 @@ export default function CustomerDashboardPage() {
                   id: customerIdFromUrl || "",
                   email,
                   phone,
+                  name: selectedCustomer?.name, // Preserve existing name
                 });
               }
             }}
+          />
+          <AuthorisedRepresentatives
+            customerId={customerIdFromUrl || selectedCustomer?.id}
           />
           <NotesHistory
             customerId={customerIdFromUrl || selectedCustomer?.id}
@@ -123,6 +136,7 @@ export default function CustomerDashboardPage() {
         <div className="space-y-6">
           <FinancialOverview
             customerId={customerIdFromUrl || selectedCustomer?.id}
+            customerName={selectedCustomer?.name}
             onCreditRefundApplied={() => {
               // Refresh notes if needed
             }}

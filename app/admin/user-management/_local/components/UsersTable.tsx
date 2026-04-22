@@ -133,14 +133,14 @@ export default function UsersTable({
                   <td className="text-[#6F6C90]">{r.created}</td>
                   <td>
                     <div className="flex items-center justify-center gap-3">
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => onInvoices?.(r)}
                         className="grid h-[34px] w-[34px] place-items-center rounded-[8px] border border-[#E7E4EC] bg-white hover:bg-[#F8F8F8]"
                         title="View invoices"
                       >
                         <IconReceipt />
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         onClick={() => onView?.(r)}
@@ -148,7 +148,7 @@ export default function UsersTable({
                       >
                         <IconView />
                       </button>
-                      {canCharge && (
+                      {/* {canCharge && (
                         <button
                           type="button"
                           onClick={() => onCharge?.(r)}
@@ -157,7 +157,7 @@ export default function UsersTable({
                         >
                           <IconCharge />
                         </button>
-                      )}
+                      )} */}
                       {canEdit && (
                         <button
                           type="button"

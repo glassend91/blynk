@@ -7,6 +7,8 @@ export const pages: CmsPageKey[] = [
   "hardship",
   "policies",
   "help",
+  "terms",
+  "privacy",
   "seo",
 ];
 
@@ -84,6 +86,24 @@ export const seed: Record<CmsPageKey, CmsPageData> = {
       metaDescription:
         "Page description for search engines (max 160 characters)",
       keywords: "",
+    },
+  },
+  terms: {
+    bodyContent: "",
+    pageTitle: "",
+    seo: {
+      metaTitle: "Terms & Conditions",
+      metaDescription: "Standard terms and conditions for our services",
+      keywords: "terms, conditions, legal",
+    },
+  },
+  privacy: {
+    bodyContent: "",
+    pageTitle: "",
+    seo: {
+      metaTitle: "Privacy Policy",
+      metaDescription: "How we handle your personal data",
+      keywords: "privacy, data, security",
     },
   },
 };

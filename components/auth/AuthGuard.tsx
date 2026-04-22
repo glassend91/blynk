@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getAuthUser, refreshAuthUser } from "@/lib/auth";
 import { canAccessRoute } from "@/lib/permissions";
+import InactivityTimeout from "./InactivityTimeout";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -107,5 +108,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <InactivityTimeout />
+      {children}
+    </>
+  );
 }
