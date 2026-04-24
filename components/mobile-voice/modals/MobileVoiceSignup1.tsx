@@ -71,34 +71,61 @@ export default function MobileVoiceSignup1({
       setLoading(true);
       setLoadError(null);
       try {
-        const resp = await apiClient.get("/wholesaler-plans");
-        const data = resp.data && resp.data.data ? resp.data.data : resp.data;
+        let combinedPlans: Plan[] = [];
+
+        // 1. Fetch wholesaler plans
+        try {
+          const resp = await apiClient.get("/wholesaler-plans");
+          const data = resp.data && resp.data.data ? resp.data.data : resp.data;
+
+          if (Array.isArray(data) && data.length > 0) {
+            const voicePlans = data.filter(
+              (p: any) => p.connection_type_name === "Voice",
+            );
+            const mapped = voicePlans.map((s: any) => ({
+              id: s.value?.toString() || s._id,
+              name: s.custom_name || s.label || "Voice Plan",
+              price: s.price,
+              perks: s.label ? [s.label.split("UTB:")[0].trim()] : [],
+            }));
+            combinedPlans = [...mapped];
+          }
+        } catch (err: any) {
+          console.error("Failed to load Wholesaler rate plans:", err);
+        }
+
+        // 2. Fetch CMS plans for Mobile / Voice
+        try {
+          // Both Mobile and Voice Only can be matched, but we'll fetch 'Mobile' as default or fetch all and filter
+          const resp = await apiClient.get("/services", {
+            params: { status: "Published", serviceType: "Mobile" },
+          });
+          const cmsData = resp.data?.data || resp.data;
+          if (Array.isArray(cmsData)) {
+            const cmsMapped = cmsData.map((s: any) => ({
+              id: s._id,
+              name: s.serviceName,
+              price: s.price,
+              perks: s.features ? s.features.map((f: any) => f.name) : [],
+              badge: "Service Plan",
+            }));
+            combinedPlans = [...combinedPlans, ...cmsMapped];
+          }
+        } catch (cmsErr) {
+          console.error("Failed to fetch CMS Mobile plans:", cmsErr);
+        }
 
         if (!mounted) return;
 
-        if (Array.isArray(data) && data.length > 0) {
-          const voicePlans = data.filter(
-            (p: any) => p.connection_type_name === "Voice",
+        setPlans(combinedPlans);
+        if (initialSelectedPlan) {
+          const found = combinedPlans.find(
+            (p: any) => p.name === initialSelectedPlan.name,
           );
-          const mapped = voicePlans.map((s: any) => ({
-            id: s.value?.toString() || s._id,
-            name: s.custom_name || s.label || "Voice Plan",
-            price: s.price,
-            perks: s.label ? [s.label.split("UTB:")[0].trim()] : [],
-          }));
-          setPlans(mapped);
-          if (initialSelectedPlan) {
-            const found = mapped.find(
-              (p: any) => p.name === initialSelectedPlan.name,
-            );
-            if (found) setSelectedPlan(found);
-          }
-        } else {
-          setPlans([]);
+          if (found) setSelectedPlan(found);
         }
       } catch (err: any) {
-        console.error("Failed to load Wholesaler rate plans:", err);
-        setLoadError(err?.message || "Failed to load plans");
+        if (mounted) setLoadError(err?.message || "Failed to load plans");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -106,7 +133,7 @@ export default function MobileVoiceSignup1({
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [initialSelectedPlan]);
 
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan);

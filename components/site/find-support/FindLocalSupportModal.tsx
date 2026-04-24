@@ -57,8 +57,9 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
           ratingCount: Math.floor(Math.random() * 50) + 10,
           lat: s.lat,
           lng: s.lng,
+          status: s.status,
           photo: s.bannerUrl || "https://images.unsplash.com/photo-1526948128573-703ee1aeb6fa?q=80&w=800&auto=format&fit=crop",
-        }));
+        })).filter((l: any) => l.status === "Active");
         setLocations(mapped);
       }
     } catch (err: any) {

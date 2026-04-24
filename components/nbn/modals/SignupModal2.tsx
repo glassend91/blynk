@@ -48,35 +48,73 @@ export default function SignupModal2({
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (availablePlans) {
-      if (availablePlans.length > 0) {
-        const mapped = availablePlans.map((p: any) => ({
-          id: p.id,
-          name: p.label || p.name || "NBN Plan",
-          price: parseFloat(p.fee) || parseFloat(p.price) || 0,
-          features: p.features || [
-            "Unlimited Data",
-            "24/7 Support",
-            "No Lock-in Contract",
-          ],
-          speed: p.speed || "",
-        }));
-        setPlans(mapped);
-        setLoadError(null);
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      setLoadError(null);
 
+      try {
+        let combinedPlans: Plan[] = [];
+
+        // 1. Process wholesaler plans
+        if (availablePlans && availablePlans.length > 0) {
+          const mapped = availablePlans.map((p: any) => ({
+            id: p.id,
+            name: p.label || p.name || "NBN Plan",
+            price: parseFloat(p.fee) || parseFloat(p.price) || 0,
+            features: p.features || [
+              "Unlimited Data",
+              "24/7 Support",
+              "No Lock-in Contract",
+            ],
+            speed: p.speed || "",
+          }));
+          combinedPlans = [...mapped];
+        }
+
+        // 2. Fetch CMS plans
+        try {
+          const resp = await apiClient.get("/services", {
+            params: { status: "Published", serviceType: "NBN" },
+          });
+          const cmsData = resp.data?.data || resp.data;
+          if (Array.isArray(cmsData)) {
+            const cmsMapped = cmsData.map((s: any) => ({
+              id: s._id,
+              name: s.serviceName,
+              price: s.price,
+              features: s.features ? s.features.map((f: any) => f.name) : [],
+              speed: s.specifications?.downloadSpeed
+                ? `${s.specifications.downloadSpeed} Mbps`
+                : "",
+            }));
+            combinedPlans = [...combinedPlans, ...cmsMapped];
+          }
+        } catch (cmsErr) {
+          console.error("Failed to fetch CMS NBN plans:", cmsErr);
+        }
+
+        if (!mounted) return;
+
+        setPlans(combinedPlans);
         if (initialSelectedPlan) {
-          const found = mapped.find(
+          const found = combinedPlans.find(
             (p: any) =>
               p.id === initialSelectedPlan.id ||
               p.name === initialSelectedPlan.name,
           );
           if (found) setSelectedPlan(found);
         }
-      } else {
-        setPlans([]);
-        setLoadError(null);
+      } catch (err: any) {
+        if (mounted) setLoadError(err?.message || "Failed to load plans");
+      } finally {
+        if (mounted) setLoading(false);
       }
-    }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, [availablePlans, initialSelectedPlan]);
 
   const handlePlanSelect = (plan: Plan) => {

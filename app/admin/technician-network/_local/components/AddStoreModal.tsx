@@ -250,20 +250,20 @@ export default function AddStoreWizard({
         address: store.address.trim(),
         hours: store.hours.trim(),
         phone: store.phone.trim(),
-        googleLink: store.googleLink.trim() || undefined,
-        bannerUrl: store.bannerUrl.trim() || undefined,
-        pitch: store.pitch.trim() || undefined,
+        googleLink: store.googleLink.trim() || "",
+        bannerUrl: store.bannerUrl.trim() || "",
+        pitch: store.pitch.trim() || "",
         status: store.status,
         lat: store.lat ? Number(store.lat) : undefined,
         lng: store.lng ? Number(store.lng) : undefined,
         technicians: validTechnicians.map((t) => ({
           fullName: t.fullName.trim(),
-          roleTitle: t.roleTitle?.trim() || undefined,
-          years: t.years?.trim() || undefined,
-          specialties: t.specialties?.trim() || undefined,
-          videoUrl: t.videoUrl?.trim() || undefined,
-          bio: t.bio?.trim() || undefined,
-          photoUrl: t.photoUrl?.trim() || undefined,
+          roleTitle: t.roleTitle?.trim() || "",
+          years: t.years?.trim() || "",
+          specialties: t.specialties?.trim() || "",
+          videoUrl: t.videoUrl?.trim() || "",
+          bio: t.bio?.trim() || "",
+          photoUrl: t.photoUrl?.trim() || "",
         })),
       };
 
@@ -700,14 +700,24 @@ function TechnicianDetails({
             </Field>
           </div>
 
-          <Field label="Introduction Video URL">
-            <Input
-              value={p.videoUrl || ""}
-              onChange={(e) => update(p.id!, { videoUrl: e.target.value })}
-              placeholder="https://youtube.com/watch?v=…"
-              disabled={submitting}
-            />
-          </Field>
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2">
+            <Field label="Introduction Video URL">
+              <Input
+                value={p.videoUrl || ""}
+                onChange={(e) => update(p.id!, { videoUrl: e.target.value })}
+                placeholder="https://youtube.com/watch?v=…"
+                disabled={submitting}
+              />
+            </Field>
+            <Field label="Photo Image URL">
+              <Input
+                value={p.photoUrl || ""}
+                onChange={(e) => update(p.id!, { photoUrl: e.target.value })}
+                placeholder="https://example.com/photo.jpg"
+                disabled={submitting}
+              />
+            </Field>
+          </div>
 
           <Field label="Bio/Introduction">
             <TextArea

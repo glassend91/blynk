@@ -66,30 +66,59 @@ export default function MobileBroadbandSignup1({
       setLoading(true);
       setLoadError(null);
       try {
-        const resp = await apiClient.get("/wholesaler-plans");
-        const data = resp.data && resp.data.data ? resp.data.data : resp.data;
-        if (!mounted) return;
-        if (Array.isArray(data) && data.length > 0) {
-          const broadbandPlans = data.filter(
-            (p: any) => p.connection_type_name === "Broadband",
-          );
-          const mapped = broadbandPlans.map((s: any) => ({
-            id: s.value?.toString() || s._id,
-            title: s.custom_name || s.label || "Data Plan",
-            price: s.price,
-            bullets: s.label ? [s.label.split("UTB:")[0].trim()] : [],
-          }));
-          setPlans(mapped);
-          if (initialSelectedPlan) {
-            const found = mapped.find(
-              (p: any) => p.title === initialSelectedPlan.name,
+        let combinedPlans: Plan[] = [];
+
+        // 1. Fetch wholesaler plans
+        try {
+          const resp = await apiClient.get("/wholesaler-plans");
+          const data = resp.data && resp.data.data ? resp.data.data : resp.data;
+          if (Array.isArray(data) && data.length > 0) {
+            const broadbandPlans = data.filter(
+              (p: any) => p.connection_type_name === "Broadband",
             );
-            if (found) setSelectedPlan(found);
+            const mapped = broadbandPlans.map((s: any) => ({
+              id: s.value?.toString() || s._id,
+              title: s.custom_name || s.label || "Data Plan",
+              price: s.price,
+              bullets: s.label ? [s.label.split("UTB:")[0].trim()] : [],
+            }));
+            combinedPlans = [...mapped];
           }
+        } catch (err: any) {
+          console.error("Failed to load Wholesaler rate plans:", err);
+        }
+
+        // 2. Fetch CMS plans for Data Only
+        try {
+          const resp = await apiClient.get("/services", {
+            params: { status: "Published", serviceType: "Data Only" },
+          });
+          const cmsData = resp.data?.data || resp.data;
+          if (Array.isArray(cmsData)) {
+            const cmsMapped = cmsData.map((s: any) => ({
+              id: s._id,
+              title: s.serviceName,
+              price: s.price,
+              bullets: s.features ? s.features.map((f: any) => f.name) : [],
+              badge: "Service Plan",
+            }));
+            combinedPlans = [...combinedPlans, ...cmsMapped];
+          }
+        } catch (cmsErr) {
+          console.error("Failed to fetch CMS Data Only plans:", cmsErr);
+        }
+
+        if (!mounted) return;
+
+        setPlans(combinedPlans);
+        if (initialSelectedPlan) {
+          const found = combinedPlans.find(
+            (p: any) => p.title === initialSelectedPlan.name,
+          );
+          if (found) setSelectedPlan(found);
         }
       } catch (err: any) {
-        console.error("Failed to load Data Only services:", err);
-        setLoadError(err?.message || "Failed to load plans");
+        if (mounted) setLoadError(err?.message || "Failed to load plans");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -97,7 +126,7 @@ export default function MobileBroadbandSignup1({
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [initialSelectedPlan]);
 
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan);

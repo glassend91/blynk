@@ -98,16 +98,16 @@ export default function TicketTable() {
               <th>Ticket ID</th>
               <th>Customer</th>
               <th>Subject</th>
-              <th>Priority</th>
+              {/* <th>Priority</th> */}
               <th>Status</th>
-              <th>Assignee</th>
+              {/* <th>Assignee</th> */}
               <th>Created</th>
-              <th className="w-[96px] text-right">Actions</th>
+              <th className="w-[200px] text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="text-[14px] text-[#0A0A0A]">
             {rows.map((r, i) => (
-              <TicketRow key={r.id} row={r} index={i} />
+              <TicketRow key={r.id} row={r} index={i} onUpdated={fetchTickets} />
             ))}
           </tbody>
         </table>
