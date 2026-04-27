@@ -119,8 +119,9 @@ export default function AddTechnicianModal({
             <input
               value={years}
               onChange={(e) => setYears(e.target.value)}
-              placeholder="8 years"
+              placeholder="8"
               className="field"
+              type="number"
             />
           </Field>
 

@@ -686,8 +686,9 @@ function TechnicianDetails({
               <Input
                 value={p.years || ""}
                 onChange={(e) => update(p.id!, { years: e.target.value })}
-                placeholder="8 years"
+                placeholder="8"
                 disabled={submitting}
+                type="number"
               />
             </Field>
             <Field label="Specialties (comma separated)">
