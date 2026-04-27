@@ -2,32 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import AddStoreWizard from "./_local/components/AddStoreModal";
+import TechnicianDetailsModal from "./_local/components/TechnicianDetailsModal";
 import apiClient from "@/lib/apiClient";
-
-type Technician = {
-  id: string;
-  fullName: string;
-  roleTitle?: string;
-  years?: string;
-  specialties?: string;
-  videoUrl?: string;
-  bio?: string;
-  photoUrl?: string;
-};
-
-type StoreRow = {
-  id: string;
-  name: string;
-  address: string;
-  hours: string;
-  phone: string;
-  googleLink?: string;
-  bannerUrl?: string;
-  pitch?: string;
-  status: "Active" | "Inactive";
-  technicians: Technician[];
-  createdAt?: string;
-};
+import { PartnerStore as StoreRow, Technician } from "./_local/types";
 
 function StatCard({
   label,
@@ -65,6 +42,10 @@ export default function TechnicianNetworkPage() {
     activeStores: 0,
     inactiveStores: 0,
   });
+
+  // Technician details modal state
+  const [techModalOpen, setTechModalOpen] = useState(false);
+  const [selectedStore, setSelectedStore] = useState<StoreRow | null>(null);
 
   // Fetch stores and statistics on mount
   useEffect(() => {
@@ -182,6 +163,13 @@ export default function TechnicianNetworkPage() {
   const handleOpenModal = () => {
     setEditingStore(null);
     setOpen(true);
+  };
+
+  const handleShowTechs = (store: StoreRow) => {
+    if (store.technicians && store.technicians.length > 0) {
+      setSelectedStore(store);
+      setTechModalOpen(true);
+    }
   };
 
   const formatTechnicians = (technicians: Technician[]) => {
@@ -390,7 +378,12 @@ export default function TechnicianNetworkPage() {
                   <td className="border-b border-[#F0EDF5] px-4 py-3">
                     {r.phone}
                   </td>
-                  <td className="border-b border-[#F0EDF5] px-4 py-3 text-[#401B60] underline-offset-2 hover:underline">
+                  <td 
+                    className={`border-b border-[#F0EDF5] px-4 py-3 text-[#401B60] underline-offset-2 transition-all ${
+                      r.technicians?.length > 0 ? "cursor-pointer hover:underline hover:text-[#3F205F]" : ""
+                    }`}
+                    onClick={() => handleShowTechs(r)}
+                  >
                     {formatTechnicians(r.technicians)}
                   </td>
                   <td className="border-b border-[#F0EDF5] px-4 py-3">
@@ -466,6 +459,14 @@ export default function TechnicianNetworkPage() {
         onCreate={handleCreate}
         onUpdate={handleUpdate}
         editingStore={editingStore}
+      />
+
+      {/* Technician Details Modal */}
+      <TechnicianDetailsModal
+        open={techModalOpen}
+        onClose={() => setTechModalOpen(false)}
+        technicians={selectedStore?.technicians || []}
+        storeName={selectedStore?.name || ""}
       />
     </div>
   );
