@@ -18,6 +18,9 @@ type Location = {
   lat?: number;
   lng?: number;
   photo: string;
+  pitch?: string;
+  technicians?: any[];
+  googleLink?: string;
 };
 
 type Props = { open: boolean; onClose: () => void };
@@ -58,6 +61,9 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
           lat: s.lat,
           lng: s.lng,
           status: s.status,
+          pitch: s.pitch,
+          technicians: s.technicians,
+          googleLink: s.googleLink,
           photo: s.bannerUrl || "https://images.unsplash.com/photo-1526948128573-703ee1aeb6fa?q=80&w=800&auto=format&fit=crop",
         })).filter((l: any) => l.status === "Active");
         setLocations(mapped);
@@ -243,32 +249,41 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
             <div className="rounded-2xl border border-[#EEEAF4] p-4">
               <div className="mb-2 flex items-center justify-between">
                 <div className="text-[16px] font-semibold">{focused.name}</div>
-                <button className="rounded-lg bg-[#3F205F] px-3 py-1.5 text-[13px] font-semibold text-white">
+                {/* <button className="rounded-lg bg-[#3F205F] px-3 py-1.5 text-[13px] font-semibold text-white">
                   Contact
-                </button>
+                </button> */}
               </div>
               <div className="text-[13px] text-[#6F6C90]">
                 {focused.address}
               </div>
               <div className="mt-3 grid gap-4 md:grid-cols-[1.3fr,1fr]">
-                <img
-                  src={focused.photo}
-                  className="h-[220px] w-full rounded-lg object-cover"
-                  alt=""
-                />
+                {focused.photo.includes("youtube.com") || focused.photo.includes("youtu.be") || focused.photo.includes("vimeo.com") ? (
+                  <iframe
+                    src={focused.photo.includes("watch?v=") ? focused.photo.replace("watch?v=", "embed/") : focused.photo}
+                    className="h-[220px] w-full rounded-lg object-cover border-0"
+                    allowFullScreen
+                  />
+                ) : (
+                  <img
+                    src={focused.photo}
+                    className="h-[220px] w-full rounded-lg object-cover"
+                    alt=""
+                  />
+                )}
                 <div className="space-y-3">
                   <div>
                     <div className="text-[12px] font-semibold text-[#6F6C90]">
                       Store Details
                     </div>
-                    <p className="text-[13px] text-[#0A0A0A]">
-                      Expert technicians specialising in Blynk IoT solutions. 
-                      We provide comprehensive support for smart-home & industrial IoT needs.
+                    <p className="text-[13px] text-[#0A0A0A] whitespace-pre-wrap">
+                      {focused.pitch || "Expert technicians specialising in Blynk IoT solutions.\nWe provide comprehensive support for smart-home & industrial IoT needs."}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <a
-                      href="#"
+                      href={focused.googleLink || "#"}
+                      target={focused.googleLink ? "_blank" : "_self"}
+                      rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 rounded-lg border border-[#EEEAF4] px-3 py-2 text-[13px] hover:bg-[#FBFAFD]"
                     >
                       ⭐ View Google reviews
@@ -276,6 +291,57 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                   </div>
                 </div>
               </div>
+              
+              {focused.technicians && focused.technicians.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-[#EEEAF4]">
+                  <div className="text-[14px] font-semibold text-[#0A0A0A] mb-4">
+                    Our Technicians
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {focused.technicians.map((tech: any) => (
+                      <div key={tech.id} className="flex flex-col gap-3 rounded-xl border border-[#EEEAF4] p-3 bg-[#FBFAFD]">
+                        <div className="flex gap-3">
+                          {tech.photoUrl ? (
+                            <img src={tech.photoUrl} alt={tech.fullName} className="h-12 w-12 rounded-full object-cover shrink-0" />
+                          ) : (
+                            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#E8E6ED] text-[#6F6C90] text-lg font-bold">
+                              {tech.fullName.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[14px] font-semibold text-[#0A0A0A]">{tech.fullName}</div>
+                            <div className="text-[12px] text-[#6F6C90]">{tech.roleTitle || "Technician"} {tech.years ? `• ${tech.years} yrs exp` : ""}</div>
+                            {tech.specialties && (
+                              <div className="text-[11px] text-[#8E8AA3] mt-1 truncate">
+                                {tech.specialties}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        {tech.videoUrl && (
+                          <div className="mt-1">
+                            {tech.videoUrl.includes("youtube.com") || tech.videoUrl.includes("youtu.be") || tech.videoUrl.includes("vimeo.com") ? (
+                              <iframe
+                                src={tech.videoUrl.includes("watch?v=") ? tech.videoUrl.replace("watch?v=", "embed/") : tech.videoUrl}
+                                className="w-full h-[140px] rounded-lg object-cover border-0 bg-black"
+                                allowFullScreen
+                              />
+                            ) : (
+                              <video 
+                                controls 
+                                className="w-full h-[140px] rounded-lg object-cover bg-black" 
+                                src={tech.videoUrl} 
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
