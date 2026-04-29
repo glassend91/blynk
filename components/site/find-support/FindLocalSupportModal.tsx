@@ -25,6 +25,29 @@ type Location = {
 
 type Props = { open: boolean; onClose: () => void };
 
+function getEmbedUrl(url: string) {
+  if (!url) return url;
+  if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    let videoId = "";
+    if (url.includes("watch?v=")) {
+      videoId = url.split("watch?v=")[1].split("&")[0];
+    } else if (url.includes("youtu.be/")) {
+      videoId = url.split("youtu.be/")[1].split("?")[0];
+    } else if (url.includes("/shorts/")) {
+      videoId = url.split("/shorts/")[1].split("?")[0];
+    }
+    if (videoId) {
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+  } else if (url.includes("vimeo.com")) {
+    const vimeoId = url.split("vimeo.com/")[1]?.split("?")[0];
+    if (vimeoId && !url.includes("player.vimeo.com")) {
+      return `https://player.vimeo.com/video/${vimeoId}`;
+    }
+  }
+  return url;
+}
+
 export default function FindLocalSupportModal({ open, onClose }: Props) {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(false);
@@ -253,13 +276,25 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                   Contact
                 </button> */}
               </div>
-              <div className="text-[13px] text-[#6F6C90]">
-                {focused.address}
+              <div className="mt-1 flex flex-col gap-1.5 text-[13px] text-[#6F6C90]">
+                <div className="flex items-center gap-2">
+                  <span>📍</span> {focused.address}
+                </div>
+                {focused.hours && (
+                  <div className="flex items-center gap-2">
+                    <span>🕒</span> {focused.hours}
+                  </div>
+                )}
+                {focused.phone && (
+                  <div className="flex items-center gap-2">
+                    <span>📞</span> {focused.phone}
+                  </div>
+                )}
               </div>
-              <div className="mt-3 grid gap-4 md:grid-cols-[1.3fr,1fr]">
+              <div className="mt-4 grid gap-4 md:grid-cols-[1.3fr,1fr]">
                 {focused.photo.includes("youtube.com") || focused.photo.includes("youtu.be") || focused.photo.includes("vimeo.com") ? (
                   <iframe
-                    src={focused.photo.includes("watch?v=") ? focused.photo.replace("watch?v=", "embed/") : focused.photo}
+                    src={getEmbedUrl(focused.photo)}
                     className="h-[220px] w-full rounded-lg object-cover border-0"
                     allowFullScreen
                   />
@@ -275,7 +310,7 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                     <div className="text-[12px] font-semibold text-[#6F6C90]">
                       Store Details
                     </div>
-                    <p className="text-[13px] text-[#0A0A0A] whitespace-pre-wrap">
+                    <p className="text-[13px] text-[#0A0A0A] whitespace-pre-wrap mt-1">
                       {focused.pitch || "Expert technicians specialising in Blynk IoT solutions.\nWe provide comprehensive support for smart-home & industrial IoT needs."}
                     </p>
                   </div>
@@ -312,17 +347,22 @@ export default function FindLocalSupportModal({ open, onClose }: Props) {
                             <div className="text-[14px] font-semibold text-[#0A0A0A]">{tech.fullName}</div>
                             <div className="text-[12px] text-[#6F6C90]">{tech.roleTitle || "Technician"} {tech.years ? `• ${tech.years} yrs exp` : ""}</div>
                             {tech.specialties && (
-                              <div className="text-[11px] text-[#8E8AA3] mt-1 truncate">
-                                {tech.specialties}
+                              <div className="text-[11px] text-[#8E8AA3] mt-1">
+                                <span className="font-semibold text-[#6F6C90]">Specialties:</span> {tech.specialties}
+                              </div>
+                            )}
+                            {tech.bio && (
+                              <div className="text-[11px] text-[#6F6C90] mt-1 whitespace-pre-wrap">
+                                {tech.bio}
                               </div>
                             )}
                           </div>
                         </div>
-                        {tech.videoUrl && (
+                        {tech.videoUrl && tech.videoUrl.trim().startsWith("http") && (
                           <div className="mt-1">
                             {tech.videoUrl.includes("youtube.com") || tech.videoUrl.includes("youtu.be") || tech.videoUrl.includes("vimeo.com") ? (
                               <iframe
-                                src={tech.videoUrl.includes("watch?v=") ? tech.videoUrl.replace("watch?v=", "embed/") : tech.videoUrl}
+                                src={getEmbedUrl(tech.videoUrl)}
                                 className="w-full h-[140px] rounded-lg object-cover border-0 bg-black"
                                 allowFullScreen
                               />
